@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no">
+    <meta charset="UTF-8">
+
+    <meta name="renderer" content="webkit">
+    <link rel="stylesheet" href="../../public/stylesheets/plugin/element.min.css">
+    <script src="../../public/javascripts/plugin/vue.js"></script>
+    <script src="../../public/javascripts/plugin/element.min.js"></script>
+
+    <title></title>
+</head>
+
+
+<body class="_scrollbar">
+    <div id="c-container-list" style="height: 100%;" data-uri="resource_permission_page"
+        v-loading.fullscreen.lock="loading">
+        <el-container>
+            <el-main>
+                <el-main>
+                    <!-- <el-form>
+                        <div style="margin-bottom:10px;">
+                            <el-button
+                                @click="UpdateTableAndVisible = true; formData = {}; search({url: 'sys_machine_list'})"
+                                type="primary">新增设备<i class="el-icon-plus el-icon--right"></i></el-button>
+                            <el-button @click="detailTableAndVisible = true; formData = {}" type="primary">导入设备
+                            </el-button>
+                        </div>
+                    </el-form> -->
+                    <el-form>
+                        <el-input placeholder="请输入内容" v-model="listSearch._value_" class="_searchVal">
+                            <el-select v-model="listSearch._name_" class="_searchVal_select" slot="prepend"
+                                placeholder="请选择" :change="listSearch._name_ = 'permissionName'">
+                                <el-option label="权限名称" value="permissionName"></el-option>
+                            </el-select>
+                        </el-input>
+                        <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
+                        </el-button>
+                    </el-form>
+                    <template>
+                        <el-table :data="tableData" stripe style="width: 100%" border>
+                            <el-table-column prop="permissionName" label="资源名称"></el-table-column>
+                            <el-table-column prop="requestUri" label="资源地址"></el-table-column>
+                            <el-table-column prop="sort" label="排序号"></el-table-column>
+                            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+                            
+                            <!-- <el-table-column fixed="right" label="操作">
+                                <template slot-scope="scope">
+                                    <el-button type="text" size="small"
+                                        @click="machineDest(scope.row.machineInstanceId)">
+                                        详情
+                                    </el-button>
+                                </template>
+                            </el-table-column> -->
+                        </el-table>
+                    </template>
+
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                        :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper" :total="total">
+                    </el-pagination>
+
+
+                    <el-dialog title="新增设备" :visible.sync="UpdateTableAndVisible">
+                        <el-form :model="formData" id="machine" label-width="100px">
+                            <el-form-item label="设备SN码：">
+                                <el-input v-model="formData.machineSn"></el-input>
+                            </el-form-item>
+                            <el-form-item label="出货单号：">
+                                <el-input v-model="formData.orderNum"></el-input>
+                            </el-form-item>
+                            <el-form-item label="物料编号：">
+                                <el-select width="100%" v-model="formData.machineId" filterable remote reserve-keyword
+                                    placeholder="输入【物料编号】自动查询，支持模糊查询" :remote-method="remoteMethod" :loading="loading">
+                                    <el-option v-for="item in options" :key="item.value" :label="item.label"
+                                        :value="item.value">
+                                    </el-option>
+                                </el-select>
+                                <div>输入【物料编号】进行查询出结果后，请点击选择相应的【物料编号】</div>
+                            </el-form-item>
+                            <el-form-item label="出库日期：">
+                                <el-date-picker v-model="formData.exWarehouseTime" start-placeholder="开始日期">
+                                </el-date-picker>
+                            </el-form-item>
+
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="machine(formData)">提交
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                </el-main>
+        </el-container>
+    </div>
+</body>
+
+</html>
