@@ -78,9 +78,8 @@
                                     @click="admindetail({adminId: scope.row.adminId });">
                                     详情
                                 </el-button>
-                                <el-button type="text" size="small"
-                                    @click="adminblock(scope.row.adminId);">
-                                    {{ scope.row.status != 1 ? '正常' : '冻结' }} 
+                                <el-button type="text" size="small" @click="pullblack({URL: 'admin_block', NUMBER: scope.row.adminId, TAG: 'adminId'})">
+                                    {{ scope.row.status != 1 ? '正常' : '冻结' }}
                                 </el-button>
                                 <el-button type="text" size="small" v-show="scope.row.wechatId != -1"
                                     @click="workpush(scope.row.adminId);">
@@ -208,20 +207,20 @@
                     </el-form>
                 </el-dialog>
 
-                <el-dialog title="提示" :visible.sync="dialogVisible" style="text-align: center;">
+                <el-dialog title="提示" :visible.sync="dialogVisible" style="text-align: center;" :close-on-click-modal=false :close-on-press-escape=false :show-close=false>
                     <div class="green">
-                        账号已经创建成功 !
+                        账号创建/更新成功 !
                     </div>
                     <div ref="qrcode" id="qrcode">
                     </div>
                     <div>
-                        绑定微信请使用微信扫码
+                        请需要绑定的微信用户使用微信进行扫码
                     </div>
                     <div>
-                        ( 绑定微信后才可以进行工单推送绑定 )
+                        ( 绑定微信后才可以进行工单推送绑定操作 )
                     </div>
                     <div class="btn-center" style="text-align: center; margin: 20px;">
-                        <el-button type="primary" @click="detailTableAndVisible = false; dialogVisible = false; list();">关闭</el-button>
+                        <el-button type="primary" @click="detailTableAndVisible = false; dialogVisible = false; list(); UpdateTableAndVisible = false;">关闭</el-button>
                     </div>
                 </el-dialog>
 

@@ -116,9 +116,9 @@ module.exports = {
             hash: true,
             chunks: ['configration', 'list']
         }),
-        new HtmlWebpackPlugin({  //addressmanage
-            template: './src/views/addressmanage.html',
-            filename: '../views/addressmanage.html',
+        new HtmlWebpackPlugin({  //reference
+            template: './src/views/reference.html',
+            filename: '../views/reference.html',
             minify: {
                 removeAttributeQuotes: true,
                 collapseWhitespace: true
@@ -159,6 +159,36 @@ module.exports = {
         new HtmlWebpackPlugin({  //repair
             template: './src/views/repair.html',
             filename: '../views/repair.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //Pay Service
+            template: './src/views/payservice.html',
+            filename: '../views/payservice.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //master
+            template: './src/views/master.html',
+            filename: '../views/master.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //advertisement
+            template: './src/views/advertisement.html',
+            filename: '../views/advertisement.html',
             minify: {
                 removeAttributeQuotes: true,
                 collapseWhitespace: true
