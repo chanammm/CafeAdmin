@@ -23,7 +23,7 @@
                 <el-main>
                     <el-form>
                         <div style="margin-bottom:10px;">
-                            <el-button @click="UpdateTableAndVisible = true; formData = {}; imageList = {}"
+                            <el-button @click="formData = {};tableDatass = []; option = []; tableDatas = []; devicemachineDest()"
                                 type="primary">新增<i class="el-icon-plus el-icon--right"></i></el-button>
                         </div>
                     </el-form>
@@ -87,12 +87,20 @@
                                 </template>
                             </el-table-column>
                             <!-- <el-table-column prop="sort" label="排序号"></el-table-column> -->
-                            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+                            <el-table-column prop="createTime" label="创建时间">
+                                <template slot-scope="scope">
+                                    <i class="el-icon-time"></i>
+                                    <span>{{ scope.row.createTime }}</span>
+                                </template>
+                            </el-table-column>
 
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
-                                    <el-button type="text" size="small" @click="devicemachineDest(scope.row.machineId)">
+                                    <el-button type="text" size="small" @click="devicemachineDest(scope.row)">
                                         详情
+                                    </el-button>
+                                    <el-button type="text" size="small" @click="pullblack({URL: 'repairs_type_block', NUMBER: scope.row.repairsTypeId , TAG: 'repairsTypeId'})">
+                                        {{ scope.row.status != 1 ? '正常' : '冻结' }}
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -106,7 +114,7 @@
 
 
                     <el-dialog title="报修类型" :visible.sync="UpdateTableAndVisible">
-                        <el-form :model="formData">
+                        <el-form :model="formData" label-width="100px">
                             
                             <el-form-item label="报修分类名">
                                 <el-input v-model="formData.repairsName"></el-input>
@@ -122,78 +130,86 @@
 
                             <el-form-item label="是否需要选择需求内容">
                                 <el-radio-group v-model="formData.needOfferExplain ">
-                                    <el-radio :label="0">否</el-radio>
                                     <el-radio :label="1">是</el-radio>
+                                    <el-radio :label="0">否</el-radio>
                                 </el-radio-group>
                             </el-form-item>
 
                             <el-form-item label="是否需要填写故障描述">
                                 <el-radio-group v-model="formData.needFaultContent">
-                                    <el-radio :label="0">否</el-radio>
                                     <el-radio :label="1">是</el-radio>
+                                    <el-radio :label="0">否</el-radio>
                                 </el-radio-group>
                             </el-form-item>
 
                             <el-form-item label="是否需要上传图片">
                                 <el-radio-group v-model="formData.needUploadPic">
-                                    <el-radio :label="0">否</el-radio>
                                     <el-radio :label="1">是</el-radio>
+                                    <el-radio :label="0">否</el-radio>
                                 </el-radio-group>
                             </el-form-item>
 
                             <el-form-item label="状态">
                                 <el-radio-group v-model="formData.status">
-                                    <el-radio :label="0">冻结</el-radio>
                                     <el-radio :label="1">正常</el-radio>
+                                    <el-radio :label="0">冻结</el-radio>
                                 </el-radio-group>
                             </el-form-item>
 
                             <el-form-item label="是否需要支付">
                                 <el-radio-group v-model="formData.needPay">
-                                    <el-radio :label="0">否</el-radio>
                                     <el-radio :label="1">是</el-radio>
+                                    <el-radio :label="0">否</el-radio>
                                 </el-radio-group>
                             </el-form-item>
 
                             <el-form-item label="设备分类" prop="machineId">
-                                <el-table :data="options" @selection-change="handleSelectionChange" 
-                                tooltip-effect="dark" ref="multipleTable" height="300px">
-                                    <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
-                                        <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
+                                <el-table :data="tableDatass" @current-change="getTemplateRow"
+                                tooltip-effect="dark" height="300px">
+                                    <el-table-column width="55">
+                                        <template slot-scope="scope">  
+                                            <el-radio  v-model="tableRadio" :label="scope.row"><i></i></el-radio>
                                         </template>
                                     </el-table-column>
-                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
-                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                    <el-table-column prop="machineName" label="设备分类名"></el-table-column>
+                                    <el-table-column prop="machineContent" label="分类说明"></el-table-column>
                                 </el-table>
                             </el-form-item>
 
                             <el-form-item label="收费项" prop="demandChargeIds">
-                                <el-table :data="options" @selection-change="handleSelectionChange" 
+                                <el-table :data="option" @selection-change="handleSelectionChange" 
                                 tooltip-effect="dark" ref="multipleTable" height="300px">
                                     <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
+                                    <el-table-column prop="demandName" label="名称"></el-table-column>
+                                    <el-table-column prop="demandType" label="类型">
                                         <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
+                                            {{ scope.row.demandType == 1 ? '远程指导' : "上门" }}
                                         </template>
                                     </el-table-column>
-                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
-                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                    <el-table-column prop="price" label="价格">
+                                        <template slot-scope="scope">
+                                            {{ parseFloat(scope.row.price / 100).toFixed(2) }} RMB
+                                        </template>
+                                    </el-table-column>
                                 </el-table>
                             </el-form-item>
 
                             <el-form-item label="报价说明" prop="machineOfferExplainId">
-                                <el-table :data="options" @selection-change="handleSelectionChange" 
-                                tooltip-effect="dark" ref="multipleTable" height="300px">
-                                    <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
-                                        <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
+                                <el-table :data="tableDatas" @current-change="getTemplateRows"
+                                tooltip-effect="dark" height="300px">
+                                    <el-table-column label="选择" width="55">
+                                        <template slot-scope="scope">  
+                                            <el-radio  v-model="tableRadios" :label="scope.row"><i></i></el-radio>
                                         </template>
                                     </el-table-column>
+                                    <el-table-column prop="repairsName" label="名称"></el-table-column>
                                     <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
                                     <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                    <el-table-column prop="offerContent" label="说明" :show-overflow-tooltip="true">
+                                        <template slot-scope="scope">
+                                            {{ scope.row.offerContent == -1 ? '无' : scope.row.offerContent }}
+                                        </template>
+                                    </el-table-column>
                                 </el-table>
                             </el-form-item>
 

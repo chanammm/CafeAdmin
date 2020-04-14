@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--[if IE 9 ]><html class="ie9"><![endif]-->
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="format-detection" content="telephone=no">
+    <meta charset="UTF-8">
+
+    <meta name="renderer" content="webkit">
+    <link rel="stylesheet" href="../../public/stylesheets/plugin/element.min.css">
+    <script src="../../public/javascripts/plugin/vue.js"></script>
+    <script src="../../public/javascripts/plugin/element.min.js"></script>
+
+    <title></title>
+</head>
+
+
+<body class="_scrollbar">
+    <div id="c-container-list" style="height: 100%;" data-uri="complete_work_list" v-loading.fullscreen.lock="loading">
+        <el-container>
+            <el-main>
+                <el-main>
+                    <el-form>
+                        <el-input placeholder="请输入内容" v-model="listSearch._value_" class="_searchVal">
+                            <el-select v-model="listSearch._name_" class="_searchVal_select" slot="prepend"
+                                placeholder="请选择">
+                                <el-option label="工单号" value="workId"></el-option>
+                            </el-select>
+                        </el-input>
+                        
+                        <div class="_search_centent" v-show="more">
+                            <el-button>状态</el-button>
+                            <el-select v-model="listSearch.status" slot="prepend" placeholder="请选择">
+                                <el-option label="不限" value=""></el-option>
+                                <el-option label="已确认/已支付定金/待沟通" value="0"></el-option>
+                                <el-option label="已联络/待派单" value="1"></el-option>
+                                <el-option label="已派单/维修中" value="2"></el-option>
+                                <el-option label="已完成/已回访" value="3"></el-option>
+                                <el-option label="已提交/未确认" value="5"></el-option>
+                                <el-option label="已取消" value="19"></el-option>
+                            </el-select>
+                        </div>
+                        <div class="more_search el-icon-circle-plus-outline" v-show="!more" @click="more = !more">
+                            更多搜索条件
+                        </div>
+                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div>
+
+                        <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
+                        </el-button>
+                    </el-form>
+                    <template>
+                        <el-table :data="tableData" stripe style="width: 100%" border>
+                            <el-table-column prop="workId" label="工单号"></el-table-column>
+                            <el-table-column prop="demandName" label="需求名"></el-table-column>
+                            <el-table-column prop="demandType" label="需求类型">
+                                <template slot-scope="scope">
+                                    {{ scope.row.orderType == 1 ? '远程指导' : "上门" }}
+                                </template>
+                            </el-table-column>
+
+                            <el-table-column prop="machineName" label="设备名"></el-table-column>
+
+                            <el-table-column prop="maintainerName" label="维修师傅名称"></el-table-column>
+
+                            <el-table-column prop="paymentStr" label="支付金额"></el-table-column>
+                            <el-table-column prop="timeConsumingStr" label="工单耗时"></el-table-column>
+
+                            <el-table-column prop="status" label="工单状态">
+                                <template slot-scope="scope">
+                                    <div :class="scope.row.status == 1 ? 'red' : scope.row.status == 2 ? 'green' : 'ccc'">
+                                        {{ scope.row.status == 1 ? '已确认/已支付定金/待沟通' : scope.row.status == 2 ? '已联络/待派单' : scope.row.status == 3 ? '已派单/维修中' : scope.row.status == 5 ? '已完成/已回访' : scope.row.status == 18 ? '已提交/未确认' : "已取消" }}
+                                    </div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+
+                            <!-- <el-table-column fixed="right" label="操作">
+                                <template slot-scope="scope">
+                                    <el-button type="text" size="small" @click="machineDest(scope.row)">
+                                        详情
+                                    </el-button>
+                                    <el-button type="text" v-show="scope.row.orderType == 1 && scope.row.status == 2" size="small" @click="refundorder(scope.row)">
+                                        退款
+                                    </el-button>
+                                </template>
+                            </el-table-column> -->
+                        </el-table>
+                    </template>
+
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                        :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="pageSize"
+                        layout="total, sizes, prev, pager, next, jumper" :total="total">
+                    </el-pagination>
+
+
+                    <el-dialog title="新增设备分类" :visible.sync="UpdateTableAndVisible">
+                        <el-form :model="formData" label-width="180px">
+                            <el-form-item label="分类名称：" prop="machineName">
+                                <el-input v-model="formData.machineName"></el-input>
+                            </el-form-item>
+                            <el-form-item label="分类说明：" prop="machineContent">
+                                <el-input type="textarea" v-model="formData.machineContent"></el-input>
+                            </el-form-item>
+                            <el-form-item label="排序号：" prop="sort">
+                                <el-input v-model="formData.sort"></el-input>
+                            </el-form-item>
+                            <el-form-item label="状态：" prop="status">
+                                <el-radio-group v-model="formData.status">
+                                    <el-radio :label="1">正常</el-radio>
+                                    <el-radio :label="0">冻结</el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item label="报修类型：" prop="repairsTypeIds">
+                                <el-table :data="options" @selection-change="handleSelectionChange" 
+                                tooltip-effect="dark" ref="multipleTables" height="300px">
+                                    <el-table-column type="selection" width="55"></el-table-column>
+                                    <el-table-column prop="machineName" label="设备类型">
+                                        <template slot-scope="scope">
+                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
+                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                </el-table>
+                            </el-form-item>
+                            <el-form-item label="分类图片：" prop="machinePic">
+                                <template v-model="formData.machinePic">
+                                    <el-upload :action="fileUpdata" list-type="picture-card"
+                                        :file-list="imageList.machinePic" :limit="num" :data="fileData" :headers="fileUpdataExcData"
+                                        :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed"
+                                        :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                    <el-dialog :visible.sync="dialogVisible">
+                                        <img width="100%" :src="dialogImageUrl" alt="">
+                                    </el-dialog>
+                                </template>
+                            </el-form-item>
+
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="machine(formData)">提交
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                    <el-dialog title="工单退款" :visible.sync="SearchTableAndVisible" width="50%">
+                        <el-form :data="SearchTableFormData" label-width="140px">
+                            <el-form-item label="退款订单号" prop="orderId">
+                                <el-input v-model="SearchTableFormData.orderId"></el-input>
+                            </el-form-item>
+                            <el-form-item label="退款金额" prop="refund">
+                                <el-input v-model="SearchTableFormData.refund"></el-input>
+                            </el-form-item>
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="refundorder({orderId: SearchTableFormData.orderId,refund:SearchTableFormData.refund })">提交
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                </el-main>
+        </el-container>
+    </div>
+</body>
+
+</html>

@@ -18,6 +18,7 @@ module.exports = {
         login: './src/public/javascripts/interactive/login.js', //登陆操作
         index: './src/public/javascripts/interactive/index.js', //common 首页
         list: './src/public/javascripts/interactive/list.js', // 列表页
+        statistics: './src/public/javascripts/interactive/statistics.js', // 统计
     },
     devServer: {
         port: 3000,
@@ -195,6 +196,66 @@ module.exports = {
             },
             hash: true,
             chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //loginlog
+            template: './src/views/loginlog.html',
+            filename: '../views/loginlog.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //order
+            template: './src/views/order.html',
+            filename: '../views/order.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //completeorder
+            template: './src/views/completeorder.html',
+            filename: '../views/completeorder.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //underwayorder
+            template: './src/views/underwayorder.html',
+            filename: '../views/underwayorder.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //cancelorder
+            template: './src/views/cancelorder.html',
+            filename: '../views/cancelorder.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'list']
+        }),
+        new HtmlWebpackPlugin({  //statistics
+            template: './src/views/statistics.html',
+            filename: '../views/statistics.html',
+            minify: {
+                removeAttributeQuotes: true,
+                collapseWhitespace: true
+            },
+            hash: true,
+            chunks: ['configration', 'statistics']
         }),
         new MiniCssExtractPlugin({
             template: './src/public/stylesheets/base/style.min.css',
