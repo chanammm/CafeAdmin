@@ -27,11 +27,6 @@ window.addEventListener('pageshow', function (params) {
             '/manage' + par.substring(par.lastIndexOf('/'), par.lastIndexOf('?') == -1 ? par.length : par.lastIndexOf('?')),
             document.getElementById('c-container-list').getAttribute('data-uri'),
         ];
-    var _data = {
-        id: ym.init.COMPILESTR.decrypt(token.id),
-        token: ym.init.COMPILESTR.decrypt(token.asset),
-        url: u
-    };
     new Vue({
         el: '#c-container-list',
         data: () => {
@@ -43,7 +38,6 @@ window.addEventListener('pageshow', function (params) {
                     Authorization: JSON.parse(sessionStorage.getItem('token')).asset.secret
                 },
                 loading: false,
-                testAdmin: ym.init.COMPILESTR.decrypt(JSON.parse(sessionStorage.getItem('_a'))._i) == "yuanmenghhx" || ym.init.COMPILESTR.decrypt(JSON.parse(sessionStorage.getItem('_a'))._i) == "yuanmengKSX" ? false : true,  //指定的账号不能显示订单查看
                 more: false,
                 tableData: [],
                 tableDatas: [],
@@ -62,13 +56,16 @@ window.addEventListener('pageshow', function (params) {
                     machineId: [],
                     addressId: []
                 },
-                inputArray: [{
-                    children: [{
+                changeInputValueData: [], //详细说明的数组
+                inputArrays: [{
+                    // name: '',
+                    // value: '',
+                    inputArray: [{
                         name: '',
-                        value: ''
-                    }]
+                        value: '',
+                    }], //优惠券的输入说明 数组
                 }], //优惠券的输入说明 数组
-                changeInputValues: [], //详细说明的数组
+                changeInputValueDatas: [], //详细说明的数组
                 formDataTree: {
                 },
                 formDataTrees: {},
@@ -99,8 +96,8 @@ window.addEventListener('pageshow', function (params) {
                     values: 'value',
                     children: 'zones'
                 },
-                tableRadio:[],   //单选选择
-                tableRadios:[],
+                tableRadio: [],   //单选选择
+                tableRadios: [],
                 count: 1,
                 listSearch: {
                 },  //新的列表查询对象
@@ -251,7 +248,7 @@ window.addEventListener('pageshow', function (params) {
                     it.pageparams = params; //保存搜索条件
                     params._name_ ? params[params._name_] = params._value_ : null;
                 }
-                if(uri == 'sys_user_login_index_list') params['loginType'] = 1; //默认管理端
+                if (uri == 'sys_user_login_index_list') params['loginType'] = 1; //默认管理端
 
                 /**
                  * 工单的校验
@@ -285,6 +282,12 @@ window.addEventListener('pageshow', function (params) {
                                 }
                             })
                         } else {
+                            if(uri == "sys_machine_offer_explain_list"){
+                                // data.page.records[]
+                                data.page.records.forEach((element, index) => {
+                                    data.page.records[index].offerExplain = ym.init.COMPILESTR.decrypt(element.offerExplain)
+                                })
+                            }
                             data.page.total ? it.total = parseInt(data.page.total) : null;
                             xml = data.page.records;
                         }
@@ -582,11 +585,11 @@ window.addEventListener('pageshow', function (params) {
             //新增/编辑 报修分类 
             devicemachine(params, bool = false) {
                 console.log(params)
-                if(params.machineId) bool = true;
+                if (params.machineId) bool = true;
                 params['demandChargeIds'] = !JSON.stringify(this.data['repairsTypeIds']) ? null : JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""); //费用项数组 demandChargeIds 
                 params['machineId'] = this.tableRadio.machineId; //设备分类
                 params['machineOfferExplainId'] = this.tableRadios.machineOfferExplainId; //报价参考
-                axios.post(bool ? 'update_repairs_type' :'create_repairs_type', qs.stringify(params)).then(res => {
+                axios.post(bool ? 'update_repairs_type' : 'create_repairs_type', qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
                         is.UpdateTableAndVisible = false;
                         is.ISuccessfull(res.data.msg);
@@ -601,11 +604,11 @@ window.addEventListener('pageshow', function (params) {
                     })
             },
 
-            getTemplateRow(item){
+            getTemplateRow(item) {
                 this.tableRadio = item
             },
 
-            getTemplateRows(item){
+            getTemplateRows(item) {
                 this.tableRadios = item
             },
 
@@ -647,44 +650,44 @@ window.addEventListener('pageshow', function (params) {
             devicemachineDest(params) {
                 this.UpdateTableAndVisible = true;
                 this.$nextTick(() => {
-                    this.search({url: "sys_machine_list"});  //设备分类列表
+                    this.search({ url: "sys_machine_list" });  //设备分类列表
                     setTimeout(() => {
                         this.tableDatass = this.options;
                         this.tableDatass.forEach((ele, index) => {
-                            if(!params) return;
+                            if (!params) return;
                             if (ele.machineId == params.machineId) {
                                 this.getTemplateRow(ele);
                             }
                         })
                         setTimeout(() => {
-                            this.search({url: "sys_demand_charge_list"});  //设备收费项目列表
+                            this.search({ url: "sys_demand_charge_list" });  //设备收费项目列表
                             setTimeout(() => {
                                 this.option = this.options;
                                 this.option.forEach((ele, index) => {
                                     this.$nextTick(() => {
-                                        if(!params) return;
+                                        if (!params) return;
                                         if (params.repairsTypeId == ele.repairsId) {
                                             this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
                                         }
                                     })
                                 })
                                 setTimeout(() => {
-                                    this.search({url: "sys_machine_offer_explain_list"});  //设备收费参考
+                                    this.search({ url: "sys_machine_offer_explain_list" });  //设备收费参考
                                     setTimeout(() => {
                                         this.tableDatas = this.options;
                                         this.tableDatas.forEach((ele, index) => {
-                                            if(!params) return;
+                                            if (!params) return;
                                             if (ele.repairsId == params.repairsTypeId) {
                                                 this.getTemplateRows(ele);
                                             }
                                         })
-                                    },700)
-                                },600)
-                            },500)
-                        },400)
-                    },300)
+                                    }, 700)
+                                }, 600)
+                            }, 500)
+                        }, 400)
+                    }, 300)
                 })
-                if(!params) return;
+                if (!params) return;
                 axios.get('sys_repairs_type_detail', {
                     params: {
                         repairsTypeId: params.repairsTypeId
@@ -768,6 +771,8 @@ window.addEventListener('pageshow', function (params) {
                 this.data['pageSize'] = 1000;
                 this.data['url'] = params.url;
                 axios.post(this.data.url, qs.stringify(this.data)).then(params => {
+                    this.options = [];
+                    this.roleId = [];
                     if (params.data.state == 200) {
                         // if (this.data.url == 'sys_repairs_type_list') {}
                         if (this.data.url == 'sys_role_list') {
@@ -858,7 +863,7 @@ window.addEventListener('pageshow', function (params) {
                 if (isNaN(params.roleId)) {  //不修改角色
                     xml['roleId'] = this.data.roleId;
                 }
-                xml = Object.assign({}, params, xml,{
+                xml = Object.assign({}, params, xml, {
                     token: JSON.parse(sessionStorage.getItem('token')).asset.secret
                 });
                 axios.post('update_admin', qs.stringify(xml)).then(params => {
@@ -891,7 +896,7 @@ window.addEventListener('pageshow', function (params) {
                 params['workPush'] = 0;  //是否执行工单推送(0-否,1-是)
                 params['wechatId'] = -1;  //绑定微信用户id 默认创建 -1 无
                 params['token'] = JSON.parse(sessionStorage.getItem('token')).asset.secret;
-                
+
                 let data = params;
                 axios.post('create_admin', qs.stringify(params)).then(params => {
                     if (params.data.state == 200) {
@@ -1262,13 +1267,15 @@ window.addEventListener('pageshow', function (params) {
                 this.$nextTick(() => {
                     setTimeout(() => {
                         this.options.forEach((ele, index) => {
-                            if(!params) return;
+                            if (!params) return;
                             if (ele.repairsTypeId == params.repairsId) {
                                 this.getTemplateRow(ele);
                             }
                         })
                     }, 1000)
                 })
+                // 以上是打开 视图，更新保修类型列表
+                // 以下是回来的文本
                 if (!params) return;
                 axios.get("sys_machine_offer_explain_detail", {
                     params: {
@@ -1276,8 +1283,22 @@ window.addEventListener('pageshow', function (params) {
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
+                        res.data.data['offerExplain'] == -1 ? res.data.data['offerExplain'] = "无" : 
+                        (()=>{
+                            this.changeInputValueDatas = JSON.parse(decodeURI(ym.init.COMPILESTR.decrypt(res.data.data.offerExplain)));
+                            let arr = []; this.inputArrays = [];
+                            this.sortArr(this.changeInputValueDatas, 'parentIndex').forEach((element, index) => {
+                                arr.push({
+                                    inputArray: element
+                                });
+                            })
+                            this.$nextTick(() => {
+                                this.inputArrays = arr;
+                            })
+                            // console.log(this.inputArrays)
+                        })()
+
                         res.data.data['offerContent'] == -1 ? res.data.data['offerContent'] = "无" : null;
-                        res.data.data['offerExplain'] == -1 ? res.data.data['offerExplain'] = "无" : null;
                         this.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1298,7 +1319,7 @@ window.addEventListener('pageshow', function (params) {
                 this.$nextTick(() => {
                     setTimeout(() => {
                         this.options.forEach((ele, index) => {
-                            if(!params) return;
+                            if (!params) return;
                             if (ele.repairsTypeId == params.repairsId) {
                                 this.getTemplateRow(ele);
                             }
@@ -1314,6 +1335,10 @@ window.addEventListener('pageshow', function (params) {
                     if (res.data.state == 200) {
                         res.data.data['price'] = parseFloat(res.data.data['price'] / 100).toFixed(2);
                         res.data.data['prices'] = res.data.data['price'];
+                        res.data.data['contenta'] = res.data.data['content'].split('|')[0];
+                        if(res.data.data['content'].split('|').length > 1){
+                            res.data.data['contents'] = res.data.data['content'].split('|')[1];
+                        }
                         this.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1329,6 +1354,7 @@ window.addEventListener('pageshow', function (params) {
              * **/
             paysubmit(params) {
                 params['repairsId'] = this.tableRadio.repairsTypeId; // 设备报修id
+                params['content'] = params.contenta + '|' + params.contents;  //组个参考价
                 this.data = params;
                 this.data['price'] = parseFloat(this.data['prices'] * 100).toFixed(0);
                 this.data['status'] = 1; //暂定
@@ -1337,6 +1363,7 @@ window.addEventListener('pageshow', function (params) {
                         this.data = {};
                         this.SearchTableAndVisible = false;
                         this.ISuccessfull(res.data.msg);
+                        this.list()
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1350,8 +1377,9 @@ window.addEventListener('pageshow', function (params) {
              * 更新 / 新增 报价参考
              * **/
             reference(params) {
+                // console.log(params);
+                params['offerExplain'] = encodeURI(ym.init.COMPILESTR.encryption(JSON.stringify(this.changeInputValueDatas)));
                 params['repairsId'] = this.tableRadio.repairsTypeId; // 设备报修id
-                params['offerExplain'] = 'json'; //默认json
                 this.data = params;
                 this.data['status'] = 1; //暂定
                 axios.post(params.machineOfferExplainId ? "update_machine_offer_explain" : "create_machine_offer_explain", qs.stringify(this.data)).then(res => {
@@ -1359,6 +1387,7 @@ window.addEventListener('pageshow', function (params) {
                         this.data = {};
                         this.SearchTableAndVisible = false;
                         this.ISuccessfull(res.data.msg);
+                        this.list();
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1368,46 +1397,117 @@ window.addEventListener('pageshow', function (params) {
                     })
             },
 
-            inputArrayChange(params) {  //优惠券 添加行
-                let _array_ = this.inputArray;
-                _array_.push({children:{
+            sortArr(arr, str) {
+                var _arr = [],
+                    _t = [],
+                    // 临时的变量
+                    _tmp;
+
+                // 按照特定的参数将数组排序将具有相同值得排在一起
+                arr = arr.sort(function (a, b) {
+                    var s = a[str],
+                        t = b[str];
+                    return s < t ? -1 : 1;
+                });
+                if (arr.length) {
+                    _tmp = arr[0][str];
+                }
+                // 将相同类别的对象添加到统一个数组
+                for (var i in arr) {
+                    if (arr[i][str] === _tmp) {
+                        _t.push(arr[i]);
+                    } else {
+                        _tmp = arr[i][str];
+                        _arr.push(_t);
+                        _t = [arr[i]];
+                    }
+                }
+                // 将最后的内容推出新数组
+                _arr.push(_t);
+                return _arr;
+            },
+
+            inputArrayChange(params) {  //优惠券 添加行数
+                let _array_ = this.inputArrays[params].inputArray;
+                _array_.push({
                     value: '',
                     name: ''
-                }})
+                })
+                //  this.inputArrays.inputArray;
                 this.$nextTick(function () {
                     this.inputArray = _array_;
                 })
             },
-            inputArrayChangeDelete(params) {  //删除列表以及内容
-                this.inputArray.splice(params, 1);  //删除列表
-                this.changeInputValues.splice(params, 1); //删除已经填写的内容
+            inputArrayChanges(params) {  //优惠券 添加行
+                let _array_ = this.inputArrays;
+                _array_.push({
+                    value: '',
+                    name: '',
+                    inputArray: [
+                        {
+                            value: '',
+                            name: '',
+                        }
+                    ]
+                })
+                this.$nextTick(function () {
+                    this.inputArrays = _array_;
+                })
             },
-            changeInputValue(params, index) {   //添加的表单 value
-                let _arr_ = [];
-                if (this.changeInputValues.length > 0) {
-                    this.changeInputValues.forEach((element, i) => {
+            changeInputValues(params, index, parentIndex) {   //添加的表单 value
+                let _arr_ = [], bool = true;
+                if (this.changeInputValueDatas.length > 0) {
+                    this.changeInputValueDatas.forEach((element, i) => {
                         _arr_.push(element);
-                        if (element.index == index) {
-                            _arr_.splice(i, 1, {
-                                value: params,
-                                index: index
-                            });
+                        if (element.parentIndex == parentIndex) {
+                            if (element.index == index) {
+                                _arr_.splice(i, 1, {
+                                    value: params,
+                                    index: index,
+                                    parentIndex: parentIndex
+                                });
+                                bool = false;
+                            };
                         };  //先清除掉之前的内容稍后执行添加 
+
                     })
-                    if (this.changeInputValues.length == index) {
+                    // console.log(this.changeInputValueDatas.length == index)
+                    if (bool) {
                         _arr_.push({
                             value: params,
-                            index: index
+                            index: index,
+                            parentIndex: parentIndex
                         })
                     }
-                    this.changeInputValues = _arr_;
+                    this.changeInputValueDatas = _arr_;
                     return false;
                 }
-                this.changeInputValues.push({
+                this.changeInputValueDatas.push({
                     value: params,
-                    index: index
+                    index: index,
+                    parentIndex: parentIndex
                 })
-    
+
+            },
+
+            inputArrayChangeDelete(params, index) {  //删除列表以及内容
+                this.inputArrays[params].inputArray.splice(index, 1);  //删除列表
+                this.changeInputValueDatas.forEach((element, eq) => {
+                    if (element.parentIndex == params) {
+                        if (element.index == index) {
+                            this.changeInputValueDatas.splice(eq, 1); //删除已经填写的内容
+                        }
+                    }
+                });
+            },
+
+            inputArrayChangeDeletes(params) {  //删除列表以及内容
+                this.inputArrays.splice(params, 1);  //删除列表
+                this.changeInputValueDatas.forEach((element, eq) => {
+                    if (element.parentIndex == params) {
+                        this.changeInputValueDatas.splice(eq, 1); //删除已经填写的内容
+                    }
+                });
             },
 
 
@@ -1418,12 +1518,13 @@ window.addEventListener('pageshow', function (params) {
             advdetails(params) {
                 console.log(params)
                 axios.get("sys_advertising_detail", {
-                    params:{
-                        advertisingId : params.id 
+                    params: {
+                        advertisingId: params.id
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
                         this.SearchTableAndVisible = true;
+                        this.imageList.machinePic.push({ name: 'machinePic', url: res.data.data.advertisingUrl }); //TAG 图片
                         this.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1437,6 +1538,7 @@ window.addEventListener('pageshow', function (params) {
              * 更新 / 新增 首页广告
              * **/
             advsubmit(params) {
+                params['advertisingUrl'] = this.data.machinePic;
                 this.data = params;
                 params.id ? this.data['advertisingId'] = params.id : null;
                 axios.post(params.id ? "update_advertising" : "create_advertising", qs.stringify(this.data)).then(res => {
@@ -1459,8 +1561,8 @@ window.addEventListener('pageshow', function (params) {
              * **/
             masterdetails(params) {
                 axios.get("sys_maintainer_detail", {
-                    params:{
-                        maintainerId : params.id  
+                    params: {
+                        maintainerId: params.id
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
@@ -1474,9 +1576,9 @@ window.addEventListener('pageshow', function (params) {
                         is.IError(error);
                     })
             },
-             /**
-             * 更新 / 新增 维修师傅
-             * **/
+            /**
+            * 更新 / 新增 维修师傅
+            * **/
             mastersubmit(params) {
                 this.data = params;
                 params.id ? this.data['maintainerId'] = params.id : null;
@@ -1500,13 +1602,12 @@ window.addEventListener('pageshow', function (params) {
              * **/
             refundorder: function (params) {
                 console.log(params)
-                if(params.workId) 
-                {
+                if (params.workId) {
                     this.SearchTableAndVisible = true;
                     params['refund'] = params['paymentStr'];
                     this.SearchTableFormData = params;
                     return
-                } 
+                }
                 params['refund'] = parseFloat(params['refund'] * 100).toFixed(0);
                 axios.post("order_refund", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
@@ -1528,8 +1629,8 @@ window.addEventListener('pageshow', function (params) {
             contactorder(params) {
                 axios.get("contact_work", {
                     params: {
-                        workId : params.workId,
-                        contactContent : -1
+                        workId: params.workId,
+                        contactContent: -1
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
@@ -1549,23 +1650,23 @@ window.addEventListener('pageshow', function (params) {
              * 工单派单
              * **/
             goorder(params) {
-                if(!params.work){
-                    this.SearchTableAndVisible = true;  
+                if (!params.work) {
+                    this.SearchTableAndVisible = true;
                     this.SearchTableFormData = {};
                     this.SearchTableFormData['workId'] = params.workId;
-                    this.search({url: 'sys_maintainer_list'})
+                    this.search({ url: 'sys_maintainer_list' })
                     return false;
                 }
                 axios.get("send_work", {
                     params: {
-                        workId : params.work,
-                        maintainerId : this.tableRadio.id || null
+                        workId: params.work,
+                        maintainerId: this.tableRadio.id || null
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
                         this.ISuccessfull(res.data.msg);
                         this.SearchTableAndVisible = false;
-                        this.UpdateTableAndVisible =false;
+                        this.UpdateTableAndVisible = false;
                         this.list();
                     } else {
                         is.IError(res.data.msg);
@@ -1580,21 +1681,21 @@ window.addEventListener('pageshow', function (params) {
              * 工单完成
              * **/
             denorder(params) {
-                if(!params.payment){
+                if (!params.payment) {
                     this.TableAndVisible = true;
                     this.SearchTableFormDatas.workId = params.workId
                     return false;
                 }
                 axios.get("complete_work", {
                     params: {
-                        workId : params.workId,
-                        payment : params.payment
+                        workId: params.workId,
+                        payment: params.payment
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
                         this.ISuccessfull(res.data.msg);
                         this.TableAndVisible = false;
-                        this.UpdateTableAndVisible =false;
+                        this.UpdateTableAndVisible = false;
                         this.list();
                     } else {
                         is.IError(res.data.msg);
@@ -1609,7 +1710,7 @@ window.addEventListener('pageshow', function (params) {
              * 工单取消
              * **/
             celorder(params) {
-                if(!params.work){
+                if (!params.work) {
                     this.detailTableAndVisible = true;
                     params['work'] = params.workId;
                     this.DataVisible = params
@@ -1617,15 +1718,15 @@ window.addEventListener('pageshow', function (params) {
                 }
                 axios.post("cancel_work", qs.stringify({
                     workId: params.workId,
-                    cancelContent : params.cancelContent,
-                    needRefund  : params.needRefund,
-                    orderId  : params.needRefund == 0 ? -1 : params.orderId, 
-                    refund  : params.needRefund == 0 ? 0 : params.refund
+                    cancelContent: params.cancelContent,
+                    needRefund: params.needRefund,
+                    orderId: params.needRefund == 0 ? -1 : params.orderId,
+                    refund: params.needRefund == 0 ? 0 : params.refund
                 })).then(res => {
                     if (res.data.state == 200) {
                         this.ISuccessfull(res.data.msg);
                         this.detailTableAndVisible = false;
-                        this.UpdateTableAndVisible =false;
+                        this.UpdateTableAndVisible = false;
                         this.list();
                     } else {
                         is.IError(res.data.msg);
@@ -1643,7 +1744,7 @@ window.addEventListener('pageshow', function (params) {
                 this.UpdateTableAndVisible = true;
                 axios.get("sys_work_detail", {
                     params: {
-                        workId : params.workId
+                        workId: params.workId
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
@@ -1656,7 +1757,7 @@ window.addEventListener('pageshow', function (params) {
                         is.IError(error);
                     })
             },
-            
+
 
 
             /**

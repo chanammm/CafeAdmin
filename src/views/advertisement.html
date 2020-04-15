@@ -23,7 +23,7 @@
                 <el-main>
                     <el-form>
                         <div style="margin-bottom:10px;">
-                            <el-button @click="SearchTableAndVisible = true; SearchTableFormData = {};  payserverdetails();" type="primary">新增<i
+                            <el-button @click="SearchTableAndVisible = true; SearchTableFormData = {};  payserverdetails(); imageList.machinePic = []" type="primary">新增<i
                                     class="el-icon-plus el-icon--right"></i></el-button>
                         </div>
                     </el-form>
@@ -53,7 +53,7 @@
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
                                     <el-button type="text" size="small"
-                                        @click="advdetails(scope.row)">
+                                        @click="advdetails(scope.row); imageList.machinePic = []">
                                         详情
                                     </el-button>
                                     <el-button type="text" size="small"
@@ -80,7 +80,18 @@
                                 <el-input v-model="SearchTableFormData.advertisingName"></el-input>
                             </el-form-item>
                             <el-form-item label="资源地址" prop="advertisingUrl">
-                                <el-input v-model="SearchTableFormData.advertisingUrl"></el-input>
+                                <!-- <el-input v-model="SearchTableFormData.advertisingUrl"></el-input> -->
+                                <template v-model="SearchTableFormData.advertisingUrl">
+                                    <el-upload :action="fileUpdata" list-type="picture-card"
+                                        :file-list="imageList.machinePic" :limit="num" :data="fileData" :headers="fileUpdataExcData"
+                                        :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed"
+                                        :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                    <el-dialog :visible.sync="dialogVisible">
+                                        <img width="100%" :src="dialogImageUrl" alt="">
+                                    </el-dialog>
+                                </template>
                             </el-form-item>
                             <el-form-item label="排序号" prop="sort">
                                 <el-input v-model="SearchTableFormData.sort"></el-input>

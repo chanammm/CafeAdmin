@@ -90,7 +90,7 @@ new Vue({
                         _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:iforx${parseInt(13 * num / 2)}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
                             </el-menu-item>`;
                     } else {
-                        element.requestUri = `/work/admin/views/${element.requestUri.substring(element.requestUri.lastIndexOf('/') + 1).split('.')[0]}`;
+                        element.requestUri = `/por/admin/views/${element.requestUri.substring(element.requestUri.lastIndexOf('/') + 1).split('.')[0]}`;
                         _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:iforx${parseInt(13 * num / 2)}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
                             </el-menu-item>`;
                     }
