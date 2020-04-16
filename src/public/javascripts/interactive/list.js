@@ -1681,11 +1681,13 @@ window.addEventListener('pageshow', function (params) {
              * 工单完成
              * **/
             denorder(params) {
-                if (!params.payment) {
+                if (!params.payments) {
                     this.TableAndVisible = true;
                     this.SearchTableFormDatas.workId = params.workId
                     return false;
                 }
+                params['payment'] = parseFloat(params.payments * 100).toFixed(0);
+                delete params.payments;
                 axios.get("complete_work", {
                     params: {
                         workId: params.workId,
@@ -1721,7 +1723,7 @@ window.addEventListener('pageshow', function (params) {
                     cancelContent: params.cancelContent,
                     needRefund: params.needRefund,
                     orderId: params.needRefund == 0 ? -1 : params.orderId,
-                    refund: params.needRefund == 0 ? 0 : params.refund
+                    refund: params.needRefund == 0 ? 0 : parseFloat(params.refund * 100).toFixed(0)
                 })).then(res => {
                     if (res.data.state == 200) {
                         this.ISuccessfull(res.data.msg);

@@ -72,7 +72,7 @@ class init {
             axios.defaults.headers.common['Authorization'] = this.data.token; // 设置请求头为 Authorization
 
             axios.post("create_admin_wechat", qs.stringify({ code: this.GETURI('code') }))
-                .then(function (response) {
+                .then((response) => {
 
                     if (response.data.state != 200) {
                         alert("服务异常！请退出重试");
@@ -83,7 +83,7 @@ class init {
                     this.data['workPush'] = 1;
 
                     axios.post("update_admin", qs.stringify(this.data))
-                        .then(function (response) {
+                        .then((response)=>{
                             if (response.data.state == 200) {
                                 alert('绑定成功！');
                             } else {
@@ -109,9 +109,9 @@ class init {
         }))
             .then(params => {
                 if (params.data.state == 200) {
-                    this.data.token = params.data.data.secret;
+                    axios.defaults.headers.common['Authorization'] = params.data.data.secret; // 设置请求头为 Authorization
                     axios.post("update_admin", qs.stringify(this.data))
-                        .then(function (response) {
+                        .then((response) => {
                             if (response.data.state == 200) {
                                 alert('绑定成功！');
                             } else {
