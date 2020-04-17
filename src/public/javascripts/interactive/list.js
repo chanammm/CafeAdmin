@@ -895,12 +895,31 @@ window.addEventListener('pageshow', function (params) {
             adminmanage(params) {
                 params['workPush'] = 0;  //是否执行工单推送(0-否,1-是)
                 params['wechatId'] = -1;  //绑定微信用户id 默认创建 -1 无
-                params['token'] = JSON.parse(sessionStorage.getItem('token')).asset.secret;
-
                 let data = params;
+
                 axios.post('create_admin', qs.stringify(params)).then(params => {
                     if (params.data.state == 200) {
                         is.dialogVisible = true;
+
+                        data['token'] = JSON.parse(sessionStorage.getItem('token')).asset.secret; // 当前执行修改的用户 token 
+                        
+                        data['adminId'] = params.data.data.id;
+                        
+                        // if(!data.adminId){
+                        //     axios.post('sys_admin_list', qs.stringify({
+                        //         page : 1,
+                        //         pageSize : 20,
+                        //         adminName : data.adminName
+                        //     })).then(params => {
+                        //         if (params.data.state == 200) {
+                        //             console.log(params)
+                        //             // data['adminId'] = 
+                        //         } else {
+                        //             is.IError(params.data.msg);
+                        //         }
+                        //     })
+                        // }
+
                         this.$nextTick(function () {
                             document.querySelector('#qrcode').innerHTML = "";  //清空原先的 二维码
                             new QRCode(this.$refs.qrcode, {
