@@ -237,9 +237,9 @@ module.exports = {
             hash: true,
             chunks: ['configration', 'list']
         }),
-        new HtmlWebpackPlugin({  //cancelorder
-            template: './src/views/cancelorder.html',
-            filename: '../views/cancelorder.html',
+        new HtmlWebpackPlugin({  //demand
+            template: './src/views/demand.html',
+            filename: '../views/demand.html',
             minify: {
                 removeAttributeQuotes: true,
                 collapseWhitespace: true

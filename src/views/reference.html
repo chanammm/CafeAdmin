@@ -57,6 +57,13 @@
                                     <el-button type="text" size="small" @click="machineOfferExplain(scope.row)">
                                         详情
                                     </el-button>
+                                    <el-button type="text" size="small" @click="pullblack({URL: 'machine_offer_explain_block', NUMBER: scope.row.machineOfferExplainId, TAG: 'machineOfferExplainId'})">
+                                        {{ scope.row.status != 1 ? '正常' : '冻结' }}
+                                    </el-button>
+                                    <el-button type="text" size="small"
+                                        @click="deletedata({URL: 'delete_machine_offer_explain', TAG: 'machineOfferExplainId', NUMBER: scope.row.machineOfferExplainId  })">
+                                        删除
+                                    </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>

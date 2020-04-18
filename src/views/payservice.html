@@ -23,21 +23,20 @@
                 <el-main>
                     <el-form>
                         <div style="margin-bottom:10px;">
-                            <el-button @click="SearchTableAndVisible = true; SearchTableFormData = {};  payserverdetails();" type="primary">新增<i
-                                    class="el-icon-plus el-icon--right"></i></el-button>
+                            <el-button
+                                @click="SearchTableAndVisible = true; SearchTableFormData = {};  payserverdetails();"
+                                type="primary">新增<i class="el-icon-plus el-icon--right"></i></el-button>
                         </div>
                     </el-form>
                     <el-form>
                         <el-input placeholder="请输入内容" v-model="listSearch._value_" class="_searchVal">
                             <el-select v-model="listSearch._name_" class="_searchVal_select" slot="prepend"
                                 placeholder="请选择">
-                                <el-option label="收费项名称" value="demandName"></el-option>
-                                <el-option label="报修类型名" value="repairsTypeName"></el-option>
-                                <el-option label="报修分类名" value="repairsName"></el-option>
+                                <el-option label="收费项名称" value="demandChargeName"></el-option>
                             </el-select>
                         </el-input>
 
-                        <div class="_search_centent" v-show="more">
+                        <!-- <div class="_search_centent" v-show="more">
                             <el-button>需求类型</el-button>
                             <el-select v-model="listSearch.demandType" slot="prepend" placeholder="请选择">
                                 <el-option label="不限" value=""></el-option>
@@ -48,19 +47,14 @@
                         <div class="more_search el-icon-circle-plus-outline" v-show="!more" @click="more = !more">
                             更多搜索条件
                         </div>
-                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div>
+                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div> -->
 
                         <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
                         </el-button>
                     </el-form>
                     <template>
                         <el-table :data="tableData" stripe style="width: 100%" border>
-                            <el-table-column prop="demandName" label="需求名"></el-table-column>
-                            <el-table-column prop="offerContent" label="需求类型">
-                                <template slot-scope="scope">
-                                    {{ scope.row.demandType == 1 ? '远程指导' : "上门" }}
-                                </template>
-                            </el-table-column>
+                            <el-table-column prop="demandChargeName" label="收费项名称"></el-table-column>
                             <el-table-column prop="content" label="参考价">
                                 <template slot-scope="scope">
                                     <div>{{ scope.row.content.split('|')[0] }}</div>
@@ -72,22 +66,26 @@
                                     {{ parseFloat(scope.row.price / 100).toFixed(2) }} RMB
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="repairsName" label="报修分类名">
-                                <template slot-scope="scope">
-                                    {{ scope.row.repairsName == -1 ? '无' : scope.row.repairsName }}
-                                </template>
-                            </el-table-column>
-                            <el-table-column prop="repairsTypeName" label="报修类型名">
-                                <template slot-scope="scope">
-                                    {{ scope.row.repairsTypeName == -1 ? '无' : scope.row.repairsTypeName }}
-                                </template>
-                            </el-table-column>
                             <el-table-column prop="sort" label="排序"></el-table-column>
+                            <el-table-column prop="status" label="状态">
+                                <template slot-scope="scope">
+                                    <div :class="scope.row.status == 1 ? 'green': 'red'">
+                                        {{ scope.row.status == 1 ? '正常' : '冻结' }}
+                                    </div>
+                                </template>
+                            </el-table-column>
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
-                                    <el-button type="text" size="small"
-                                        @click="payserverdetails(scope.row)">
+                                    <el-button type="text" size="small" @click="payserverdetails(scope.row)">
                                         详情
+                                    </el-button>
+                                    <el-button type="text" size="small"
+                                        @click="pullblack({URL: 'demand_charge_block', NUMBER: scope.row.demandChargeId, TAG: 'demandChargeId'})">
+                                        {{ scope.row.status != 1 ? '正常' : '冻结' }}
+                                    </el-button>
+                                    <el-button type="text" size="small"
+                                        @click="deletedata({URL: 'delete_demand_charge', TAG: 'demandChargeId', NUMBER: scope.row.demandChargeId })">
+                                        删除
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -101,32 +99,24 @@
 
                     <el-dialog title="收费项" :visible.sync="SearchTableAndVisible" width="50%">
                         <el-form :data="SearchTableFormData" label-width="160px">
-                            <el-form-item label="报修分类名" prop="demandType">
-                                <el-radio-group v-model="SearchTableFormData.demandType">
-                                    <el-radio :label="1">远程指导</el-radio>
-                                    <el-radio :label="2">上门</el-radio>
-                                </el-radio-group>
-                            </el-form-item>
-                            <el-form-item label="需求名" prop="demandName ">
-                                <el-input v-model="SearchTableFormData.demandName "></el-input>
-                            </el-form-item>
                             <el-form-item label="单价" prop="prices">
                                 <el-input v-model="SearchTableFormData.prices"></el-input>
                             </el-form-item>
                             <el-form-item label="参考价" prop="content">
-                                <el-input v-model="SearchTableFormData.contenta" style="width: 50%;margin-bottom: 10px;"></el-input>
-                                示例
+                                <el-input v-model="SearchTableFormData.contenta"
+                                    style="width: 50%;margin-bottom: 10px;"></el-input>
+                                <!-- 示例 -->
                                 <el-input v-model="SearchTableFormData.contents" style="width: 50%"></el-input>
                             </el-form-item>
                             <el-form-item label="排序号" prop="sort">
                                 <el-input v-model="SearchTableFormData.sort"></el-input>
                             </el-form-item>
-                            <el-form-item label="报修类型：" prop="repairsTypeIds">
-                                <el-table :data="options" @current-change="getTemplateRow"
-                                tooltip-effect="dark" ref="multipleTable" height="300px">
+                            <el-form-item label="报修分类名" prop="demandType">
+                                <el-table :data="option" @current-change="getTemplateRows" tooltip-effect="dark"
+                                    ref="multipleTable" height="300px">
                                     <el-table-column label="选择" width="55">
-                                        <template slot-scope="scope">  
-                                            <el-radio  v-model="tableRadio" :label="scope.row"><i></i></el-radio>
+                                        <template slot-scope="scope">
+                                            <el-radio v-model="tableRadios" :label="scope.row"><i></i></el-radio>
                                         </template>
                                     </el-table-column>
                                     <el-table-column prop="machineName" label="设备类型">

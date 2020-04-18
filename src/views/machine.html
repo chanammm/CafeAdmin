@@ -102,6 +102,10 @@
                                     <el-button type="text" size="small" @click="pullblack({URL: 'machine_block', NUMBER: scope.row.machineId, TAG: 'machineId'})">
                                         {{ scope.row.status != 1 ? '正常' : '冻结' }}
                                     </el-button>
+                                    <el-button type="text" size="small"
+                                    @click="deletedata({URL: 'delete_machine', TAG: 'machineId', NUMBER: scope.row.machineId })">
+                                    删除
+                                </el-button>
                                 </template>
                             </el-table-column>
                         </el-table>

@@ -86,7 +86,14 @@
                                     </div>
                                 </template>
                             </el-table-column>
-                            <!-- <el-table-column prop="sort" label="排序号"></el-table-column> -->
+                            <el-table-column prop="status" label="状态">
+                                <template slot-scope="scope">
+                                    <div :class="scope.row.status == 1 ? 'green': 'red'">
+                                        {{ scope.row.status == 1 ? '正常' : '冻结' }}
+                                    </div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="sort" label="排序号"></el-table-column>
                             <el-table-column prop="createTime" label="创建时间">
                                 <template slot-scope="scope">
                                     <i class="el-icon-time"></i>
@@ -101,6 +108,10 @@
                                     </el-button>
                                     <el-button type="text" size="small" @click="pullblack({URL: 'repairs_type_block', NUMBER: scope.row.repairsTypeId , TAG: 'repairsTypeId'})">
                                         {{ scope.row.status != 1 ? '正常' : '冻结' }}
+                                    </el-button>
+                                    <el-button type="text" size="small"
+                                        @click="deletedata({URL: 'delete_repairs_type', TAG: 'repairsTypeId', NUMBER: scope.row.repairsTypeId })">
+                                        删除
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -176,21 +187,18 @@
                                 </el-table>
                             </el-form-item>
 
-                            <el-form-item label="收费项" prop="demandChargeIds">
+                            <el-form-item label="需求类型" prop="demandIds">
                                 <el-table :data="option" @selection-change="handleSelectionChange" 
                                 tooltip-effect="dark" ref="multipleTable" height="300px">
                                     <el-table-column type="selection" width="55"></el-table-column>
                                     <el-table-column prop="demandName" label="名称"></el-table-column>
-                                    <el-table-column prop="demandType" label="类型">
+                                    <el-table-column prop="demandTypeName" label="需求类型名"></el-table-column>
+                                    <el-table-column prop="isMultiple" label="多选">
                                         <template slot-scope="scope">
-                                            {{ scope.row.demandType == 1 ? '远程指导' : "上门" }}
+                                            {{ scope.row.isMultiple == 1 ? '是' : "否" }}
                                         </template>
                                     </el-table-column>
-                                    <el-table-column prop="price" label="价格">
-                                        <template slot-scope="scope">
-                                            {{ parseFloat(scope.row.price / 100).toFixed(2) }} RMB
-                                        </template>
-                                    </el-table-column>
+                        </el-table-column>
                                 </el-table>
                             </el-form-item>
 
