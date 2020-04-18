@@ -23,7 +23,7 @@
                     <el-form>
                         <div style="margin-bottom:10px;">
                             <el-button
-                                @click="UpdateTableAndVisible = true; formData = {}; search({url: 'sys_repairs_type_list'}); imageList = {}"
+                                @click="UpdateTableAndVisible = true; formData = {}; search({url: 'sys_repairs_type_list'}); imageList.machinePic = [];"
                                 type="primary">新增分类<i class="el-icon-plus el-icon--right"></i></el-button>
                         </div>
                     </el-form>
@@ -143,18 +143,12 @@
                                     <el-table-column prop="repairsName" label="类型名称"></el-table-column>
                                 </el-table>
                             </el-form-item>
-                            <el-form-item label="分类图片：" prop="machinePic">
-                                <template v-model="formData.machinePic">
-                                    <el-upload :action="fileUpdata" list-type="picture-card"
-                                        :file-list="imageList.machinePic" :limit="num" :data="fileData" :headers="fileUpdataExcData"
-                                        :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed"
-                                        :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
-                                        <i class="el-icon-plus"></i>
-                                    </el-upload>
-                                    <el-dialog :visible.sync="dialogVisible">
-                                        <img width="100%" :src="dialogImageUrl" alt="">
-                                    </el-dialog>
-                                </template>
+                            <el-form-item label="分类图片：" prop="machinePic" v-model="formData.machinePic">
+                                <el-upload :action="fileUpdata" list-type="picture-card"
+                                    :file-list="imageList.machinePic" :limit="num" :data="fileData" :headers="fileUpdataExcData"
+                                    :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed" :on-remove="handleRemove">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
                             </el-form-item>
 
                             <div class="btn-center" style="text-align: center; margin: 20px;">
@@ -194,8 +188,8 @@
                                     <el-table-column prop="repairsName" label="类型名称"></el-table-column>
                                 </el-table>
                             </el-form-item>
-                            <el-form-item label="分类图片：" prop="SearchTableFormData.machinePic">
-                                <template v-model="SearchTableFormData.machinePic">
+                            <el-form-item label="分类图片：" prop="SearchTableFormData.machinePic" v-model="SearchTableFormData.machinePic">
+                                <template>
                                     <el-upload :action="fileUpdata" list-type="picture-card"
                                         :file-list="imageList.machinePics" :limit="num" :data="fileData" :headers="fileUpdataExcData"
                                         :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed"

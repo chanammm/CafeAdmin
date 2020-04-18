@@ -614,6 +614,7 @@ window.addEventListener('pageshow', function (params) {
 
             //查看设备分类详细
             machineDest(params, timer = null) {
+                is.imageList.machinePics = [];
                 axios.get('sys_machine_detail', {
                     params: {
                         machineId: params.machineId
@@ -636,6 +637,7 @@ window.addEventListener('pageshow', function (params) {
                         } else {
                             is.adoptModule = false;
                         }
+                        is.imageList.machinePics.push({ name: 'machinePics', url: res.data.data.machinePic }); // 图片
                         is.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1138,7 +1140,7 @@ window.addEventListener('pageshow', function (params) {
                 xml['_emjoy_'] = xml['_emjoy_'].split(']')[0];
                 xml['repairsTypeIds'] = xml['_emjoy_'].replace(/\"/g, "");
                 delete xml['_emjoy_'];
-                xml['machinePic'] = this.data.machinePic;  //类型图片
+                xml['machinePic'] = this.data.machinePic || xml.machinePic;  //类型图片
 
                 axios.post('update_machine', qs.stringify(xml)).then(params => {
                     if (params.data.state == 200) {
@@ -1207,8 +1209,8 @@ window.addEventListener('pageshow', function (params) {
             },
 
             handlePictureCardPreview(file) {  //点击查看放大的时候
+                this.dialogImageUrl = file.url;
                 this.dialogVisible = true;
-                this.dialogImageUrl = file;
             },
             fileExceed() {
                 this.IError('单图上传');
@@ -1557,7 +1559,7 @@ window.addEventListener('pageshow', function (params) {
              * 更新 / 新增 首页广告
              * **/
             advsubmit(params) {
-                params['advertisingUrl'] = this.data.machinePic;
+                params['advertisingUrl'] = this.data.machinePic || params.advertisingUrl;
                 this.data = params;
                 params.id ? this.data['advertisingId'] = params.id : null;
                 axios.post(params.id ? "update_advertising" : "create_advertising", qs.stringify(this.data)).then(res => {
@@ -1622,7 +1624,7 @@ window.addEventListener('pageshow', function (params) {
             refundorder: function (params) {
                 console.log(params)
                 if (params.workId) {
-                    this.SearchTableAndVisible = true;
+                    this.UpdateVisible = true;
                     params['refund'] = params['paymentStr'];
                     this.SearchTableFormData = params;
                     return
@@ -1630,7 +1632,7 @@ window.addEventListener('pageshow', function (params) {
                 params['refund'] = parseFloat(params['refund'] * 100).toFixed(0);
                 axios.post("order_refund", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
-                        this.SearchTableAndVisible = false;
+                        this.UpdateVisible = false;
                         this.ISuccessfull(res.data.msg);
                         this.list();
                     } else {
@@ -1777,6 +1779,19 @@ window.addEventListener('pageshow', function (params) {
                     .catch(function (error) {
                         is.IError(error);
                     })
+            },
+
+            /**
+             * 工单订单
+             * **/
+            order(params) {
+                this.dialogVisible = true;
+                this.search({ url: "sys_work_order_list"});
+                this.$nextTick(() => {
+                    setTimeout(() => {
+                        this.option = this.options;
+                    },1000)
+                })
             },
 
 

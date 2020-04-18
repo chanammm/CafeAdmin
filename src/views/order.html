@@ -16,7 +16,7 @@
 
 
 <body class="_scrollbar">
-    <div id="c-container-list" style="height: 100%;" data-uri="sys_work_order_list" v-loading.fullscreen.lock="loading">
+    <div id="c-container-list" style="height: 100%;" data-uri="sys_work_list" v-loading.fullscreen.lock="loading">
         <el-container>
             <el-main>
                 <el-main>
@@ -25,9 +25,23 @@
                             <el-select v-model="listSearch._name_" class="_searchVal_select" slot="prepend"
                                 placeholder="请选择">
                                 <el-option label="工单号" value="workId"></el-option>
-                                <el-option label="订单号" value="orderId"></el-option>
+                                <el-option label="联系人名称" value="contactName"></el-option>
                             </el-select>
                         </el-input>
+
+                        <div class="_search_centent" v-show="more">
+                            <el-button>状态</el-button>
+                            <el-select v-model="listSearch.status" slot="prepend" placeholder="请选择">
+                                <el-option label="不限" value=""></el-option>
+                                <el-option label="进行中" value="1"></el-option>
+                                <el-option label="已完成" value="2"></el-option>
+                                <el-option label="已取消" value="3"></el-option>
+                            </el-select>
+                        </div>
+                        <div class="more_search el-icon-circle-plus-outline" v-show="!more" @click="more = !more">
+                            更多搜索条件
+                        </div>
+                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div>
 
                         <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
                         </el-button>
@@ -41,38 +55,38 @@
                     <template>
                         <el-table :data="tableData" stripe style="width: 100%" border>
                             <el-table-column prop="workId" label="工单号"></el-table-column>
-                            <el-table-column prop="orderId" label="工单订单号"></el-table-column>
-                            <el-table-column prop="orderType" label="订单类型">
-                                <template slot-scope="scope">
-                                    {{ scope.row.orderType == 1 ? '系统生成(可退款)' : "人工录入(不可退款)" }}
-                                </template>
-                            </el-table-column>
-
-                            <el-table-column prop="paymentStr" label="支付金额"></el-table-column>
-
-                            <el-table-column prop="refundStr" label="已退款金额"></el-table-column>
-                            <el-table-column prop="refundStatus" label="退款状态">
-                                <template slot-scope="scope">
-                                    <div :class="scope.row.refundStatus == 3 ? 'red' : scope.row.refundStatus == 1 ? 'ccc' : 'green'">
-                                        {{ scope.row.refundStatus == 1 ? '无退款' : scope.row.refundStatus == 3 ? '全部退款' : "部分退款" }}
-                                    </div>
-                                </template>
-                            </el-table-column>
+                            <el-table-column prop="machineName" label="设备名称"></el-table-column>
+                            <el-table-column prop="repairsTypeName" label="保修类型"></el-table-column>
+                            <el-table-column prop="shopName" label="门店名称"></el-table-column>
+                            <el-table-column prop="contactName" label="联系人名称"></el-table-column>
+                            <el-table-column prop="contactPhone" label="联系人电话"></el-table-column>
 
                             <el-table-column prop="status" label="工单状态">
                                 <template slot-scope="scope">
-                                    <div :class="scope.row.status == 1 ? 'red' : scope.row.status == 2 ? 'green' : 'ccc'">
-                                        {{ scope.row.status == 1 ? '未支付' : scope.row.status == 2 ? '已支付' : "已取消" }}
+                                    <div
+                                        :class="scope.row.status == 19 ? 'ccc' : scope.row.status == 3 ? 'red' : 'green'">
+                                        {{
+                                            scope.row.status == 1 ?
+                                            '已确认'
+                                            : scope.row.status == 2 ?
+                                            '已联络' 
+                                            : scope.row.status == 3 ? 
+                                            '维修中' 
+                                            : scope.row.status == 4 ? 
+                                            '已完成' 
+                                            : scope.row.status == 18 ? 
+                                            '已提交' 
+                                            : '已取消'
+                                        }}
                                     </div>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="paymentTime" label="支付时间"></el-table-column>
                             <el-table-column prop="createTime" label="创建时间"></el-table-column>
 
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
-                                    <el-button type="text" v-show="scope.row.orderType == 1 && scope.row.status == 2" size="small" @click="refundorder(scope.row)">
-                                        退款
+                                    <el-button type="text" size="small" @click="orderdest(scope.row)">
+                                        详情
                                     </el-button>
                                 </template>
                             </el-table-column>
@@ -84,59 +98,7 @@
                         layout="total, sizes, prev, pager, next, jumper" :total="total">
                     </el-pagination>
 
-
-                    <el-dialog title="新增设备分类" :visible.sync="UpdateTableAndVisible">
-                        <el-form :model="formData" label-width="180px">
-                            <el-form-item label="分类名称：" prop="machineName">
-                                <el-input v-model="formData.machineName"></el-input>
-                            </el-form-item>
-                            <el-form-item label="分类说明：" prop="machineContent">
-                                <el-input type="textarea" v-model="formData.machineContent"></el-input>
-                            </el-form-item>
-                            <el-form-item label="排序号：" prop="sort">
-                                <el-input v-model="formData.sort"></el-input>
-                            </el-form-item>
-                            <el-form-item label="状态：" prop="status">
-                                <el-radio-group v-model="formData.status">
-                                    <el-radio :label="1">正常</el-radio>
-                                    <el-radio :label="0">冻结</el-radio>
-                                </el-radio-group>
-                            </el-form-item>
-                            <el-form-item label="报修类型：" prop="repairsTypeIds">
-                                <el-table :data="options" @selection-change="handleSelectionChange" 
-                                tooltip-effect="dark" ref="multipleTables" height="300px">
-                                    <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
-                                        <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
-                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
-                                </el-table>
-                            </el-form-item>
-                            <el-form-item label="分类图片：" prop="machinePic">
-                                <template v-model="formData.machinePic">
-                                    <el-upload :action="fileUpdata" list-type="picture-card"
-                                        :file-list="imageList.machinePic" :limit="num" :data="fileData" :headers="fileUpdataExcData"
-                                        :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed"
-                                        :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
-                                        <i class="el-icon-plus"></i>
-                                    </el-upload>
-                                    <el-dialog :visible.sync="dialogVisible">
-                                        <img width="100%" :src="dialogImageUrl" alt="">
-                                    </el-dialog>
-                                </template>
-                            </el-form-item>
-
-                            <div class="btn-center" style="text-align: center; margin: 20px;">
-                                <el-button type="primary" @click="machine(formData)">提交
-                                </el-button>
-                            </div>
-                        </el-form>
-                    </el-dialog>
-
-                    <el-dialog title="工单退款" :visible.sync="SearchTableAndVisible" width="50%">
+                    <el-dialog title="工单退款" :visible.sync="UpdateVisible" width="50%">
                         <el-form :data="SearchTableFormData" label-width="140px">
                             <el-form-item label="退款订单号" prop="orderId">
                                 <el-input v-model="SearchTableFormData.orderId"></el-input>
@@ -145,7 +107,239 @@
                                 <el-input v-model="SearchTableFormData.refund"></el-input>
                             </el-form-item>
                             <div class="btn-center" style="text-align: center; margin: 20px;">
-                                <el-button type="primary" @click="refundorder({orderId: SearchTableFormData.orderId,refund:SearchTableFormData.refund })">提交
+                                <el-button type="primary"
+                                    @click="refundorder({orderId: SearchTableFormData.orderId,refund:SearchTableFormData.refund })">
+                                    提交
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                    <el-dialog title="工单详情" :visible.sync="UpdateTableAndVisible">
+                        <el-form :model="formData" label-width="180px">
+
+                            <el-form-item label="需求名：" prop="demandName">
+                                <!-- <el-input v-model="formData.demandName"></el-input> -->
+                                {{formData.demandName}}
+                            </el-form-item>
+
+                            <el-form-item label="需求类型：" prop="demandType">
+                                <!-- <el-radio-group v-model="formData.demandType">
+                                    <el-radio :label="1">远程指导</el-radio>
+                                    <el-radio :label="2">上门</el-radio>
+                                </el-radio-group> -->
+                                {{formData.demandType == 1 ? '远程指导' : '上门'}}
+                            </el-form-item>
+
+                            <el-form-item label="故障描述：" prop="faultContent">
+                                <!-- <el-input v-model="formData.faultContent"></el-input> -->
+                                {{formData.faultContent}}
+                            </el-form-item>
+
+                            <el-form-item label="保修类型名：" prop="repairsTypeName">
+                                <!-- <el-input v-model="formData.repairsTypeName"></el-input> -->
+                                {{formData.repairsTypeName}}
+                            </el-form-item>
+
+                            <el-form-item label="门店名称：" prop="shopName">
+                                <!-- <el-input v-model="formData.shopName"></el-input> -->
+                                {{formData.shopName}}
+                            </el-form-item>
+
+                            <el-form-item label="故障部分图：" prop="faultPartPic">
+                                <!-- <el-input v-model="formData.faultPartPic"></el-input> -->
+                                <el-image :src="formData.faultPartPic">
+                                    <div slot="placeholder" class="image-slot">
+                                        加载中<span class="dot">...</span>
+                                    </div>
+                                </el-image>
+                            </el-form-item>
+
+                            <el-form-item label="机器品牌图：" prop="machineBrandPic">
+                                <!-- <el-input v-model="formData.machineBrandPic"></el-input> -->
+                                <el-image :src="formData.machineBrandPic">
+                                    <div slot="placeholder" class="image-slot">
+                                        加载中<span class="dot">...</span>
+                                    </div>
+                                </el-image>
+                            </el-form-item>
+
+                            <el-form-item label="机器整体图：" prop="machineOverallPic">
+                                <!-- <el-input v-model="formData.machineOverallPic"></el-input> -->
+                                <el-image :src="formData.machineOverallPic">
+                                    <div slot="placeholder" class="image-slot">
+                                        加载中<span class="dot">...</span>
+                                    </div>
+                                </el-image>
+                            </el-form-item>
+
+                            <el-form-item label="联系地址：">
+                                {{ formData.province + formData.city + formData.district + formData.address }}
+                            </el-form-item>
+
+                            <el-form-item label="联系人名称：" prop="contactName">
+                                <!-- <el-input v-model="formData.contactName"></el-input> -->
+                                {{formData.contactName}}
+                            </el-form-item>
+
+                            <el-form-item label="联系人电话：" prop="contactPhone">
+                                <!-- <el-input v-model="formData.contactPhone"></el-input> -->
+                                {{formData.contactPhone}}
+                            </el-form-item>
+
+                            <el-form-item label="维修师傅名称：" prop="maintainerName">
+                                <!-- <el-input v-model="formData.maintainerName"></el-input> -->
+                                {{formData.maintainerName == -1 ? '无' : formData.maintainerName}}
+                            </el-form-item>
+
+                            <el-form-item label="维修师傅电话：" prop="maintainerPhone">
+                                <!-- <el-input v-model="formData.maintainerPhone"></el-input> -->
+                                {{formData.maintainerPhone == -1 ? '无' : formData.maintainerPhone}}
+                            </el-form-item>
+
+                            <el-form-item label="联系人电话：" prop="contactPhone">
+                                <!-- <el-input v-model="formData.contactPhone"></el-input> -->
+                                {{formData.contactPhone}}
+                            </el-form-item>
+
+                            <el-form-item label="用户端用户微信昵称：" prop="nickName">
+                                <!-- <el-input v-model="formData.nickName"></el-input> -->
+                                {{formData.nickName}}
+                            </el-form-item>
+
+                            <el-form-item label="支付总金额展示：" prop="paymentStr">
+                                <!-- <el-input v-model="formData.paymentStr"></el-input> -->
+                                {{formData.paymentStr}}
+                            </el-form-item>
+
+                            <el-form-item label="工单耗时：" prop="timeConsumingStr">
+                                <!-- <el-input v-model="formData.timeConsumingStr"></el-input> -->
+                                {{formData.timeConsumingStr == -1 ? '无' : formData.timeConsumingStr}}
+                            </el-form-item>
+                            <el-form-item label="上门费用：" prop="visitCostStr">
+                                <!-- <el-input v-model="formData.visitCostStr"></el-input> -->
+                                {{formData.visitCostStr}}
+                            </el-form-item>
+
+                            <el-form-item label="状态：" prop="status">
+                                <!-- <el-radio-group v-model="formData.status">
+                                    <el-radio :label="1">已确认/已支付定金/待沟通</el-radio>
+                                    <el-radio :label="2">已联络/待派单</el-radio>
+                                    <el-radio :label="3">已派单/维修中</el-radio>
+                                    <el-radio :label="5">已完成/已回访</el-radio>
+                                    <el-radio :label="18">已提交/未确认</el-radio>
+                                    <el-radio :label="19">已取消</el-radio>
+                                </el-radio-group> -->
+                                {{
+                                    formData.status == 1 ?
+                                    '已确认'
+                                    : formData.status == 2 ?
+                                    '已联络' 
+                                    : formData.status == 3 ? 
+                                    '维修中' 
+                                    : formData.status == 4 ? 
+                                    '已完成' 
+                                    : formData.status == 18 ? 
+                                    '已提交' 
+                                    : '已取消'
+                                }}
+                            </el-form-item>
+
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button v-show="formData.status == 1" type="primary" @click="contactorder(formData)">
+                                    工单沟通
+                                </el-button>
+                                <el-button v-show="formData.status == 2" type="primary" @click="goorder(formData)">工单派单
+                                </el-button>
+                                <el-button v-show="formData.status == 3" type="primary" @click="denorder(formData)">完成工单
+                                </el-button>
+                                <el-button v-show="formData.status != 4 && formData.status != 19" type="primary" @click="celorder(formData)">取消工单
+                                </el-button>
+                                <el-button v-show="formData.orderCount > 0" type="primary" @click="order(formData)">查看订单
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+
+                    <el-dialog title="工单派送" :visible.sync="SearchTableAndVisible">
+                        <el-form :model="SearchTableFormData" label-width="180px">
+                            <el-table :data="options" @current-change="getTemplateRow" tooltip-effect="dark"
+                                ref="multipleTable" height="300px">
+                                <el-table-column label="选择" width="55">
+                                    <template slot-scope="scope">
+                                        <el-radio v-model="tableRadio" :label="scope.row"><i></i></el-radio>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column prop="maintainerName" label="师傅名称"></el-table-column>
+                                <el-table-column prop="maintainerPhone" label="师傅联系电话"></el-table-column>
+                            </el-table>
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="goorder({work: SearchTableFormData.workId})">派送
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                    <el-dialog title="工单订单" :visible.sync="dialogVisible" width="80%">
+                        <el-table :data="option" tooltip-effect="dark" height="500px" >
+                            <el-table-column prop="orderId" label="订单号"></el-table-column>
+                            <el-table-column prop="paymentStr" label="支付金额"></el-table-column>
+                            <el-table-column prop="refundStr" label="已退款金额"></el-table-column>
+                            <el-table-column prop="status" label="订单状态">
+                                <template slot-scope="scope">
+                                    {{ scope.row.status == 1 ? '未支付' : scope.row.status == 2 ? '已支付' : '已取消' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="createTime" label="创建时间"></el-table-column>
+                            <el-table-column fixed="right" label="操作">
+                                <template slot-scope="scope">
+                                    <el-button type="text" v-show="scope.row.orderType == 1 && scope.row.status == 2"
+                                        size="small" @click="refundorder(scope.row)">
+                                        退款
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-dialog>
+
+                    <el-dialog title="确认完成工单" :visible.sync="TableAndVisible">
+                        <el-form :model="SearchTableFormDatas" label-width="180px">
+                            <el-form-item label="工单号" prop="workId">
+                                <el-input v-model="SearchTableFormDatas.workId"></el-input>
+                            </el-form-item>
+                            <el-form-item label="工单金额" prop="payments">
+                                <el-input v-model="SearchTableFormDatas.payments"></el-input>
+                            </el-form-item>
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="denorder(SearchTableFormDatas)">确认完成
+                                </el-button>
+                            </div>
+                        </el-form>
+                    </el-dialog>
+
+                    <el-dialog title="取消工单" :visible.sync="detailTableAndVisible">
+                        <el-form :model="DataVisible" label-width="180px">
+                            <el-form-item label="工单号" prop="work">
+                                <el-input v-model="DataVisible.work"></el-input>
+                            </el-form-item>
+                            <el-form-item label="取消原因" prop="cancelContent ">
+                                <el-input v-model="DataVisible.cancelContent "></el-input>
+                            </el-form-item>
+                            <el-form-item label="退款" prop="needRefund ">
+                                <el-radio-group v-model="formData.needRefund ">
+                                    <el-radio :label="0">否</el-radio>
+                                    <el-radio :label="1">是</el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item label="订单号" prop="orderId">
+                                <el-input v-model="DataVisible.orderId"></el-input>
+                            </el-form-item>
+                            <el-form-item label="工单金额" prop="refund">
+                                <el-input v-model="DataVisible.refund"></el-input>
+                            </el-form-item>
+                            <div class="btn-center" style="text-align: center; margin: 20px;">
+                                <el-button type="primary" @click="celorder(DataVisible)">派送
                                 </el-button>
                             </div>
                         </el-form>
