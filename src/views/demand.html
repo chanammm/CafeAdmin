@@ -30,7 +30,7 @@
                         <el-select v-model="listSearch._name_" class="_searchVal_select" slot="prepend"
                             placeholder="请选择">
                             <el-option label="需求名" value="demandName"></el-option>
-                            <el-option label="需求类型名" value="demandTypeName"></el-option>
+                            <!-- <el-option label="需求类型名" value="demandTypeName"></el-option> -->
                         </el-select>
                     </el-input>
 
@@ -39,26 +39,21 @@
                 </el-form>
                 <template>
                     <el-table :data="tableData" stripe style="width: 100%" border>
-                        <el-table-column prop="demandName" label="需求名"></el-table-column>
-                        <el-table-column prop="demandTypeName" label="需求类型名"></el-table-column>
+                        <el-table-column prop="demandTypeName" label="需求名称"></el-table-column>
                         <el-table-column prop="isMultiple" label="多选">
                             <template slot-scope="scope">
                                 {{ scope.row.isMultiple == 1 ? '是' : "否" }}
                             </template>
                         </el-table-column>
 
-                        <el-table-column prop="repairsName" label="报修分类名"></el-table-column>
-
-                        <el-table-column prop="repairsTypeName" label="报修类型名"></el-table-column>
-
                         <el-table-column prop="sort" label="排序号"></el-table-column>
-                        <el-table-column prop="status" label="状态">
+                        <!-- <el-table-column prop="status" label="状态">
                             <template slot-scope="scope">
                                 <div :class="scope.row.status == 1 ? 'green': 'red'">
                                     {{ scope.row.status == 1 ? '正常' : '冻结' }}
                                 </div>
                             </template>
-                        </el-table-column>
+                        </el-table-column> -->
                         <el-table-column prop="createTime" label="创建时间"></el-table-column>
 
                         <el-table-column fixed="right" label="操作">
@@ -66,10 +61,10 @@
                                 <el-button type="text" size="small" @click="demandDest(scope.row)">
                                     详情
                                 </el-button>
-                                <el-button type="text" size="small"
+                                <!-- <el-button type="text" size="small"
                                     @click="pullblack({URL: 'demand_block', NUMBER: scope.row.demandId, TAG: 'demandId'})">
                                     {{ scope.row.status != 1 ? '正常' : '冻结' }}
-                                </el-button>
+                                </el-button> -->
                                 <el-button type="text" size="small"
                                     @click="deletedata({URL: 'delete_demand', TAG: 'demandId', NUMBER: scope.row.demandId })">
                                     删除
@@ -86,28 +81,28 @@
 
                 <el-dialog title="需求类型" :visible.sync="UpdateTableAndVisible">
                     <el-form :model="formData" label-width="180px">
-                        <el-form-item label="需求名称" prop="demandName">
-                            <el-input v-model="formData.demandName"></el-input>
+                        <el-form-item label="需求名称" prop="demandTypeName">
+                            <el-input v-model="formData.demandTypeName"></el-input>
                         </el-form-item>
-                        <el-form-item label="需求类型" prop="demandTypeName ">
+                        <!-- <el-form-item label="需求类型" prop="demandTypeName ">
                             <el-input type="textarea" v-model="formData.demandTypeName "></el-input>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="排序号" prop="sort">
                             <el-input v-model="formData.sort"></el-input>
                         </el-form-item>
-                        <el-form-item label="状态" prop="status">
+                        <!-- <el-form-item label="状态" prop="status">
                             <el-radio-group v-model="formData.status">
                                 <el-radio :label="1">正常</el-radio>
                                 <el-radio :label="0">冻结</el-radio>
                             </el-radio-group>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="多选" prop="isMultiple ">
                             <el-radio-group v-model="formData.isMultiple ">
                                 <el-radio :label="1">是</el-radio>
                                 <el-radio :label="0">否</el-radio>
                             </el-radio-group>
                         </el-form-item>
-                        <el-form-item label="报修类型" prop="repairsTypeIds">
+                        <!-- <el-form-item label="报修类型" prop="repairsTypeIds">
                             <el-table :data="tableDatass" @current-change="getTemplateRow" tooltip-effect="dark"
                                 height="300px">
                                 <el-table-column label="选择" width="55">
@@ -123,26 +118,13 @@
                                 <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
                                 <el-table-column prop="repairsName" label="类型名称"></el-table-column>
                             </el-table>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="收费项目" prop="demandChargeIds">
                             <el-table :data="option" @selection-change="handleSelectionChange" tooltip-effect="dark"
                                 ref="multipleTable" height="300px">
                                 <el-table-column type="selection" width="55"></el-table-column>
-                                <el-table-column prop="demandName" label="名称">
-                                    <template slot-scope="scope">
-                                        {{ scope.row.demandName == -1 ? '无' : scope.row.demandName }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="demandType" label="类型">
-                                    <template slot-scope="scope">
-                                        {{ scope.row.demandType == 1 ? '远程指导' : "上门" }}
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="price" label="价格">
-                                    <template slot-scope="scope">
-                                        {{ parseFloat(scope.row.price / 100).toFixed(2) }} RMB
-                                    </template>
-                                </el-table-column>
+                                <el-table-column prop="demandChargeName" label="名称"></el-table-column>
+                                <el-table-column prop="priceStr" label="价格"></el-table-column>
                             </el-table>
                         </el-form-item>
 

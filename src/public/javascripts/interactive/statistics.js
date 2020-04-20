@@ -381,10 +381,7 @@ new Vue({
                         if (res.data.list.workCount == +false) continue;
                         for (let j of res.data.list) {
                             if (_date[i] == j.workDate) {
-                                RegExp(/天/g).test(j.timeConsumingStr) ? _content[i] = j.timeConsumingStr.replace(/\天/g, '') : _content[i] = '0.';
-                                RegExp(/时/g).test(j.timeConsumingStr) ? _content[i] = _content[i] + j.timeConsumingStr.replace(/\时/g, '') : _content[i] = _content[i] + '00';
-                                RegExp(/分/g).test(j.timeConsumingStr) ? _content[i] = _content[i] + j.timeConsumingStr.replace(/\分/g, '') : _content[i] = _content[i] + '00';
-                                RegExp(/秒/g).test(j.timeConsumingStr) ? _content[i] = _content[i] + j.timeConsumingStr.replace(/\秒/g, '') : _content[i] = _content[i] + '0';
+                                _content[i] = parseFloat(j.timeConsuming / 1000).toFixed(3);
                                 // _content[i] = j.timeConsumingStr.replace(/\天/g, '.').replace(/\时/g, '0').split('分')[0]; //对应的数值
                             }
                         }
@@ -413,15 +410,12 @@ new Vue({
                                 htmlStr += params[0].name +'<br/>';//x轴的名称
                                 
                                 //为了保证和原来的效果一样，这里自己实现了一个点的效果
-                                htmlStr += '<span style="margin-right:5px;display:inline-block;width:10px;height:10px;border-radius:5px;background-color:'+color+';"></span>';
-                                let x = '';
                                 blocks.forEach(element => {
-                                    x += `工单耗时： 无`;
                                     if(element.workDate == params[0].name){
-                                        x = `工单耗时：${ element.timeConsumingStr }`;
+                                        htmlStr += '<span style="margin-right:5px;display:inline-block;width:10px;height:10px;border-radius:5px;background-color:'+color+';"></span>';
+                                        htmlStr += `工单耗时：${ element.timeConsumingStr }`;
                                     }
                                 })
-                                htmlStr += x
 
                                 //添加一个汉字，这里你可以格式你的数字或者自定义文本内容
                                 // htmlStr += `工单耗时：${ params[0].value }天${ params[0].value }时${ params[0].value }分${ params[0].value }秒`;

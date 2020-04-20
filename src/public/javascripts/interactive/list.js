@@ -283,12 +283,12 @@ window.addEventListener('pageshow', function (params) {
                                 }
                             })
                         } else {
-                            if (uri == "sys_machine_offer_explain_list") {
-                                // data.page.records[]
-                                data.page.records.forEach((element, index) => {
-                                    data.page.records[index].offerExplain = ym.init.COMPILESTR.decrypt(element.offerExplain)
-                                })
-                            }
+                            // if (uri == "sys_machine_offer_explain_list") {
+                            //     // data.page.records[]
+                            //     data.page.records.forEach((element, index) => {
+                            //         data.page.records[index].offerExplain = ym.init.COMPILESTR.decrypt(element.offerExplain)
+                            //     })
+                            // }
                             data.page.total ? it.total = parseInt(data.page.total) : null;
                             xml = data.page.records;
                         }
@@ -559,12 +559,15 @@ window.addEventListener('pageshow', function (params) {
             machine(params, xml = {}) {
                 try {
                     xml = params;
-                    xml['_emjoy_'] = [];
-                    xml['_emjoy_'] = JSON.stringify(this.data.repairsTypeIds).split('[')[1];
-                    xml['_emjoy_'] = xml['_emjoy_'].split(']')[0];
-                    xml['repairsTypeIds'] = xml['_emjoy_'].replace(/\"/g, "");
-                    delete xml['_emjoy_'];
+                    if (this.data.repairsTypeIds) {
+                        xml['_emjoy_'] = [];
+                        xml['_emjoy_'] = JSON.stringify(this.data.repairsTypeIds).split('[')[1];
+                        xml['_emjoy_'] = xml['_emjoy_'].split(']')[0];
+                        xml['repairsTypeIds'] = xml['_emjoy_'].replace(/\"/g, "");
+                        delete xml['_emjoy_'];
+                    }
                     xml['machinePic'] = this.data.machinePic;  //类型图片
+                    xml['status'] = 1;
                     axios.post('create_machine', qs.stringify(params)).then(res => {
                         if (res.data.state == 200) {
                             is.UpdateTableAndVisible = false;
@@ -585,31 +588,35 @@ window.addEventListener('pageshow', function (params) {
 
             //新增/编辑 报修分类 
             devicemachine(params, bool = false) {
-                if (params.machineId) bool = true;
-                params['demandIds'] = !JSON.stringify(this.data['repairsTypeIds']) ? null : JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""); //费用项数组 demandChargeIds 
-                params['machineId'] = this.tableRadio.machineId; //设备分类
-                params['machineOfferExplainId'] = this.tableRadios.machineOfferExplainId; //报价参考
-                axios.post(bool ? 'update_repairs_type' : 'create_repairs_type', qs.stringify(params)).then(res => {
-                    if (res.data.state == 200) {
-                        is.UpdateTableAndVisible = false;
-                        is.ISuccessfull(res.data.msg);
-                        is.data = {};
-                        is.list();
-                    } else {
-                        is.IError(res.data.msg);
-                    }
-                })
-                    .catch(function (error) {
-                        is.IError(error);
+                if (params.createTime) bool = true;
+                try {
+                    params['status'] = 1;
+                    params['demandIds'] = !JSON.stringify(this.data['repairsTypeIds']) ? null : JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""); //费用项数组 demandChargeIds 
+                    this.tableRadios ? params['machineOfferExplainId'] = this.tableRadios.machineOfferExplainId : null; //报价参考
+                    axios.post(bool ? 'update_repairs_type' : 'create_repairs_type', qs.stringify(params)).then(res => {
+                        if (res.data.state == 200) {
+                            this.UpdateTableAndVisible = false;
+                            this.ISuccessfull(res.data.msg);
+                            this.data = {};
+                            this.list();
+                            this.tableRadios = [];
+                        } else {
+                            this.IError(res.data.msg);
+                        }
                     })
+                        .catch(function (error) {
+                            this.IError(error);
+                        })
+                } catch (error) {
+                    this.IError(error);
+                }
             },
 
             //新增/编辑 需求分类 
             demandsubmit(params, bool = false) {
                 if (params.demandId) bool = true;
-                console.log(this.tableRadio)
+                params['status'] = 1;
                 params['demandChargeIds'] = !JSON.stringify(this.data['repairsTypeIds']) ? null : JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""); //费用项数组 demandChargeIds 
-                params['repairsId'] = this.tableRadio.repairsTypeId; //报修分类
                 axios.post(bool ? 'update_demand' : 'create_demand', qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
                         is.UpdateTableAndVisible = false;
@@ -646,10 +653,10 @@ window.addEventListener('pageshow', function (params) {
                         if (res.data.data.status == 1) {
                             is.adoptModule = true;
                             this.$nextTick(() => {
-                                this.search({ url: "sys_repairs_type_list", machineId: params.machineId });  //查询当前的 已经绑定的项目
+                                params ? this.search({ url: "sys_repairs_type_list", id: params.machineId, tag: 'machineId' }) : this.search({ url: "sys_repairs_type_list" });  //查询当前的 已经绑定的项目
                                 setTimeout(() => {
                                     this.options.forEach((ele, index) => {
-                                        if (ele.machineId == params.machineId) {
+                                        if (ele.selected == +true) {
                                             this.$refs.multipleTable.toggleRowSelection(this.options[index], true);
                                         }
                                     })
@@ -671,40 +678,41 @@ window.addEventListener('pageshow', function (params) {
 
             //查看/新增 报修分类详细
             devicemachineDest(params) {
+                console.log(params);
                 this.UpdateTableAndVisible = true;
                 this.$nextTick(() => {
-                    this.search({ url: "sys_machine_list" });  //设备分类列表
+                    // this.search({ url: "sys_machine_list" });  //设备分类列表
+                    // setTimeout(() => {
+                    //     this.tableDatass = this.options;
+                    //     this.tableDatass.forEach((ele, index) => {
+                    //         if (!params) return;
+                    //         if (ele.machineId == params.machineId) {
+                    //             this.getTemplateRow(ele);
+                    //         }
+                    //     })
                     setTimeout(() => {
-                        this.tableDatass = this.options;
-                        this.tableDatass.forEach((ele, index) => {
-                            if (!params) return;
-                            if (ele.machineId == params.machineId) {
-                                this.getTemplateRow(ele);
-                            }
-                        })
+                        params ? this.search({ url: "sys_demand_list", id: params.repairsTypeId, tag: 'repairsTypeId' }) : this.search({ url: "sys_demand_list" });  //设备需求分类列表
                         setTimeout(() => {
-                            this.search({ url: "sys_demand_list" });  //设备需求分类列表
+                            this.option = this.options;
+                            this.option.forEach((ele, index) => {
+                                this.$nextTick(() => {
+                                    if (!params) return;
+                                    if (ele.selected == +true) {
+                                        this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
+                                    }
+                                })
+                            })
                             setTimeout(() => {
-                                this.option = this.options;
-                                this.option.forEach((ele, index) => {
-                                    this.$nextTick(() => {
+                                params ? this.search({ url: "sys_machine_offer_explain_list", id: params.repairsTypeId, tag: 'repairsTypeId' }) : this.search({ url: "sys_machine_offer_explain_list" });  //设备收费参考
+                                setTimeout(() => {
+                                    this.tableDatas = this.options;
+                                    this.tableDatas.forEach((ele, index) => {
                                         if (!params) return;
-                                        if (params.repairsTypeId == ele.repairsId) {
-                                            this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
+                                        if (ele.selected == +true) {
+                                            this.getTemplateRows(ele);
                                         }
                                     })
-                                })
-                                setTimeout(() => {
-                                    this.search({ url: "sys_machine_offer_explain_list" });  //设备收费参考
-                                    setTimeout(() => {
-                                        this.tableDatas = this.options;
-                                        this.tableDatas.forEach((ele, index) => {
-                                            if (!params) return;
-                                            if (ele.repairsId == params.repairsTypeId) {
-                                                this.getTemplateRows(ele);
-                                            }
-                                        })
-                                    }, 700)
+                                    // }, 700)
                                 }, 600)
                             }, 500)
                         }, 400)
@@ -731,30 +739,30 @@ window.addEventListener('pageshow', function (params) {
             demandDest(params) {
                 this.UpdateTableAndVisible = true;
                 this.$nextTick(() => {
-                    this.search({ url: "sys_repairs_type_list" });  //报修分类列表
+                    // this.search({ url: "sys_repairs_type_list" });  //报修分类列表
+                    // setTimeout(() => {
+                    //     this.tableDatass = this.options;
+                    //     this.tableDatass.forEach((ele, index) => {
+                    //         if (!params) return;
+                    //         if (ele.repairsTypeId == params.repairsId) {
+                    //             this.getTemplateRow(ele);
+                    //         }
+                    //     })
+                    //     setTimeout(() => {
+                    this.search({ url: "sys_demand_charge_list" });  //设备收费项目列表
                     setTimeout(() => {
-                        this.tableDatass = this.options;
-                        this.tableDatass.forEach((ele, index) => {
-                            if (!params) return;
-                            if (ele.repairsTypeId == params.repairsId) {
-                                this.getTemplateRow(ele);
-                            }
+                        this.option = this.options;
+                        this.option.forEach((ele, index) => {
+                            this.$nextTick(() => {
+                                if (!params) return;
+                                if (params.demandId == ele.demandChargeId) {
+                                    this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
+                                }
+                            })
                         })
-                        setTimeout(() => {
-                            this.search({ url: "sys_demand_charge_list" });  //设备收费项目列表
-                            setTimeout(() => {
-                                this.option = this.options;
-                                this.option.forEach((ele, index) => {
-                                    this.$nextTick(() => {
-                                        if (!params) return;
-                                        if (params.demandId == ele.demandId) {
-                                            this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
-                                        }
-                                    })
-                                })
-                            }, 500)
-                        }, 400)
-                    }, 300)
+                    }, 500)
+                    //     }, 400)
+                    // }, 300)
                 })
                 if (!params) return;
                 axios.get('sys_demand_detail', {
@@ -841,6 +849,7 @@ window.addEventListener('pageshow', function (params) {
                 data['pageSize'] = 1000;
                 data['url'] = params.url;
                 if (params.url == "sys_work_order_list") data['workId'] = params.workId;
+                if (params.id) data[params.tag] = params.id;  //0.0.2 版本更新内容
                 axios.post(data.url, qs.stringify(data)).then(params => {
                     this.options = [];
                     this.roleId = [];
@@ -1202,13 +1211,15 @@ window.addEventListener('pageshow', function (params) {
             //更新 设备信息
             updateMachine(params, xml = {}) {
                 xml = params;
-                xml['_emjoy_'] = [];
-                xml['_emjoy_'] = JSON.stringify(this.data.repairsTypeIds).split('[')[1];
-                xml['_emjoy_'] = xml['_emjoy_'].split(']')[0];
-                xml['repairsTypeIds'] = xml['_emjoy_'].replace(/\"/g, "");
-                delete xml['_emjoy_'];
+                if (this.data.repairsTypeIds) {
+                    xml['_emjoy_'] = [];
+                    xml['_emjoy_'] = JSON.stringify(this.data.repairsTypeIds).split('[')[1];
+                    xml['_emjoy_'] = xml['_emjoy_'].split(']')[0];
+                    xml['repairsTypeIds'] = xml['_emjoy_'].replace(/\"/g, "");
+                    delete xml['_emjoy_'];
+                }
                 xml['machinePic'] = this.data.machinePic || xml.machinePic;  //类型图片
-
+                xml['status'] = 1;
                 axios.post('update_machine', qs.stringify(xml)).then(params => {
                     if (params.data.state == 200) {
                         is.ISuccessfull(params.data.msg);
@@ -1351,17 +1362,17 @@ window.addEventListener('pageshow', function (params) {
             machineOfferExplain(params) {
                 this.SearchTableAndVisible = true;
                 this.SearchTableFormData = {};
-                this.search({ url: "sys_repairs_type_list" })
-                this.$nextTick(() => {
-                    setTimeout(() => {
-                        this.options.forEach((ele, index) => {
-                            if (!params) return;
-                            if (ele.repairsTypeId == params.repairsId) {
-                                this.getTemplateRow(ele);
-                            }
-                        })
-                    }, 1000)
-                })
+                // this.search({ url: "sys_repairs_type_list" })
+                // this.$nextTick(() => {
+                //     setTimeout(() => {
+                //         this.options.forEach((ele, index) => {
+                //             if (!params) return;
+                //             if (ele.repairsTypeId == params.repairsId) {
+                //                 this.getTemplateRow(ele);
+                //             }
+                //         })
+                //     }, 1000)
+                // })
                 // 以上是打开 视图，更新保修类型列表
                 // 以下是回来的文本
                 if (!params) return;
@@ -1371,22 +1382,24 @@ window.addEventListener('pageshow', function (params) {
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
-                        res.data.data['offerExplain'] == -1 ? res.data.data['offerExplain'] = "无" :
-                            (() => {
-                                this.changeInputValueDatas = JSON.parse(decodeURI(ym.init.COMPILESTR.decrypt(res.data.data.offerExplain)));
-                                let arr = []; this.inputArrays = [];
-                                this.sortArr(this.changeInputValueDatas, 'parentIndex').forEach((element, index) => {
-                                    arr.push({
-                                        inputArray: element
-                                    });
-                                })
-                                this.$nextTick(() => {
-                                    this.inputArrays = arr;
-                                })
-                                // console.log(this.inputArrays)
-                            })()
+                        // res.data.data['offerExplain'] == -1 ? res.data.data['offerExplain'] = "无" :
+                        //     (() => {
+                        //         this.changeInputValueDatas = JSON.parse(decodeURI(ym.init.COMPILESTR.decrypt(res.data.data.offerExplain)));
+                        //         let arr = []; this.inputArrays = [];
+                        //         this.sortArr(this.changeInputValueDatas, 'parentIndex').forEach((element, index) => {
+                        //             arr.push({
+                        //                 inputArray: element
+                        //             });
+                        //         })
+                        //         this.$nextTick(() => {
+                        //             this.inputArrays = arr;
+                        //         })
+                        //         // console.log(this.inputArrays)
+                        //     })()
 
-                        res.data.data['offerContent'] == -1 ? res.data.data['offerContent'] = "无" : null;
+                        // res.data.data['offerContent'] == -1 ? res.data.data['offerContent'] = "无" : null;
+                        
+                        this.imageList.machinePic.push({ name: 'machinePic', url: res.data.data.offerExplainPic }); //TAG 图片
                         this.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1403,20 +1416,21 @@ window.addEventListener('pageshow', function (params) {
             payserverdetails(params) {
                 this.SearchTableAndVisible = true;
                 this.SearchTableFormData = {};
-                this.search({ url: "sys_demand_list" })
-                this.$nextTick(() => {
-                    setTimeout(() => {
-                        this.option = this.options;
-                        this.option.forEach((ele, index) => {
-                            this.$nextTick(() => {
-                                if (!params) return;
-                                if (params.demandId == ele.demandId) {
-                                    this.getTemplateRows(ele);
-                                }
-                            })
-                        })
-                    }, 700)
-                })
+                // 查询需求类型 demandId 
+                // this.search({ url: "sys_demand_list" })
+                // this.$nextTick(() => {
+                //     setTimeout(() => {
+                //         this.option = this.options;
+                //         this.option.forEach((ele, index) => {
+                //             this.$nextTick(() => {
+                //                 if (!params) return;
+                //                 if (params.demandId == ele.demandId) {
+                //                     this.getTemplateRows(ele);
+                //                 }
+                //             })
+                //         })
+                //     }, 700)
+                // })
                 if (!params) return;
                 axios.get("sys_demand_charge_detail", {
                     params: {
@@ -1445,7 +1459,7 @@ window.addEventListener('pageshow', function (params) {
              * **/
             paysubmit(params) {
                 params['repairsId'] = this.tableRadio.repairsTypeId; // 设备报修id
-                params['demandId'] = this.tableRadios.demandId; // 设备报修id
+                params['demandId'] = params.demandChargeId ? params.demandId : -1; // 需求类型 id，可以双向绑定，避免混乱，默认不绑定
                 params['content'] = params.contenta + '|' + params.contents;  //组个参考价
                 this.data = params;
                 this.data['price'] = parseFloat(this.data['prices'] * 100).toFixed(0);
@@ -1455,6 +1469,7 @@ window.addEventListener('pageshow', function (params) {
                         this.data = {};
                         this.SearchTableAndVisible = false;
                         this.ISuccessfull(res.data.msg);
+                        this.tableRadio = [];
                         this.list()
                     } else {
                         is.IError(res.data.msg);
@@ -1469,17 +1484,15 @@ window.addEventListener('pageshow', function (params) {
              * 更新 / 新增 报价参考
              * **/
             reference(params) {
-                // console.log(params);
-                params['offerExplain'] = encodeURI(ym.init.COMPILESTR.encryption(JSON.stringify(this.changeInputValueDatas)));
-                params['repairsId'] = this.tableRadio.repairsTypeId; // 设备报修id
-                this.data = params;
-                this.data['status'] = 1; //暂定
-                axios.post(params.machineOfferExplainId ? "update_machine_offer_explain" : "create_machine_offer_explain", qs.stringify(this.data)).then(res => {
+                let is = this;
+                // params['offerExplain'] = encodeURI(ym.init.COMPILESTR.encryption(JSON.stringify(this.changeInputValueDatas)));
+                params['offerExplainPic'] = this.data.machinePic;
+                params['status'] = 1; //暂定
+                axios.post(params.machineOfferExplainId ? "update_machine_offer_explain" : "create_machine_offer_explain", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
-                        this.data = {};
-                        this.SearchTableAndVisible = false;
-                        this.ISuccessfull(res.data.msg);
-                        this.list();
+                        is.SearchTableAndVisible = false;
+                        // is.ISuccessfull(res.data.msg);
+                        is.list();
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1489,6 +1502,8 @@ window.addEventListener('pageshow', function (params) {
                     })
             },
 
+
+            // ***************************************************************  工具类插件【数组超长bug，无法删除数组元素】   **********************************************************************************
             sortArr(arr, str) {
                 var _arr = [],
                     _t = [],
@@ -1551,8 +1566,8 @@ window.addEventListener('pageshow', function (params) {
                 if (this.changeInputValueDatas.length > 0) {
                     this.changeInputValueDatas.forEach((element, i) => {
                         _arr_.push(element);
-                        if (element.parentIndex == parentIndex) {
-                            if (element.index == index) {
+                        if (element.parentIndex == parentIndex) {  //外层相等
+                            if (element.index == index) {   //内层相等
                                 _arr_.splice(i, 1, {
                                     value: params,
                                     index: index,
@@ -1561,7 +1576,6 @@ window.addEventListener('pageshow', function (params) {
                                 bool = false;
                             };
                         };  //先清除掉之前的内容稍后执行添加 
-
                     })
                     // console.log(this.changeInputValueDatas.length == index)
                     if (bool) {
@@ -1601,7 +1615,7 @@ window.addEventListener('pageshow', function (params) {
                     }
                 });
             },
-
+            // ***************************************************************  工具类插件【数组超长bug，无法删除数组元素】   **********************************************************************************
 
 
             /**
@@ -1693,7 +1707,7 @@ window.addEventListener('pageshow', function (params) {
              * 工单退款
              * **/
             refundorder: function (params) {
-                console.log(params)
+
                 if (params.workId) {
                     this.UpdateVisible = true;
                     params['refund'] = params['paymentStr'];
@@ -1704,6 +1718,7 @@ window.addEventListener('pageshow', function (params) {
                 axios.post("order_refund", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
                         this.UpdateVisible = false;
+                        this.dialogVisible = false;
                         this.ISuccessfull(res.data.msg);
                         this.list();
                     } else {
@@ -1765,6 +1780,7 @@ window.addEventListener('pageshow', function (params) {
                         this.ISuccessfull(res.data.msg);
                         this.SearchTableAndVisible = false;
                         this.UpdateTableAndVisible = false;
+                        this.tableRadio = [];
                         this.list();
                     } else {
                         is.IError(res.data.msg);
@@ -1789,7 +1805,8 @@ window.addEventListener('pageshow', function (params) {
                 axios.get("complete_work", {
                     params: {
                         workId: params.workId,
-                        payment: params.payment
+                        payment: params.payment,
+                        completeContent: params.completeContent
                     }
                 }).then(res => {
                     if (res.data.state == 200) {
@@ -1815,20 +1832,23 @@ window.addEventListener('pageshow', function (params) {
                     params['work'] = params.workId;
                     this.DataVisible = params
                     if (params.orderCount < 1) return;
-                    this.search({ url: "sys_work_order_list", workId: params.workId });
-                    this.$nextTick(() => {
-                        setTimeout(() => {
-                            this.optiones = this.options;
-                        }, 1000)
-                    })
+                    // this.search({ url: "sys_work_order_list", workId: params.workId });
+                    // this.$nextTick(() => {
+                    //     setTimeout(() => {
+                    //         this.optiones = this.options;
+                    //     }, 1000)
+                    // })
                     return false;
                 }
                 axios.post("cancel_work", qs.stringify({
                     workId: params.workId,
                     cancelContent: params.cancelContent,
-                    needRefund: params.needRefund,
-                    orderId: params.needRefund == 0 ? -1 : this.tableRadio.orderId,
-                    refund: params.needRefund == 0 ? 0 : parseFloat(params.refund * 100).toFixed(0)
+                    // needRefund: params.needRefund,
+                    // orderId: params.needRefund == 0 ? -1 : this.tableRadio.orderId,
+                    // refund: params.needRefund == 0 ? 0 : parseFloat(params.refund * 100).toFixed(0)
+                    needRefund: 0,
+                    orderId: -1,
+                    refund: 0
                 })).then(res => {
                     if (res.data.state == 200) {
                         this.ISuccessfull(res.data.msg);
@@ -1920,20 +1940,26 @@ window.addEventListener('pageshow', function (params) {
              * TAG ID Number MIT : 删除参数名称
              * **/
             deletedata(params, dataBlock = {}) {
-                dataBlock[params.TAG] = params.NUMBER;
-                axios.get(params.URL, {
-                    params: dataBlock
-                }).then(res => {
-                    if (res.data.state == 200) {
-                        is.ISuccessfull = true;
-                        is.list();
-                    } else {
-                        is.IError(res.data.msg);
+                this.$alert('删除后将无法恢复', '是否删除？', {
+                    confirmButtonText: '确定',
+                    callback: action => {
+                        if(action != 'confirm') return;
+                        dataBlock[params.TAG] = params.NUMBER;
+                        axios.get(params.URL, {
+                            params: dataBlock
+                        }).then(res => {
+                            if (res.data.state == 200) {
+                                this.ISuccessfull = true;
+                                this.list();
+                            } else {
+                                this.IError(res.data.msg);
+                            }
+                        })
+                            .catch(function (error) {
+                                this.IError(error);
+                            })
                     }
-                })
-                    .catch(function (error) {
-                        is.IError(error);
-                    })
+                });
             },
 
 

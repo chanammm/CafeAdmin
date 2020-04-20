@@ -23,7 +23,7 @@
                     <el-form>
                         <div style="margin-bottom:10px;">
                             <el-button
-                                @click="UpdateTableAndVisible = true; formData = {}; search({url: 'sys_repairs_type_list'}); imageList.machinePic = [];"
+                                @click="UpdateTableAndVisible = true;options = []; formData = {}; search({url: 'sys_repairs_type_list'}); imageList.machinePic = [];"
                                 type="primary">新增分类<i class="el-icon-plus el-icon--right"></i></el-button>
                         </div>
                     </el-form>
@@ -35,7 +35,7 @@
                             </el-select>
                         </el-input>
 
-                        <div class="_search_centent" v-show="more">
+                        <!-- <div class="_search_centent" v-show="more">
                             <el-button>状态</el-button>
                             <el-select v-model="listSearch.status" slot="prepend" placeholder="请选择">
                                 <el-option label="不限" value=""></el-option>
@@ -46,7 +46,7 @@
                         <div class="more_search el-icon-circle-plus-outline" v-show="!more" @click="more = !more">
                             更多搜索条件
                         </div>
-                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div>
+                        <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div> -->
 
                         <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
                         </el-button>
@@ -55,18 +55,18 @@
                         <el-table :data="tableData" stripe style="width: 100%" border>
                             <el-table-column prop="machineName" label="设备分类名称"></el-table-column>
                             <el-table-column prop="machineContent" label="分类说明"></el-table-column>
-                            <el-table-column prop="bindRepairs" label="已绑定的报修类型">
+                            <!-- <el-table-column prop="bindRepairs" label="已绑定的报修类型">
                                 <template slot-scope="scope">
                                     {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
                                 </template>
-                            </el-table-column>
-                            <el-table-column prop="status" label="数据状态">
+                            </el-table-column> -->
+                            <!-- <el-table-column prop="status" label="数据状态">
                                 <template slot-scope="scope">
                                     <div :class="scope.row.status == 1 ? 'green': 'red'">
                                         {{ scope.row.status == 1 ? '正常' : '冻结' }}
                                     </div>
                                 </template>
-                            </el-table-column>
+                            </el-table-column> -->
                             <el-table-column prop="machinePic" label="分类图片">
                                 <template slot-scope="scope">
                                     <el-popover trigger="hover" placement="top">
@@ -87,21 +87,16 @@
                                 </template>
                             </el-table-column>
                             <el-table-column prop="sort" label="排序号"></el-table-column>
-                            <el-table-column prop="createName" label="创建者">
-                                <template slot-scope="scope">
-                                    {{ scope.row.createName == -1 ? '无' : scope.row.createName }}
-                                </template>
-                            </el-table-column>
                             <el-table-column prop="createTime" label="创建时间"></el-table-column>
 
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
-                                    <el-button type="text" size="small" @click="machineDest(scope.row)">
+                                    <el-button type="text" size="small" @click="options = [];machineDest(scope.row)">
                                         详情
                                     </el-button>
-                                    <el-button type="text" size="small" @click="pullblack({URL: 'machine_block', NUMBER: scope.row.machineId, TAG: 'machineId'})">
+                                    <!-- <el-button type="text" size="small" @click="pullblack({URL: 'machine_block', NUMBER: scope.row.machineId, TAG: 'machineId'})">
                                         {{ scope.row.status != 1 ? '正常' : '冻结' }}
-                                    </el-button>
+                                    </el-button> -->
                                     <el-button type="text" size="small"
                                     @click="deletedata({URL: 'delete_machine', TAG: 'machineId', NUMBER: scope.row.machineId })">
                                     删除
@@ -128,23 +123,17 @@
                             <el-form-item label="排序号：" prop="sort">
                                 <el-input v-model="formData.sort"></el-input>
                             </el-form-item>
-                            <el-form-item label="状态：" prop="status">
+                            <!-- <el-form-item label="状态：" prop="status">
                                 <el-radio-group v-model="formData.status">
                                     <el-radio :label="1">正常</el-radio>
                                     <el-radio :label="0">冻结</el-radio>
                                 </el-radio-group>
-                            </el-form-item>
-                            <el-form-item label="报修类型：" prop="repairsTypeIds">
+                            </el-form-item> -->
+                            <el-form-item label="报修分类：" prop="repairsTypeIds">
                                 <el-table :data="options" @selection-change="handleSelectionChange" 
                                 tooltip-effect="dark" ref="multipleTables" height="300px">
                                     <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
-                                        <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
-                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                    <el-table-column prop="repairsTypeName" label="报修类型名称">
                                 </el-table>
                             </el-form-item>
                             <el-form-item label="分类图片：" prop="machinePic" v-model="formData.machinePic">
@@ -162,7 +151,7 @@
                         </el-form>
                     </el-dialog>
 
-                    <el-dialog title="设备分类详情" :visible.sync="SearchTableAndVisible" width="50%">
+                    <el-dialog title="设备分类" :visible.sync="SearchTableAndVisible" width="50%">
                         <el-form :data="SearchTableFormData" label-width="140px">
                             <el-form-item label="分类名称：" prop="machineName">
                                 <el-input v-model="SearchTableFormData.machineName"></el-input>
@@ -173,23 +162,17 @@
                             <el-form-item label="排序号：" prop="sort">
                                 <el-input v-model="SearchTableFormData.sort"></el-input>
                             </el-form-item>
-                            <el-form-item label="状态：" prop="status">
+                            <!-- <el-form-item label="状态：" prop="status">
                                 <el-radio-group v-model="SearchTableFormData.status">
                                     <el-radio :label="1">正常</el-radio>
                                     <el-radio :label="0">冻结</el-radio>
                                 </el-radio-group>
-                            </el-form-item>
-                            <el-form-item label="报修类型：" prop="repairsTypeIds">
+                            </el-form-item> -->
+                            <el-form-item label="报修分类：" prop="repairsTypeIds">
                                 <el-table :data="options" @selection-change="handleSelectionChange" 
                                 tooltip-effect="dark" ref="multipleTable" height="300px">
                                     <el-table-column type="selection" width="55"></el-table-column>
-                                    <el-table-column prop="machineName" label="设备类型">
-                                        <template slot-scope="scope">
-                                            {{ scope.row.machineName == -1 ? '无' : scope.row.machineName }}
-                                        </template>
-                                    </el-table-column>
-                                    <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
-                                    <el-table-column prop="repairsName" label="类型名称"></el-table-column>
+                                    <el-table-column prop="repairsTypeName" label="报修类型名称"></el-table-column>
                                 </el-table>
                             </el-form-item>
                             <el-form-item label="分类图片：" prop="SearchTableFormData.machinePic" v-model="SearchTableFormData.machinePic">

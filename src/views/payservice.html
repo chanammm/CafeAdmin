@@ -67,22 +67,22 @@
                                 </template>
                             </el-table-column>
                             <el-table-column prop="sort" label="排序"></el-table-column>
-                            <el-table-column prop="status" label="状态">
+                            <!-- <el-table-column prop="status" label="状态">
                                 <template slot-scope="scope">
                                     <div :class="scope.row.status == 1 ? 'green': 'red'">
                                         {{ scope.row.status == 1 ? '正常' : '冻结' }}
                                     </div>
                                 </template>
-                            </el-table-column>
+                            </el-table-column> -->
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
                                     <el-button type="text" size="small" @click="payserverdetails(scope.row)">
                                         详情
                                     </el-button>
-                                    <el-button type="text" size="small"
+                                    <!-- <el-button type="text" size="small"
                                         @click="pullblack({URL: 'demand_charge_block', NUMBER: scope.row.demandChargeId, TAG: 'demandChargeId'})">
                                         {{ scope.row.status != 1 ? '正常' : '冻结' }}
-                                    </el-button>
+                                    </el-button> -->
                                     <el-button type="text" size="small"
                                         @click="deletedata({URL: 'delete_demand_charge', TAG: 'demandChargeId', NUMBER: scope.row.demandChargeId })">
                                         删除
@@ -99,8 +99,11 @@
 
                     <el-dialog title="收费项" :visible.sync="SearchTableAndVisible" width="50%">
                         <el-form :data="SearchTableFormData" label-width="160px">
+                            <el-form-item label="收费项名称" prop="demandChargeName">
+                                <el-input v-model="SearchTableFormData.demandChargeName"></el-input>
+                            </el-form-item>
                             <el-form-item label="单价" prop="prices">
-                                <el-input v-model="SearchTableFormData.prices"></el-input>
+                                <el-input v-model="SearchTableFormData.prices" type="number"></el-input>
                             </el-form-item>
                             <el-form-item label="参考价" prop="content">
                                 <el-input v-model="SearchTableFormData.contenta"
@@ -111,7 +114,7 @@
                             <el-form-item label="排序号" prop="sort">
                                 <el-input v-model="SearchTableFormData.sort"></el-input>
                             </el-form-item>
-                            <el-form-item label="报修分类名" prop="demandType">
+                            <!-- <el-form-item label="报修分类名" prop="demandType">
                                 <el-table :data="option" @current-change="getTemplateRows" tooltip-effect="dark"
                                     ref="multipleTable" height="300px">
                                     <el-table-column label="选择" width="55">
@@ -127,7 +130,7 @@
                                     <el-table-column prop="repairsTypeName" label="类型"></el-table-column>
                                     <el-table-column prop="repairsName" label="类型名称"></el-table-column>
                                 </el-table>
-                            </el-form-item>
+                            </el-form-item> -->
                         </el-form>
                         <div class="btn-center" style="text-align: center; margin: 20px;">
                             <el-button type="primary" @click="paysubmit(SearchTableFormData)">提交

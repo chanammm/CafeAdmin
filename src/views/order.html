@@ -268,7 +268,7 @@
                                 <el-button v-show="formData.status != 4 && formData.status != 19" type="primary"
                                     @click="celorder(formData)">取消工单
                                 </el-button>
-                                <el-button v-show="formData.orderCount > 0" type="primary" @click="order(formData)">查看订单
+                                <el-button v-show="formData.orderCount > 0" type="primary" @click="option = []; order(formData)"> 查看订单
                                 </el-button>
                             </div>
                         </el-form>
@@ -298,16 +298,26 @@
                         <el-table :data="option" tooltip-effect="dark" height="500px">
                             <el-table-column prop="orderId" label="订单号"></el-table-column>
                             <el-table-column prop="paymentStr" label="支付金额"></el-table-column>
-                            <el-table-column prop="refundStr" label="已退款金额"></el-table-column>
                             <el-table-column prop="status" label="订单状态">
                                 <template slot-scope="scope">
                                     {{ scope.row.status == 1 ? '未支付' : scope.row.status == 2 ? '已支付' : '已取消' }}
                                 </template>
                             </el-table-column>
+                            <el-table-column prop="refundStr" label="已退款金额"></el-table-column>
+                            <el-table-column prop="refundStatus" label="退款状态">
+                                <template slot-scope="scope">
+                                    {{ scope.row.refundStatus == 1 ? '未退款' : scope.row.refundStatus == 2 ? '部分退款' : '全额退款' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="orderType" label="订单类型">
+                                <template slot-scope="scope">
+                                    {{ scope.row.orderType == 1 ? '系统生成(可退款)' : '人工录入(不可退款)' }}
+                                </template>
+                            </el-table-column>
                             <el-table-column prop="createTime" label="创建时间"></el-table-column>
                             <el-table-column fixed="right" label="操作">
                                 <template slot-scope="scope">
-                                    <el-button type="text" v-show="scope.row.orderType == 1 && scope.row.status == 2"
+                                    <el-button type="text" v-show="scope.row.orderType == 1 && scope.row.status == 2 && scope.row.refund != scope.row.payment"
                                         size="small" @click="refundorder(scope.row)">
                                         退款
                                     </el-button>
@@ -319,10 +329,13 @@
                     <el-dialog title="确认完成工单" :visible.sync="TableAndVisible">
                         <el-form :model="SearchTableFormDatas" label-width="180px">
                             <el-form-item label="工单号" prop="workId">
-                                <el-input v-model="SearchTableFormDatas.workId"></el-input>
+                                <el-input v-model="SearchTableFormDatas.workId" disabled="disabled"></el-input>
                             </el-form-item>
                             <el-form-item label="工单金额" prop="payments">
-                                <el-input v-model="SearchTableFormDatas.payments"></el-input>
+                                <el-input v-model="SearchTableFormDatas.payments" type="number"></el-input>
+                            </el-form-item>
+                            <el-form-item label="回访记录" prop="completeContent">
+                                <el-input type="textarea" v-model="SearchTableFormDatas.completeContent"></el-input>
                             </el-form-item>
                             <div class="btn-center" style="text-align: center; margin: 20px;">
                                 <el-button type="primary" @click="denorder(SearchTableFormDatas)">确认完成
@@ -339,7 +352,7 @@
                             <el-form-item label="取消原因" prop="cancelContent">
                                 <el-input v-model="DataVisible.cancelContent"></el-input>
                             </el-form-item>
-                            <el-form-item label="退款" prop="needRefund" v-show="DataVisible.orderCount > 0">
+                            <!-- <el-form-item label="退款" prop="needRefund" v-show="DataVisible.orderCount > 0">
                                 <el-radio-group v-model="formData.needRefund">
                                     <el-radio :label="0">否</el-radio>
                                     <el-radio :label="1">是</el-radio>
@@ -359,7 +372,7 @@
                             </el-form-item>
                             <el-form-item label="工单金额" prop="refund" v-show="DataVisible.orderCount > 0">
                                 <el-input v-model="DataVisible.refund"></el-input>
-                            </el-form-item>
+                            </el-form-item> -->
                             <div class="btn-center" style="text-align: center; margin: 20px;">
                                 <el-button type="primary" @click="celorder(DataVisible)">确认取消
                                 </el-button>

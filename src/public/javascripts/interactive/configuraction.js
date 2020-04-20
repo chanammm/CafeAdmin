@@ -43,7 +43,7 @@ axios.interceptors.response.use(
 				window.ym.init.MBOX('事务提示：登陆已失效，请重新登陆');
 				setTimeout(function () {
 					if(process.env.NODE_ENV == "production"){
-						parent.location.href = 'http://zgksx.com/por/admin/login.htm?redirect[x*]';
+						parent.location.href = 'http://www.zgksx.com/por/admin/login.htm?redirect[x*]';
 					}else{
 						parent.location.href = 'http://192.168.0.168:8080/cafeadmin/src/dist/login.htm';
 					}
