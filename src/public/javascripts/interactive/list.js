@@ -42,6 +42,7 @@ window.addEventListener('pageshow', function (params) {
                 tableData: [],
                 tableDatas: [],
                 tableDatass: [],
+                tableDatasss: [],
                 UnFormData: [],
                 UnTableFormData: [],
                 currentPage: 1,
@@ -99,6 +100,8 @@ window.addEventListener('pageshow', function (params) {
                 },
                 tableRadio: [],   //单选选择
                 tableRadios: [],
+                repairsid: [],
+                maintainerIds: [],
                 count: 1,
                 listSearch: {
                 },  //新的列表查询对象
@@ -1398,7 +1401,7 @@ window.addEventListener('pageshow', function (params) {
                         //     })()
 
                         // res.data.data['offerContent'] == -1 ? res.data.data['offerContent'] = "无" : null;
-                        
+
                         this.imageList.machinePic.push({ name: 'machinePic', url: res.data.data.offerExplainPic }); //TAG 图片
                         this.SearchTableFormData = res.data.data;
                     } else {
@@ -1631,6 +1634,7 @@ window.addEventListener('pageshow', function (params) {
                     if (res.data.state == 200) {
                         this.SearchTableAndVisible = true;
                         this.imageList.machinePic.push({ name: 'machinePic', url: res.data.data.advertisingUrl }); //TAG 图片
+                        res.data.data.linkUrl == -1 ? res.data.data.linkUrl = '无' : null;
                         this.SearchTableFormData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -1795,17 +1799,20 @@ window.addEventListener('pageshow', function (params) {
              * 工单完成
              * **/
             denorder(params) {
-                if (!params.payments) {
+                if (!params.maintainPayments) {
                     this.TableAndVisible = true;
                     this.SearchTableFormDatas.workId = params.workId
                     return false;
                 }
-                params['payment'] = parseFloat(params.payments * 100).toFixed(0);
-                delete params.payments;
+                params['maintainPayment'] = parseFloat(params.maintainPayments * 100).toFixed(0);
+                params['partPayment'] = parseFloat(params.partPayments * 100).toFixed(0);
+                delete params.maintainPayments;
+                delete params.partPayments;
                 axios.get("complete_work", {
                     params: {
                         workId: params.workId,
-                        payment: params.payment,
+                        maintainPayment: params.maintainPayment,
+                        partPayment: params.partPayment,
                         completeContent: params.completeContent
                     }
                 }).then(res => {
@@ -1913,6 +1920,98 @@ window.addEventListener('pageshow', function (params) {
             },
 
             /**
+             * 后台创建工单
+             * **/
+            createorder(params) {
+                if (!params) {
+                    this.pawstate = true;
+                    this.$nextTick(() => {
+                        this.search({ url: "sys_machine_list" });  //设备分类列表
+                        setTimeout(() => {
+                            this.tableDatas = this.options;
+                            setTimeout(() => {
+                                this.search({ url: "sys_repairs_type_list" });  //设备报修分类列表
+                                setTimeout(() => {
+                                    this.option = this.options;
+                                    setTimeout(() => {
+                                        this.search({ url: "sys_demand_charge_list" });  //设备收费项目
+                                        setTimeout(() => {
+                                            this.tableDatass = this.options;
+                                            setTimeout(() => {
+                                                this.search({ url: "sys_maintainer_list" });  //师傅模块
+                                                setTimeout(() => {
+                                                    this.tableDatasss = this.options;
+                                                }, 700)
+                                            }, 600)
+                                        }, 700)
+                                    }, 600)
+                                }, 500)
+                            }, 400)
+                        }, 300)
+                    })
+                    return false;
+                }
+                params['clientId'] = -1;
+                params['machineId'] = this.tableRadios.machineId;
+                params['repairsTypeId'] = this.repairsid.repairsTypeId;
+                params['demandChargeIds'] = JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, "");
+                params['visitCost '] = params.visitCost || 0;
+                
+                params['clientAddressId'] = -1;
+                params['shopName'] = params.shopName || -1;
+                params['contactName'] = params.contactName || -1;
+                params['contactPhone'] = params.contactPhone || -1;
+
+                params['longitude'] = params.longitude || -1;
+                params['latitude'] = params.latitude || -1;
+
+                params['province'] = params.province || -1;
+                params['city'] = params.city || -1;
+                params['district'] = params.district || -1;
+                params['address'] = params.address || -1;
+                params['faultContent'] = params.faultContent || -1;
+                params['machineBrandPic'] = params.machineBrandPic || -1;
+                params['machineOverallPic'] = params.machineOverallPic || -1;
+                params['faultPartPic'] = params.faultPartPic || -1;
+                params['status'] = params.status || -1;
+                // params['createTime'] = params.createTime || -1;
+                params['contactContent'] = params.contactContent || -1;
+                
+                // params['contactTime'] = params.contactTime || -1;
+                params['maintainerId'] = params.maintainerId || -1;
+                // params['sendTime'] = params.sendTime || -1;
+                params['maintainPayment'] = params.maintainPayment || -1;
+
+                params['partPayment'] = params.partPayment || -1;
+                params['completeContent'] = params.completeContent || -1;
+                // params['endTime'] = params.endTime  || -1;
+
+                axios.post("create_work", qs.stringify(params)).then(res => {
+                    if (res.data.state == 200) {
+                        is.ISuccessfull(res.data.msg);
+                        this.pawstate = false;
+                        this.formDataTrees = {};
+                    } else {
+                        is.IError(res.data.msg);
+                    }
+                })
+                    .catch(function (error) {
+                        is.IError(error);
+                    })
+            },
+
+            repairsType(params){
+                // repairsid
+                this.repairsid = params
+            },
+
+            maintainer(params){
+                // maintainerId
+                this.maintainerId = params
+            },
+
+
+            /**
              * 冻结操作统一操作
              * URL  : https://  冻结作用域地址
              * TAG ID Number MIT : 冻结参数名称
@@ -1943,7 +2042,7 @@ window.addEventListener('pageshow', function (params) {
                 this.$alert('删除后将无法恢复', '是否删除？', {
                     confirmButtonText: '确定',
                     callback: action => {
-                        if(action != 'confirm') return;
+                        if (action != 'confirm') return;
                         dataBlock[params.TAG] = params.NUMBER;
                         axios.get(params.URL, {
                             params: dataBlock

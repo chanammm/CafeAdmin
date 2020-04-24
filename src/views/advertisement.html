@@ -41,7 +41,32 @@
                     <template>
                         <el-table :data="tableData" stripe style="width: 100%" border>
                             <el-table-column prop="advertisingName" label="广告名称"></el-table-column>
-                            <el-table-column prop="advertisingUrl" label="资源地址"></el-table-column>
+                            <el-table-column prop="advertisingUrl" label="资源地址">
+                                <template slot-scope="scope">
+                                    <el-popover trigger="hover" placement="top">
+                                        <el-image :src="scope.row.advertisingUrl" style="text-align: center;">
+                                            <div slot="error">
+                                                暂无图片信息
+                                            </div>
+                                        </el-image>
+                                        <div slot="reference" class="name-wrapper">
+                                            <el-image :src="scope.row.advertisingUrl" lazy>
+                                                <div slot="error">
+                                                    <img style="width:40px"
+                                                        src="http://s.coffeedz.com/images/product.png" />
+                                                </div>
+                                            </el-image>
+                                        </div>
+                                    </el-popover>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="linkUrl" label="链接地址">
+                                <template slot-scope="scope">
+                                    {{
+                                        scope.row.linkUrl == -1 ? '无' : scope.row.linkUrl
+                                    }}
+                                </template>
+                            </el-table-column>
                             <el-table-column prop="sort" label="排序"></el-table-column>
                             <el-table-column prop="status" label="状态">
                                 <template slot-scope="scope">
@@ -78,6 +103,9 @@
                         <el-form :data="SearchTableFormData" label-width="160px">
                             <el-form-item label="广告名" prop="advertisingName">
                                 <el-input v-model="SearchTableFormData.advertisingName"></el-input>
+                            </el-form-item>
+                            <el-form-item label="链接地址">
+                                <el-input v-model="SearchTableFormData.linkUrl"></el-input>
                             </el-form-item>
                             <el-form-item label="资源地址" prop="advertisingUrl">
                                 <!-- <el-input v-model="SearchTableFormData.advertisingUrl"></el-input> -->
