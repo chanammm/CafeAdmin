@@ -21,7 +21,11 @@
             <el-main>
                 <el-form>
                     <div style="margin-bottom:10px;">
-                        <el-button @click="createorder()" type="primary">创建工单<i class="el-icon-plus el-icon--right"></i></el-button>
+                        <el-button @click="createorder()" type="primary">创建工单<i class="el-icon-plus el-icon--right"></i>
+                        </el-button>
+
+                        <el-button @click="exportwork()" type="primary">导出
+                        </el-button>
                     </div>
                 </el-form>
                 <el-form>
@@ -182,7 +186,7 @@
                         <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
                         <el-form-item label="门店名称：" prop="shopName">
                             <!-- <el-input v-model="formData.shopName"></el-input> -->
-                            {{formData.shopName}}
+                            {{formData.shopName == -1 ? "无" : formData.shopName}}
                         </el-form-item>
                         <el-form-item label="联系地址：">
                             {{ formData.province + formData.city + formData.district + formData.address }}
@@ -217,7 +221,7 @@
                         <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
                         <el-form-item label="用户端用户微信昵称：" prop="nickName">
                             <!-- <el-input v-model="formData.nickName"></el-input> -->
-                            {{formData.nickName}}
+                            {{formData.nickName == -1 ? '无' : formData.nickName}}
                         </el-form-item>
 
                         <el-form-item label="维修金额：" prop="maintainPaymentStr">
@@ -236,7 +240,7 @@
                         </el-form-item>
                         <el-form-item label="上门费用：" prop="visitCostStr">
                             <!-- <el-input v-model="formData.visitCostStr"></el-input> -->
-                            {{formData.visitCostStr}}
+                            {{formData.visitCostStr}} 元
                         </el-form-item>
 
                         <el-form-item label="状态：" prop="status">
@@ -400,59 +404,42 @@
                     </el-form>
                 </el-dialog>
 
+                <el-dialog title="导出工单" :visible.sync="errorExe" :before-close="handleClose">
+                    <el-form :model="formDataTree" label-width="180px">
+                        <el-form-item label="工单号" prop="workId">
+                            <el-input v-model="formDataTree.workId"></el-input>
+                        </el-form-item>
+                        <el-form-item label="时间区间">
+                            <el-date-picker v-model="formDataTree.time" type="daterange" unlink-panels
+                                range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                                :picker-options="pickerOptions">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="状态" prop="status">
+                            <el-radio-group v-model="formDataTree.status">
+                                <el-radio :label="1">进行中</el-radio>
+                                <el-radio :label="2">已完成</el-radio>
+                                <el-radio :label="3">已取消</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                        <div class="btn-center" style="text-align: center; margin: 20px;">
+                            <el-button type="primary" @click="exportwork(formDataTree)">确认
+                            </el-button>
+                        </div>
+                    </el-form>
+                </el-dialog>
 
+                <el-dialog title="创建工单" :visible.sync="pawstate" :before-close="handleClose">
+                    <el-steps :active="active" finish-status="success">
+                        <el-step title="设备信息"></el-step>
+                        <el-step title="报修信息"></el-step>
+                        <el-step title="收费信息"></el-step>
+                        <el-step title="联系信息"></el-step>
+                    </el-steps>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <el-dialog title="创建工单" :visible.sync="pawstate">
                     <el-form :model="formDataTrees" label-width="180px">
-
-                        <div>需求信息：</div>
-                        <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
-                        <el-form-item label="设备" prop="machineId">
+                        <div v-show="active == 0">
+                            <!-- <el-form-item label="设备" prop="machineId"> -->
                             <el-table :data="tableDatas" @current-change="getTemplateRows" tooltip-effect="dark"
                                 height="300px">
                                 <el-table-column label="选择" width="55">
@@ -466,11 +453,12 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
-                        </el-form-item>
+                            <!-- </el-form-item> -->
+                        </div>
 
-                        <el-form-item label="报修类型" prop="repairsTypeId ">
-                            <el-table :data="option" @current-change="repairsType" tooltip-effect="dark"
-                                height="300px">
+                        <div v-show="active == 1">
+                            <!-- <el-form-item label="报修类型" prop="repairsTypeId"> -->
+                            <el-table :data="option" @current-change="repairsType" tooltip-effect="dark" height="300px">
                                 <el-table-column label="选择" width="55">
                                     <template slot-scope="scope">
                                         <el-radio v-model="repairsid" :label="scope.row"><i></i></el-radio>
@@ -482,93 +470,103 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
-                        </el-form-item>
+                            <!-- </el-form-item> -->
+                        </div>
 
-                        <el-form-item label="收费项" prop="demandChargeIds">
-                            <el-table :data="tableDatass" @selection-change="handleSelectionChange" tooltip-effect="dark"
-                                ref="multipleTable" height="300px">
+                        <div v-show="active == 2">
+                            <el-table :data="tableDatass" @selection-change="handleSelectionChange"
+                                tooltip-effect="dark" ref="multipleTable" height="300px">
                                 <el-table-column type="selection" width="55"></el-table-column>
                                 <el-table-column prop="demandChargeName" label="需求名称"></el-table-column>
+                                <el-table-column prop="priceStr" label="费用"></el-table-column>
                             </el-table>
-                        </el-form-item>
+                        </div>
 
-                        <div>门店信息：</div>
-                        <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
+                        <div v-show="active == 3">
 
-                        <el-form-item label="预支付费用" prop="visitCost">
-                            <el-input v-model="formDataTrees.visitCost"></el-input>
-                        </el-form-item>
+                            <el-form-item label="门店名称" prop="shopName">
+                                <el-input v-model="formDataTrees.shopName"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="联系地址：">
-                            <el-input v-model="formDataTrees.shopName"></el-input>
-                        </el-form-item>
+                            <el-form-item label="联系人名称" prop="contactName">
+                                <el-input v-model="formDataTrees.contactName"></el-input>
+                            </el-form-item>
 
-                        <div>联系人信息：</div>
-                        <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
+                            <el-form-item label="联系人电话" prop="contactPhone">
+                                <el-input v-model="formDataTrees.contactPhone" type="number"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="联系人名称" prop="contactName">
-                            <el-input v-model="formDataTrees.contactName"></el-input>
-                        </el-form-item>
+                            <el-form-item label="预付费" prop="visitCost">
+                                <el-input v-model="formDataTrees.visitCost" type="number"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="联系人电话" prop="contactPhone">
-                            <el-input v-model="formDataTrees.contactPhone"></el-input>
-                        </el-form-item>
+                            <el-form-item label="省/市/区">
+                                <el-cascader size="large" :options="address" v-model="formDataTrees.province"
+                                    @change="handleChange">
+                                </el-cascader>
+                            </el-form-item>
 
-                        <el-form-item label="故障信息" prop="faultContent ">
-                            <el-input v-model="formDataTrees.faultContent "></el-input>
-                        </el-form-item>
+                            <el-form-item label="详细地址">
+                                <el-input v-model="formDataTrees.address"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="联系登记内容" prop="contactContent ">
-                            <el-input v-model="formDataTrees.contactContent "></el-input>
-                        </el-form-item>
+                            <el-form-item label="故障信息" prop="faultContent ">
+                                <el-input type="textarea" v-model="formDataTrees.faultContent "></el-input>
+                            </el-form-item>
 
-                        <div>师傅信息：</div>
-                        <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
+                            <el-form-item label="联系内容" prop="contactContent ">
+                                <el-input type="textarea" v-model="formDataTrees.contactContent "></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="派单师傅" prop="maintainerId">
-                            <el-table :data="tableDatasss" @current-change="maintainer" tooltip-effect="dark"
-                                height="300px">
-                                <el-table-column label="选择" width="55">
-                                    <template slot-scope="scope">
-                                        <el-radio v-model="maintainerIds" :label="scope.row"><i></i></el-radio>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="title" label="名称" :show-overflow-tooltip="true">
-                                    <template slot-scope="scope">
-                                        {{ scope.row.maintainerName == -1 ? '无' : scope.row.maintainerName }}
-                                    </template>
-                                </el-table-column>
-                            </el-table>
-                        </el-form-item>
+                            <!-- <div>师傅信息：</div>
+                            <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
 
-                        <div>订单信息：</div>
-                        <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
-                        <el-form-item label="维修费" prop="maintainPayment">
-                            <el-input v-model="formDataTrees.maintainPayment"></el-input>
-                        </el-form-item>
+                            <el-form-item label="派单师傅" prop="maintainerId">
+                                <el-table :data="tableDatasss" @current-change="maintainer" tooltip-effect="dark"
+                                    height="300px">
+                                    <el-table-column label="选择" width="55">
+                                        <template slot-scope="scope">
+                                            <el-radio v-model="maintainerIds" :label="scope.row"><i></i></el-radio>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="title" label="名称" :show-overflow-tooltip="true">
+                                        <template slot-scope="scope">
+                                            {{ scope.row.maintainerName == -1 ? '无' : scope.row.maintainerName }}
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </el-form-item>
 
-                        <el-form-item label="配件费" prop="partPayment">
-                            <el-input v-model="formDataTrees.partPayment"></el-input>
-                        </el-form-item>
+                            <div>订单信息：</div>
+                            <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
+                            <el-form-item label="维修费" prop="maintainPayment">
+                                <el-input v-model="formDataTrees.maintainPayment"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="回访记录登记" prop="completeContent ">
-                            <el-input v-model="formDataTrees.completeContent"></el-input>
-                        </el-form-item>
+                            <el-form-item label="配件费" prop="partPayment">
+                                <el-input v-model="formDataTrees.partPayment"></el-input>
+                            </el-form-item>
 
-                        <el-form-item label="状态：" prop="status">
-                            <el-radio-group v-model="formDataTrees.status">
-                                <el-radio :label="1">已确认/已支付定金/待沟通</el-radio>
-                                <el-radio :label="2">已联络/待派单</el-radio>
-                                <el-radio :label="3">已派单/维修中</el-radio>
-                                <el-radio :label="5">已完成/已回访</el-radio>
-                                <el-radio :label="18">已提交/未确认</el-radio>
-                                <el-radio :label="19">已取消</el-radio>
-                            </el-radio-group>
-                        </el-form-item>
+                            <el-form-item label="回访记录登记" prop="completeContent ">
+                                <el-input v-model="formDataTrees.completeContent"></el-input>
+                            </el-form-item>
+
+                            <el-form-item label="状态：" prop="status">
+                                <el-radio-group v-model="formDataTrees.status">
+                                    <el-radio :label="1">已确认/已支付定金/待沟通</el-radio>
+                                    <el-radio :label="2">已联络/待派单</el-radio>
+                                    <el-radio :label="3">已派单/维修中</el-radio>
+                                    <el-radio :label="5">已完成/已回访</el-radio>
+                                    <el-radio :label="18">已提交/未确认</el-radio>
+                                    <el-radio :label="19">已取消</el-radio>
+                                </el-radio-group>
+                            </el-form-item> -->
+                        </div>
 
                         <div class="btn-center" style="text-align: center; margin: 20px;">
-                            <el-button type="primary" @click="createorder(formDataTrees)">
-                                创建工单
+                            <el-button type="primary" @click="next(formDataTrees)">
+                                <!-- @click="createorder(formDataTrees)" -->
+                                {{ activeName }}
                             </el-button>
                         </div>
                     </el-form>

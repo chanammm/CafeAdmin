@@ -211,6 +211,8 @@ window.addEventListener('pageshow', function (params) {
                     }]
                 ]),
                 pageparams: {},  // 预存的页面搜索参数
+                active: 0, // 步骤
+                activeName: '下一步'
             }
         },
         created: function () {
@@ -1886,14 +1888,20 @@ window.addEventListener('pageshow', function (params) {
                         if (res.data.data.faultPartPic != -1) {
                             res.data.data.faultPartPic = res.data.data.faultPartPic.split(',')
                             __arr__ = res.data.data.faultPartPic;
+                        }else{
+                            res.data.data.faultPartPic = '无';
                         }
                         if (res.data.data.machineBrandPic != -1) {
                             res.data.data.machineBrandPic = res.data.data.machineBrandPic.split(',')
                             __arr__.concat(__arr__, res.data.data.machineBrandPic)
+                        }else{
+                            res.data.data.machineBrandPic = '无';
                         }
                         if (res.data.data.machineOverallPic != -1) {
                             res.data.data.machineOverallPic = res.data.data.machineOverallPic.split(',')
                             __arr__.concat(__arr__, res.data.data.machineOverallPic)
+                        }else{
+                            res.data.data.machineOverallPic = '无';
                         }
                         res.data.data['srcList'] = __arr__;
                         this.formData = res.data.data;
@@ -1951,46 +1959,54 @@ window.addEventListener('pageshow', function (params) {
                     })
                     return false;
                 }
-                params['clientId'] = -1;
-                params['machineId'] = this.tableRadios.machineId;
-                params['repairsTypeId'] = this.repairsid.repairsTypeId;
-                params['demandChargeIds'] = JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, "");
-                params['visitCost '] = params.visitCost || 0;
                 
-                params['clientAddressId'] = -1;
-                params['shopName'] = params.shopName || -1;
-                params['contactName'] = params.contactName || -1;
-                params['contactPhone'] = params.contactPhone || -1;
+                params['clientId'] = -1;   //客户端用户ID
+                params['machineId'] = this.tableRadios.machineId;  //设备ID
 
-                params['longitude'] = params.longitude || -1;
-                params['latitude'] = params.latitude || -1;
-
-                params['province'] = params.province || -1;
-                params['city'] = params.city || -1;
-                params['district'] = params.district || -1;
-                params['address'] = params.address || -1;
-                params['faultContent'] = params.faultContent || -1;
-                params['machineBrandPic'] = params.machineBrandPic || -1;
-                params['machineOverallPic'] = params.machineOverallPic || -1;
-                params['faultPartPic'] = params.faultPartPic || -1;
-                params['status'] = params.status || -1;
-                // params['createTime'] = params.createTime || -1;
-                params['contactContent'] = params.contactContent || -1;
+                params['repairsTypeId'] = this.repairsid.repairsTypeId;   //报修类型ID
+                params['demandChargeIds'] = this.data['repairsTypeIds'] ? JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""): -1;  //需求类型ID
+                params['visitCost'] = parseFloat(params.visitCost * 100).toFixed(0) || 0;  //预支付费用
                 
-                // params['contactTime'] = params.contactTime || -1;
-                params['maintainerId'] = params.maintainerId || -1;
-                // params['sendTime'] = params.sendTime || -1;
-                params['maintainPayment'] = params.maintainPayment || -1;
+                params['clientAddressId'] = -1;  //用户地址ID
+                params['shopName'] = params.shopName || -1;  //门店名称
+                params['contactName'] = params.contactName || -1;  //联系人名称
+                params['contactPhone'] = params.contactPhone || -1;  //联系人电话
 
-                params['partPayment'] = params.partPayment || -1;
-                params['completeContent'] = params.completeContent || -1;
-                // params['endTime'] = params.endTime  || -1;
+                params['longitude'] = params.longitude || -1; // 坐标
+                params['latitude'] = params.latitude || -1;  //坐标
+
+                params['city'] = this.formData.province ? CodeToText[this.formData.province[1]] : -1;  //市
+                params['district'] = this.formData.province ? CodeToText[this.formData.province[2]] : -1; //区
+                params['province'] = this.formData.province ? CodeToText[this.formData.province[0]] : -1;  //省无地址ID 情况下必传
+                params['address'] = params.address || -1;  //详细地址
+
+                params['faultContent'] = params.faultContent || -1;  //故障信息
+                
+                params['machineBrandPic'] = params.machineBrandPic || -1;   //机器品牌图片
+                params['machineOverallPic'] = params.machineOverallPic || -1;  //机器整体图片
+                params['faultPartPic'] = params.faultPartPic || -1;  //故障部位图片
+                params['status'] = 1;   //工单状态
+
+                // params['createTime'] = params.createTime || -1;   //工单创建时间
+                params['contactContent'] = params.contactContent || -1;   //联系登记内容
+                
+                // params['contactTime'] = params.contactTime || -1;   //联系时间
+                params['maintainerId'] = params.maintainerId || -1;  // 派单师傅ID
+
+                // params['sendTime'] = params.sendTime || -1;  //派单时间
+                params['maintainPayment'] = params.maintainPayment || 0;   //维修费用
+
+                params['partPayment'] = params.partPayment || 0;   //配件费用
+                params['completeContent'] = params.completeContent || -1;  // 回访记录
+                // params['endTime'] = params.endTime  || -1;    //工单完成时间
 
                 axios.post("create_work", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
                         is.ISuccessfull(res.data.msg);
                         this.pawstate = false;
                         this.formDataTrees = {};
+                        this.formData = {};
+                        this.list();
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1998,6 +2014,25 @@ window.addEventListener('pageshow', function (params) {
                     .catch(function (error) {
                         is.IError(error);
                     })
+            },
+
+            next(params){
+                if(!this.tableRadios.machineId){
+                    return false;
+                }
+                if(this.active == 1 && !this.repairsid.repairsTypeId){
+                    return false
+                }
+                console.log(this.data.repairsTypeIds)
+                if(this.active == 2){
+                    if(!this.data.repairsTypeIds || this.data.repairsTypeIds.length < 1)return false
+                }
+                if(this.active == 2){
+                    this.activeName = '提交';
+                }
+                if (this.active++ > 2) {
+                    this.createorder(params);
+                };
             },
 
             repairsType(params){
@@ -2024,6 +2059,31 @@ window.addEventListener('pageshow', function (params) {
                     if (res.data.state == 200) {
                         is.ISuccessfull = true;
                         is.list();
+                    } else {
+                        is.IError(res.data.msg);
+                    }
+                })
+                    .catch(function (error) {
+                        is.IError(error);
+                    })
+            },
+
+            /**
+             * 导出工单
+             * **/
+            exportwork(params) {
+                if(!params){
+                    this.errorExe = true;
+                    return false;
+                }
+                params['startDate'] = params.time ? ym.init.getDateTime(params.time[0]).split(' ')[0]: null
+                params['endDate'] = params.time ? ym.init.getDateTime(params.time[1]).split(' ')[0]: null
+                delete params.time;
+                axios.post('export_work', qs.stringify(params)
+                ).then(res => {
+                    if (res.data.state == 200) {
+                        is.ISuccessfull = true;
+                        parent.location.href = res.data.data.path;
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -2068,6 +2128,10 @@ window.addEventListener('pageshow', function (params) {
             handleClose(deno) {
                 delete this.formData.work;
                 delete this.DataVisible.contactContent;
+                //后台创建工单
+                this.active = 0;
+                this.activeName = '下一步';
+                this.formDataTrees = {};
                 deno();
             },
 
