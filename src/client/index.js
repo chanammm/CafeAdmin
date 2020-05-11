@@ -90,6 +90,7 @@ class init {
                                 if (response.data.state == 201) {
                                     // alert("更新失败："+ response.data.msg);
                                     document.querySelector('.container').style.display = 'block';
+                                    return false;
                                 } else {
                                     alert("更新失败：" + response.data.msg);
                                 }
@@ -118,6 +119,7 @@ class init {
                                 if (response.data.state == 201) {
                                     // alert("更新失败："+ response.data.msg);
                                     document.querySelector('.container').style.display = 'block';
+                                    return false;
                                 } else {
                                     alert("更新失败：" + response.data.msg);
                                 }

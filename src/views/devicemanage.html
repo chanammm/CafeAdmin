@@ -171,7 +171,7 @@
                                 </el-table>
                             </el-form-item> -->
 
-                            <el-form-item label="需求分类" prop="demandIds">
+                            <el-form-item label="需求分类" prop="demandIds" v-show="formData.needOfferExplain != 0">
                                 <el-table :data="option" @selection-change="handleSelectionChange" 
                                 tooltip-effect="dark" ref="multipleTable" height="300px">
                                     <el-table-column type="selection" width="55"></el-table-column>
@@ -179,7 +179,7 @@
                                 </el-table>
                             </el-form-item>
 
-                            <el-form-item label="报价参考" prop="machineOfferExplainId">
+                            <el-form-item label="报价参考" prop="machineOfferExplainId" v-show="formData.needOfferExplain != 0">
                                 <el-table :data="tableDatas" @current-change="getTemplateRows"
                                 tooltip-effect="dark" height="300px">
                                     <el-table-column label="选择" width="55">

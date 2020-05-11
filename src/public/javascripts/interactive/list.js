@@ -1893,13 +1893,15 @@ window.addEventListener('pageshow', function (params) {
                         }
                         if (res.data.data.machineBrandPic != -1) {
                             res.data.data.machineBrandPic = res.data.data.machineBrandPic.split(',')
-                            __arr__.concat(__arr__, res.data.data.machineBrandPic)
+                            let __arr__1 = res.data.data.machineBrandPic;
+                            __arr__ = combine(__arr__, __arr__1);
                         }else{
                             res.data.data.machineBrandPic = '无';
                         }
                         if (res.data.data.machineOverallPic != -1) {
                             res.data.data.machineOverallPic = res.data.data.machineOverallPic.split(',')
-                            __arr__.concat(__arr__, res.data.data.machineOverallPic)
+                            let __arr__2 = res.data.data.machineOverallPic;
+                            __arr__ = combine(__arr__, __arr__2)
                         }else{
                             res.data.data.machineOverallPic = '无';
                         }
@@ -1907,6 +1909,10 @@ window.addEventListener('pageshow', function (params) {
                         this.formData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
+                    }
+                    function combine() {
+                        let arr = [].concat.apply([], arguments); //没有去重复的新数组 
+                        return Array.from(new Set(arr));
                     }
                 })
                     .catch(function (error) {
