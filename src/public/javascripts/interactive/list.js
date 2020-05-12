@@ -1906,7 +1906,31 @@ window.addEventListener('pageshow', function (params) {
                             res.data.data.machineOverallPic = '无';
                         }
                         res.data.data['srcList'] = __arr__;
-                        this.formData = res.data.data;
+
+                        // 查询工单日志
+                        axios.post("sys_work_log_list", qs.stringify({
+                            workId: params.workId,
+                            page: 1,
+                            pageSize: 100
+                        })).then(process => {
+                            if (process.data.state == 200) {
+                                let __arr__ = [];
+                                process.data.page.records.reverse().forEach(record => {
+                                    record.createName = record.createName == -1 ? '客户端创建' : record.createName;
+                                    record['create'] = record.logType == 1 ? '确认登记：' +record.createName : record.logType == 2 ? '联络登记：' +record.createName : record.logType == 3 ? '派单登记：' +record.createName :record.logType == 4 ? '回访登记：' +record.createName :record.logType == 18 ? '提交登记：' +record.createName : '取消登记：';
+                                    record.create = record.create +'，'+ record.createTime;
+                                    __arr__.push(record);
+                                })
+                                res.data.data['logs'] = __arr__;
+                                this.formData = res.data.data;
+                                console.log(this.formData)
+                            } else {
+                                is.IError(process.data.msg);
+                            }
+                        })
+                        .catch(function (error) {
+                            is.IError(error);
+                        })
                     } else {
                         is.IError(res.data.msg);
                     }

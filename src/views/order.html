@@ -122,13 +122,11 @@
                         <div>需求信息：</div>
                         <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
                         <el-form-item label="服务类型：" prop="repairsTypeName">
-                            <!-- <el-input v-model="formData.repairsTypeName"></el-input> -->
                             {{formData.repairsTypeName}}
                         </el-form-item>
 
                         <el-form-item label="需求名称：" prop="demandChargeName">
-                            <!-- <el-input v-model="formData.demandName"></el-input> -->
-                            {{formData.demandChargeName}}
+                            {{formData.demandChargeName == -1 ? "无" : formData.demandChargeName}}
                         </el-form-item>
 
                         <el-form-item label="故障描述：" prop="faultContent">
@@ -260,6 +258,15 @@
                                     : '进行中'
                                 }}
                         </el-form-item>
+
+                        <el-form-item label="状态日志" prop="logs">
+                            <div style="height:300px; line-height:0 !important;overflow-y: scroll;">
+                                <el-steps direction="vertical" :active="1" >
+                                    <el-step icon="el-icon-success" v-for="(item, i) in formData.logs" :title="item.create" :description="item.logContent"></el-step>
+                                </el-steps>
+                              </div>
+                        </el-form-item>
+
 
                         <div class="btn-center" style="text-align: center; margin: 20px;">
                             <el-button v-show="formData.status == 1" type="primary" @click="contactorder(formData)">
