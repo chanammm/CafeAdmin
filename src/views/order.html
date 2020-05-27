@@ -63,7 +63,11 @@
                 <template>
                     <el-table :data="tableData" stripe style="width: 100%" border>
                         <el-table-column prop="workId" label="工单号"></el-table-column>
-                        <el-table-column prop="machineName" label="设备名称"></el-table-column>
+                        <el-table-column prop="facilityName" label="设备名称">
+                            <template slot-scope="scope">
+                                {{ scope.row.facilityName == -1 ? '无' : scope.row.facilityName }}
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="repairsTypeName" label="保修类型"></el-table-column>
                         <el-table-column prop="shopName" label="门店名称"></el-table-column>
                         <el-table-column prop="contactName" label="联系人名称"></el-table-column>
@@ -80,6 +84,21 @@
                                             : '进行中'
                                         }}
                                 </div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="createTime" label="进度">
+                            <template slot-scope="scope">
+                                {{
+                                    scope.row.status == 1 || scope.row.status == 18 ?
+                                    '待沟通'
+                                    : scope.row.status == 2 ? 
+                                    '已沟通/待派单' 
+                                    : scope.row.status == 3 ? 
+                                    '已派单/维修中'
+                                    : scope.row.status == 4 ? 
+                                    '已完成'
+                                    : '进行中'
+                                }}
                             </template>
                         </el-table-column>
                         <el-table-column prop="createTime" label="创建时间"></el-table-column>
@@ -217,6 +236,10 @@
 
                         <div>订单信息：</div>
                         <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
+                        <el-form-item label="设备名称：" prop="facilityName ">
+                            {{formData.facilityName == -1 ? '无' : formData.facilityName}}
+                        </el-form-item>
+
                         <el-form-item label="用户端用户微信昵称：" prop="nickName">
                             <!-- <el-input v-model="formData.nickName"></el-input> -->
                             {{formData.nickName == -1 ? '无' : formData.nickName}}
@@ -401,6 +424,9 @@
                         <el-form-item label="工单号" prop="workId">
                             <el-input v-model="DataVisible.workId"></el-input>
                         </el-form-item>
+                        <el-form-item label="机器设备名(选填)" prop="facilityName">
+                            <el-input v-model="DataVisible.facilityName"></el-input>
+                        </el-form-item>
                         <el-form-item label="沟通内容" prop="contactContent">
                             <el-input type="textarea" v-model="DataVisible.contactContent"></el-input>
                         </el-form-item>
@@ -424,6 +450,7 @@
                         </el-form-item>
                         <el-form-item label="状态" prop="status">
                             <el-radio-group v-model="formDataTree.status">
+                                <el-radio :label="-1">全部</el-radio>
                                 <el-radio :label="1">进行中</el-radio>
                                 <el-radio :label="2">已完成</el-radio>
                                 <el-radio :label="3">已取消</el-radio>
@@ -446,7 +473,6 @@
 
                     <el-form :model="formDataTrees" label-width="180px">
                         <div v-show="active == 0">
-                            <!-- <el-form-item label="设备" prop="machineId"> -->
                             <el-table :data="tableDatas" @current-change="getTemplateRows" tooltip-effect="dark"
                                 height="300px">
                                 <el-table-column label="选择" width="55">
@@ -460,7 +486,10 @@
                                     </template>
                                 </el-table-column>
                             </el-table>
-                            <!-- </el-form-item> -->
+                            
+                            <el-form-item label="机器设备名（选填）" prop="facilityName" style="margin: 10px 0;">
+                                <el-input v-model="formDataTrees.facilityName"></el-input>
+                            </el-form-item>
                         </div>
 
                         <div v-show="active == 1">

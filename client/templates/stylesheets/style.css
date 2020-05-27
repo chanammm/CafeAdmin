@@ -1,0 +1,27 @@
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  max-width: 640px;
+  min-width: 320px;
+  overflow-x: hidden;
+  margin: 0 auto;
+  font-size: 14px;
+  background-color: #f0f0ee;
+}
+
+body input {
+  font-size: 14px;
+}
+
+.container .free_view_circular .free_circular {
+  width: 100%;
+  height: 203px;
+  border-radius: 30%;
+  background-color: #4A90E2;
+  margin-top: -110px;
+}

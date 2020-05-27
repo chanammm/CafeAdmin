@@ -754,13 +754,13 @@ window.addEventListener('pageshow', function (params) {
                     //         }
                     //     })
                     //     setTimeout(() => {
-                    this.search({ url: "sys_demand_charge_list" });  //设备收费项目列表
+                    this.search({ url: "sys_demand_charge_list",id: params.demandId, tag: 'demandId' });  //设备收费项目列表
                     setTimeout(() => {
                         this.option = this.options;
                         this.option.forEach((ele, index) => {
                             this.$nextTick(() => {
                                 if (!params) return;
-                                if (params.demandId == ele.demandChargeId) {
+                                if (ele.selected > 0) {
                                     this.$refs.multipleTable.toggleRowSelection(this.option[index], true);
                                 }
                             })
@@ -1917,7 +1917,7 @@ window.addEventListener('pageshow', function (params) {
                                 let __arr__ = [];
                                 process.data.page.records.reverse().forEach(record => {
                                     record.createName = record.createName == -1 ? '客户端创建' : record.createName;
-                                    record['create'] = record.logType == 1 ? '确认登记：' +record.createName : record.logType == 2 ? '联络登记：' +record.createName : record.logType == 3 ? '派单登记：' +record.createName :record.logType == 4 ? '回访登记：' +record.createName :record.logType == 18 ? '提交登记：' +record.createName : '取消登记：';
+                                    record['create'] = record.logType == 1 ? '确认登记：' +record.createName : record.logType == 2 ? '联络登记：' +record.createName : record.logType == 3 ? '派单登记：' +record.createName :record.logType == 4 ? '回访登记：' +record.createName :record.logType == 18 ? '提交登记：' +record.createName : '取消登记：'+record.createName;
                                     record.create = record.create +'，'+ record.createTime;
                                     __arr__.push(record);
                                 })
@@ -2028,7 +2028,8 @@ window.addEventListener('pageshow', function (params) {
 
                 params['partPayment'] = params.partPayment || 0;   //配件费用
                 params['completeContent'] = params.completeContent || -1;  // 回访记录
-                // params['endTime'] = params.endTime  || -1;    //工单完成时间
+                
+                params['facilityName'] = params.facilityName  || -1;    //工单设备名(选填)
 
                 axios.post("create_work", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
@@ -2104,6 +2105,8 @@ window.addEventListener('pageshow', function (params) {
             exportwork(params) {
                 if(!params){
                     this.errorExe = true;
+                    this.formDataTree = {status: ''};
+                    this.formDataTree.status = -1;
                     return false;
                 }
                 params['startDate'] = params.time ? ym.init.getDateTime(params.time[0]).split(' ')[0]: null
