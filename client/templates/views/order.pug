@@ -1,0 +1,26 @@
+
+doctype html
+html(lang="en")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0")
+  meta(http-equiv="X-UA-Compatible" content="ie=edge") 
+  meta(http-equiv="Pragma" content="no-cache")
+  meta(http-equiv="Cache-control" content="no-cache") 
+  meta(http-equiv="Cache" content="no-cache") 
+  head
+    title 咖速修
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
+  body
+    .module
+      .router 努力加载中...
+    .container
+        .free_view_circular
+            .free_circular
+    #app
+      van-tabs(v-model="tag")
+        each item in [1,2,3,4]
+          van-tab(title="标签"+ item) 内容
+      van-tabbar(v-model="active" @change="ourHref")
+          van-tabbar-item(icon="home-o") 首页
+          van-tabbar-item(icon="todo-list-o") 我的订单
+    

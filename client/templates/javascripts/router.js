@@ -6,7 +6,6 @@
     js.map(element => {
         type(element)
     })
-    let cs = type({g: 'link', len: 'https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css'});
     function type(params) {
         let js = document.createElement(params.g);
         js.setAttribute('src', params.len);

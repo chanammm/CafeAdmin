@@ -1,11 +1,11 @@
 {
-  "name": "assurances",
+  "name": "client",
   "version": "1.0.0",
   "description": "",
-  "main": "webpack-dev.js",
+  "main": "webpack-config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack-dev": "webpack --config ./webpack.dev.js"
+    "webpack-dev": "webpack --config ./webpack.config.js"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
     "@babel/preset-env": "^7.8.7",
     "axios": "^0.19.2",
     "babel-loader": "^8.0.6",
+    "babel-plugin-import": "^1.13.0",
     "css-loader": "^3.4.2",
     "file-loader": "^5.1.0",
     "html-loader": "^0.5.5",

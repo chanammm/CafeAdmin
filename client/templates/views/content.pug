@@ -1,0 +1,44 @@
+
+doctype html
+html(lang="en")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0")
+  meta(http-equiv="X-UA-Compatible" content="ie=edge") 
+  meta(http-equiv="Pragma" content="no-cache")
+  meta(http-equiv="Cache-control" content="no-cache") 
+  meta(http-equiv="Cache" content="no-cache") 
+  head
+    title 咖速修
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
+  body
+    .module 
+      .router 努力加载中...
+    .container#app
+      .free_view_circular
+          .free_circular
+            div 填写需求
+      .machine.center
+        ul
+          li(@click="contentMsg = !contentMsg")
+            span 需求内容
+            div
+              span 请选择需求内容
+              van-icon(name="arrow" size="16")
+          li
+            span 故障描述
+            textarea(placeholder="请务必描述故障问题")
+      van-popup(v-model="contentMsg" round position="bottom" :style="{ height: '40%' }")
+        van-radio-group(v-model="radio")
+          van-cell-group(v-for="(item, index = index + 1) in machineList")
+              van-cell(:title="item.demandChargeName" clickable @click="radiofn(index)")
+                template(#right-icon)
+                  //- span(style="text-align: center;margin-right: 20px;") {{item.content}}
+                  van-radio(name=index)
+        van-checkbox-group(v-model="result")
+          van-cell-group
+            each item in [1,2]
+              van-cell(clickable title="复选框" @click="checkboxfn("+ item +")")
+                template(#right-icon)
+                  van-checkbox(name=item ref="checkboxGroup" shape="square")
+      van-button(round type="info" size="normal") 提交
+      

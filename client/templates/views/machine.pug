@@ -11,7 +11,7 @@ html(lang="en")
     title 咖速修
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
   body
-    .module
+    .module 
       .router 努力加载中...
     .container
         .free_view_circular
@@ -22,10 +22,16 @@ html(lang="en")
               img(:src="image")
           van-swipe-item
               img(:src="image")
-      van-action-sheet(:actions="actions" @select="onSelect" v-model="show")
-      van-form(@submit="onSubmit")
-        van-field(v-model="username" name="user" label="用户名" placeholder="用户名" :rules="[{ required: true, message: '请填写用户名' }]")
-        van-field(v-model="password" type="password" name="pass" label="密码" placeholder="密码" :rules="[{ required: true, message: '请填写密码' }]")
-        div(style="margin: 16px;")
-          van-button(round block type="info" native-type="submit") 提交
+      van-action-sheet(:actions="actions" @select="onSelect" v-model="show" cancel-text="取消")
+      van-tabbar(v-model="active" @change="ourHref")
+          van-tabbar-item(icon="home-o") 首页
+          van-tabbar-item(icon="todo-list-o") 我的订单
+      .machine
+        ul
+          li(v-for="(item, index) in machineList" :key="item" @click="changMachine(item)")
+            img(:src="item.machinePic", alt="")
+            div
+              span {{ item.machineName }}
+              span {{ item.machineContent }}
+            img(src="../images/right.png", alt="")
     
