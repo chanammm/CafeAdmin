@@ -14,13 +14,19 @@ html(lang="en")
     .module
       .router 努力加载中...
     .container
-        .free_view_circular
-            .free_circular
-    #app
-      van-tabs(v-model="tag")
-        each item in [1,2,3,4]
-          van-tab(title="标签"+ item) 内容
-      van-tabbar(v-model="active" @change="ourHref")
-          van-tabbar-item(icon="home-o") 首页
-          van-tabbar-item(icon="todo-list-o") 我的订单
-    
+      #app
+        van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false)
+          van-swipe-item
+              img(:src="image")
+        van-tabs(v-model="tag" @click="tagClick")
+          each item in [{name:'全部', id: 0},{name: "进行中", id: 1},{name: "已完成", id: 2},{name: "已取消", id: 3}]
+            van-tab(title=item.name)
+              van-pull-refresh(v-model="refreshing" @refresh="onRefresh")
+                van-list(v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad('"+ item.id +"')")
+                  van-cell(v-for="item in list" :key="item")
+                    van-card(:desc="item.contact" :title="item.workId" :num="item.createTime")
+                      template(#tags)
+                          van-tag(plain type="danger") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
+        van-tabbar(v-model="active" @change="ourHref")
+            van-tabbar-item(icon="comment-o") 填写信息
+            van-tabbar-item(icon="todo-list-o") 我的订单

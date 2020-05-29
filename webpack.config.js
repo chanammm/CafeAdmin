@@ -4,7 +4,7 @@ var [path, HtmlWebpackPlugin, MiniCssExtractPlugin, optimizecssassets, uglifyjs,
 ];
 
 module.exports = {
-    mode: 'development',  //模式 production development
+    mode: 'production',  //模式 production development
     optimization: {
         minimizer: [
             new uglifyjs({

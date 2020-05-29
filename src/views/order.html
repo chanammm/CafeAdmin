@@ -69,6 +69,11 @@
                             </template>
                         </el-table-column>
                         <el-table-column prop="repairsTypeName" label="保修类型"></el-table-column>
+                        <el-table-column prop="creationType" label="创建类型">
+                            <template slot-scope="scope">
+                                {{ scope.row.creationType == 1 ? '手动提交(管理端)': scope.row.creationType == 1 ? '个人用户提交(小程序)': '企业用户提交(公众号)' }}
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="shopName" label="门店名称"></el-table-column>
                         <el-table-column prop="contactName" label="联系人名称"></el-table-column>
                         <el-table-column prop="contactPhone" label="联系人电话"></el-table-column>
@@ -107,6 +112,9 @@
                             <template slot-scope="scope">
                                 <el-button type="text" size="small" @click="orderdest(scope.row)">
                                     详情
+                                </el-button>
+                                <el-button type="text" size="small" @click="orderenit(scope.row)" v-if="scope.row.creationType == 3 && scope.row.status != 19">
+                                    修改
                                 </el-button>
                             </template>
                         </el-table-column>
@@ -206,7 +214,12 @@
                             {{formData.shopName == -1 ? "无" : formData.shopName}}
                         </el-form-item>
                         <el-form-item label="联系地址：">
-                            {{ formData.province + formData.city + formData.district + formData.address }}
+                            {{ 
+                                formData.province == -1 ? "未知/" : formData.province + 
+                                formData.city == -1 ? "未知/" : formData.city + 
+                                formData.district == -1 ? "未知/" : formData.district + 
+                                formData.address == -1 ? "未知" : formData.address 
+                            }}
                         </el-form-item>
 
                         <div>联系人信息：</div>
@@ -603,6 +616,111 @@
                             <el-button type="primary" @click="next(formDataTrees)">
                                 <!-- @click="createorder(formDataTrees)" -->
                                 {{ activeName }}
+                            </el-button>
+                        </div>
+                    </el-form>
+                </el-dialog>
+
+                <el-dialog title="编辑工单" :visible.sync="enitpawstate" :before-close="handleClose">
+                    <el-form :model="forEnits" label-width="180px">
+
+                        <el-form-item label="设备分类名" prop="machineName">
+                            <el-select v-model="forEnits.machineName" placeholder="请选择">
+                                <el-option
+                                  v-for="item in forEnits.machineNames"
+                                  :key="item.machineName"
+                                  :label="item.machineName"
+                                  :value="item.machineName">
+                                </el-option>
+                              </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="设备名" prop="facilityName">
+                            <el-input v-model="forEnits.facilityName"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="报修分类名" prop="repairsTypeName ">
+                            <el-select v-model="forEnits.repairsTypeName" placeholder="请选择">
+                                <el-option
+                                  v-for="item in forEnits.repairsTypeNames"
+                                  :key="item.repairsTypeName"
+                                  :label="item.repairsTypeName"
+                                  :value="item.repairsTypeName">
+                                </el-option>
+                              </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="报修收费项名" prop="demandChargeName ">
+                            <el-select v-model="forEnits.demandChargeName" placeholder="请选择">
+                                <el-option
+                                  v-for="items in forEnits.demandChargeNames"
+                                  :key="items.demandChargeName"
+                                  :label="items.demandChargeName"
+                                  :value="items.demandChargeName">
+                                </el-option>
+                              </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="门店名" prop="shopName ">
+                            <el-input v-model="forEnits.shopName "></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="联系人名" prop="contactName ">
+                            <el-input v-model="forEnits.contactName "></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="联系电话" prop="contactPhone  ">
+                            <el-input v-model="forEnits.contactPhone "></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="省/市/区">
+                            <el-cascader size="large" :options="address" v-model="forEnits.province "
+                                @change="handleChange">
+                            </el-cascader>
+                        </el-form-item>
+
+                        <el-form-item label="详细地址">
+                            <el-input v-model="forEnits.address"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="故障信息" prop="faultContent ">
+                            <el-input type="textarea" v-model="forEnits.faultContent "></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="机器铭牌图" prop="machineBrandPic">
+                            <template v-model="forEnits.machineBrandPic">
+                                <el-upload :action="fileUpdata" list-type="picture-card"
+                                    :file-list="imageList.machineBrandPic" :data="fileData" :headers="fileUpdataExcData"
+                                    :on-change="fileChange" :on-success="machineSceneSuccess" :on-exceed="fileExceed" :on-remove="handleRemove">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </template>
+                        </el-form-item>
+
+                        <el-form-item label="机器整体图" prop="machineOverallPic">
+                            <template v-model="forEnits.machineOverallPic">
+                                <el-upload :action="fileUpdata" list-type="picture-card"
+                                    :file-list="imageList.machineOverallPic" :data="fileData" :headers="fileUpdataExcData"
+                                    :on-change="fileChange" :on-success="machineSceneSuccess1" :on-exceed="fileExceed" :on-remove="handleRemove">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </template>
+                        </el-form-item>
+
+                        <el-form-item label="问题部位图" prop="faultPartPic">
+                            <template v-model="forEnits.faultPartPic">
+                                <el-upload :action="fileUpdata" list-type="picture-card"
+                                    :file-list="imageList.faultPartPic" :data="fileData" :headers="fileUpdataExcData"
+                                    :on-change="fileChange" :on-success="machineSceneSuccess2" :on-exceed="fileExceed" :on-remove="handleRemove">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </template>
+                        </el-form-item>
+
+                        <div class="btn-center" style="text-align: center; margin: 20px;">
+                            <el-button type="primary"
+                                @click="orderenit()">
+                                提交
                             </el-button>
                         </div>
                     </el-form>

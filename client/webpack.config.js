@@ -12,7 +12,7 @@ module.exports = {
             new optimizecssassets()
         ]
     },
-    mode:'development', //development  //production
+    mode:'production', //development  //production
     entry:{
         index:'./templates/javascripts/index.js'
     },
