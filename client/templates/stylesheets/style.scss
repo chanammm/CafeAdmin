@@ -53,6 +53,13 @@ body{
             }
         }
     }
+    .img{
+        text-align: center;
+    }
+    .tag_menu{
+        padding: 20px 16px;
+        box-sizing: border-box;
+    }
 }
 .my-swipe{
     // transform: translateY(-40px);
@@ -116,6 +123,8 @@ body{
     ul>li{
         .van-field{
             border-bottom: 1px solid #ccc;
+            padding: 10px 0;
+            box-sizing:  border-box;
         }
         .file{
             display: block;

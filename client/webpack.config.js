@@ -68,6 +68,16 @@ module.exports = {
             chunks: ['index']
         }),
         new HtmlWebpackPlugin({
+            template: './templates/views/user.pug', 
+            filename: '../user.html',
+            minify:{
+                removeAttributeQuotes: true,  //去除 双引号
+                collapseWhitespace: true   //加密
+            },
+            hash: true, //引入文件后面加哈希值
+            chunks: ['index']
+        }),
+        new HtmlWebpackPlugin({
             template: './templates/views/content.pug', 
             filename: '../content.html',
             minify:{

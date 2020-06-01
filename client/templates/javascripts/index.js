@@ -27,7 +27,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
-            /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/') + 1, location.href.split('.')[1]), 'index.html') : [];
+            /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -56,9 +56,11 @@ window.onload = function (params) {
             new Vue({
                 el: '#app',
                 data: {
-                    active: /order/.test(location.href) ? 1 : 0,
+                    active: /order/.test(location.href) ? 1 : /user/.test(location.href) ? 2 : 0,
                     username: '',
                     password: '',
+                    phone: '',
+                    oldpwd: '',
                     image: '../images/banner.png',
                     contentMsg: false,
                     items: [{
@@ -69,6 +71,7 @@ window.onload = function (params) {
                     activeId: 1,
                     activeIndex: 0,
                     tag: 0,
+                    num: 1,
                     machineList: [],
                     shopName: '',
                     contactName: '',
@@ -126,6 +129,15 @@ window.onload = function (params) {
                             });
                     } else if (/order/.test(location.href)) {
                         this.onLoad();
+                    } else if (/user/.test(location.href)) {
+                        axios.get('sys_admin_detail').then(params => {
+                            if (params.data.state == 200){
+                                this.username = params.data.data.adminName;
+                                this.phone = params.data.data.phone;
+                            }else{
+                                vant.Toast(params.data.msg)
+                            }
+                        })
                     }
                     if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
                         this.$nextTick(function () {
@@ -180,11 +192,13 @@ window.onload = function (params) {
                     },
 
                     onSubmit(values) {
+                        this.handling = true;
                         axios.post('admin_account_login', qs.stringify({
                             account: values.user,
                             password: values.pass
                         }))
                             .then(params => {
+                                this.handling = false;
                                 if (params.data.state == 200) {
                                     localStorage.setItem('secret', params.data.data.secret);
                                     location.href = './content.html';
@@ -194,19 +208,41 @@ window.onload = function (params) {
                             });
                     },
 
-                    ourHref(params) {
-                        params < 1 ? location.href = './content.html' : location.href = './order.html';
+                    updataSubmit(){
+                        this.handling = true;
+                        axios.post('edit_current_admin', qs.stringify({
+                            adminName: this.username,
+                            phone: this.phone,
+                            originPassword: this.oldpwd,
+                            password: this.password
+                        }))
+                            .then(params => {
+                                this.handling = false;
+                                if (params.data.state == 200) {
+                                    localStorage.clear();
+                                    vant.Toast(params.data.msg+ '，修改成功，请重新登陆');
+                                    setTimeout(() => {
+                                        location.href = './index.html';
+                                    },1500);
+                                } else {
+                                    vant.Toast(params.data.msg)
+                                };
+                            });
                     },
 
-                    onLoad(params) {
+                    ourHref(params) {
+                        params < 1 ? location.href = './content.html' : params > 1 ? location.href = './user.html' : location.href = './order.html';
+                    },
+
+                    onLoad() {
                         if (this.refreshing) {
                             this.list = [];
                             this.refreshing = false;
                         }
                         axios.get('wechat_admin_work_list', {
                             params: {
-                                status: params > 0 ? params : '',
-                                page: 1,
+                                status: this.tag > 0 ? this.tag : '',
+                                page: this.num,
                                 pageSize: 10
                             }
                         })
@@ -221,18 +257,21 @@ window.onload = function (params) {
                                     // 加载状态结束
                                     this.loading = false;
                                     this.removex();
+                                    this.num++;
                                     if (params.data.page.records.length < 10) this.finished = true;
-                                } else if (params.data.state == 300) {
-                                    this.list = [];
-                                } else {
+
+                                } else if (params.data.state == 300) {   //数据空
+                                    this.loading = false;
                                     this.finished = true;
+                                    this.list = [];
+                                    this.num = 1;
+                                } else {
+                                    this.loading = false;
+                                    this.finished = true;
+                                    this.num = 1;
                                     vant.Toast(params.data.msg)
                                 };
                             });
-                    },
-
-                    tagClick(name) {
-                        this.onLoad(name);
                     },
 
                     removex() {

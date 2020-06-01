@@ -7,7 +7,7 @@ if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
             timer * 2
             uiWidth = uiWidth - timer
             w = w + timer
-            document.getElementById('menui').style.width = (uiWidth - timer) + 'px';
+            document.querySelector('.el-drawer').style.width = '80%';
             document.getElementById('content').style.width = (w + timer) + "%";
             document.getElementsByClassName('el-submenu__title')[0].innerHTML = '<i class="el-icon-user"></i>';
             for (let i = 0; i < document.getElementsByClassName('el-dialog').length; i++) {

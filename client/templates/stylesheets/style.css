@@ -45,6 +45,15 @@ body input {
   font-size: 18px;
 }
 
+.container .img {
+  text-align: center;
+}
+
+.container .tag_menu {
+  padding: 20px 16px;
+  box-sizing: border-box;
+}
+
 .my-swipe .van-swipe-item {
   color: #fff;
   font-size: 20px;
@@ -112,6 +121,8 @@ body input {
 
 .center ul > li .van-field {
   border-bottom: 1px solid #ccc;
+  padding: 10px 0;
+  box-sizing: border-box;
 }
 
 .center ul > li .file {
