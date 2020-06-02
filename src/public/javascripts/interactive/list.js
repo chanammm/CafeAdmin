@@ -1,32 +1,22 @@
 import { regionData, CodeToText, TextToCode } from 'element-china-area-data';
 import QRCode from 'qrcodejs2';
 
-
-if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
-    window.onload = function (params) {
-        for (let i = 0; i < document.getElementsByClassName('el-dialog').length; i++) {
-            document.getElementsByClassName('el-dialog')[i].style.width = '100%';  //iframe 里面的class 
-        }
-        for (let i = 0; i < document.getElementsByClassName('w400').length; i++) {
-            document.getElementsByClassName('w400')[i].style.width = '100%'; //限定的表单宽度
-        }
-    }
-}
-
 window.addEventListener('pageshow', function (params) {
-    let par = params.target.URL.split('*').length > 1 ? params.target.URL.split('*')[0] : params.target.URL;
-    const [
-        $,
-        token,
-        u,
-        uri
-    ] = [
-            parent.all.jq,
-            parent.all.json,
-            // parent.document.getElementById('tagHref').getAttribute('src').replace('..', '/manage').split('?')[0],
-            '/manage' + par.substring(par.lastIndexOf('/'), par.lastIndexOf('?') == -1 ? par.length : par.lastIndexOf('?')),
-            document.getElementById('c-container-list').getAttribute('data-uri'),
-        ];
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        setTimeout(() => {
+            for (let i = 0; i < document.querySelectorAll('.el-dialog').length; i++) {
+                document.querySelectorAll('.el-dialog')[i].style.width = '100%';  //iframe 里面的class 
+            }
+            for (let i = 0; i < document.querySelectorAll('._searchVal').length; i++) {
+                document.querySelectorAll('._searchVal')[i].style.width = '100%'; //限定的表单宽度
+            }
+            document.querySelector('.el-pagination__total').style.display = 'none';
+            document.querySelector('.el-pagination__sizes').style.display = 'none';
+            document.querySelector('.el-pagination__jump').style.display = 'none';
+
+        }, 1000)
+    }
+    const uri = document.getElementById('c-container-list').getAttribute('data-uri');
     new Vue({
         el: '#c-container-list',
         data: () => {
@@ -186,22 +176,6 @@ window.addEventListener('pageshow', function (params) {
                     }]
                 },
                 StatusName: new Map([
-                    ['free', {
-                        user: new Map([
-                            [1, '超级管理员'],
-                            [2, '系统管理员'],
-                            [3, '商户管理员']
-                        ]),
-                        statues: new Map([
-                            [0, '冻结'],
-                            [1, '正常']
-                        ]),
-                        machineType: new Map([
-                            [1, '大型柜式机'],
-                            [2, '小型桌面机'],
-                            [3, '无网单机']
-                        ])
-                    }],
                     ['time', {
                         machineRun: new Map([
                             [1, '正常'],
@@ -764,7 +738,7 @@ window.addEventListener('pageshow', function (params) {
                     //         }
                     //     })
                     //     setTimeout(() => {
-                    this.search({ url: "sys_demand_charge_list",id: params.demandId, tag: 'demandId' });  //设备收费项目列表
+                    this.search({ url: "sys_demand_charge_list", id: params.demandId, tag: 'demandId' });  //设备收费项目列表
                     setTimeout(() => {
                         this.option = this.options;
                         this.option.forEach((ele, index) => {
@@ -1310,7 +1284,7 @@ window.addEventListener('pageshow', function (params) {
                 }
                 this.forEnits.machineOverallPic.push(e.data.path);
             },
-            
+
             machineSceneSuccess2(e) {
                 if (e.state != 200) {
                     this.IError(e.msg);
@@ -1332,12 +1306,12 @@ window.addEventListener('pageshow', function (params) {
             handleRemove(file, fileList) {
                 let _arr_ = [], name = [];
                 this.imageList[file.name].forEach(element => {
-                    if(element.url != file.url){
+                    if (element.url != file.url) {
                         _arr_.push(element);
                         name.push(element.url)
-                    }else{
-                        axios.post((process.env.NODE_ENV == "development" ? parent.all.json._j.URLS.Development_Files_ : parent.all.json._j.URLS.ForMal_Files_) +'file_deleted',qs.stringify({
-                            fileName : element.url
+                    } else {
+                        axios.post((process.env.NODE_ENV == "development" ? parent.all.json._j.URLS.Development_Files_ : parent.all.json._j.URLS.ForMal_Files_) + 'file_deleted', qs.stringify({
+                            fileName: element.url
                         })).then(params => {
                             if (params.data.state === 200) {
                                 // this.ISuccessfull(params.data.msg);
@@ -1936,21 +1910,21 @@ window.addEventListener('pageshow', function (params) {
                         if (res.data.data.faultPartPic != -1) {
                             res.data.data.faultPartPic = res.data.data.faultPartPic.split(',')
                             __arr__ = res.data.data.faultPartPic;
-                        }else{
+                        } else {
                             res.data.data.faultPartPic = '无';
                         }
                         if (res.data.data.machineBrandPic != -1) {
                             res.data.data.machineBrandPic = res.data.data.machineBrandPic.split(',')
                             let __arr__1 = res.data.data.machineBrandPic;
                             __arr__ = combine(__arr__, __arr__1);
-                        }else{
+                        } else {
                             res.data.data.machineBrandPic = '无';
                         }
                         if (res.data.data.machineOverallPic != -1) {
                             res.data.data.machineOverallPic = res.data.data.machineOverallPic.split(',')
                             let __arr__2 = res.data.data.machineOverallPic;
                             __arr__ = combine(__arr__, __arr__2)
-                        }else{
+                        } else {
                             res.data.data.machineOverallPic = '无';
                         }
                         res.data.data['srcList'] = __arr__;
@@ -1965,8 +1939,8 @@ window.addEventListener('pageshow', function (params) {
                                 let __arr__ = [];
                                 process.data.page.records.reverse().forEach(record => {
                                     record.createName = record.createName == -1 ? '客户端创建' : record.createName;
-                                    record['create'] = record.logType == 1 ? '确认登记：' +record.createName : record.logType == 2 ? '联络登记：' +record.createName : record.logType == 3 ? '派单登记：' +record.createName :record.logType == 4 ? '回访登记：' +record.createName :record.logType == 17 ? '编辑登记：' +record.createName : record.logType == 18 ? '提交登记：' +record.createName : '取消登记：'+record.createName;
-                                    record.create = record.create +'，'+ record.createTime;
+                                    record['create'] = record.logType == 1 ? '确认登记：' + record.createName : record.logType == 2 ? '联络登记：' + record.createName : record.logType == 3 ? '派单登记：' + record.createName : record.logType == 4 ? '回访登记：' + record.createName : record.logType == 17 ? '编辑登记：' + record.createName : record.logType == 18 ? '提交登记：' + record.createName : '取消登记：' + record.createName;
+                                    record.create = record.create + '，' + record.createTime;
                                     __arr__.push(record);
                                 })
                                 res.data.data['logs'] = __arr__;
@@ -1976,9 +1950,9 @@ window.addEventListener('pageshow', function (params) {
                                 is.IError(process.data.msg);
                             }
                         })
-                        .catch(function (error) {
-                            is.IError(error);
-                        })
+                            .catch(function (error) {
+                                is.IError(error);
+                            })
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -2037,14 +2011,14 @@ window.addEventListener('pageshow', function (params) {
                     })
                     return false;
                 }
-                
+
                 params['clientId'] = -1;   //客户端用户ID
                 params['machineId'] = this.tableRadios.machineId;  //设备ID
 
                 params['repairsTypeId'] = this.repairsid.repairsTypeId;   //报修类型ID
-                params['demandChargeIds'] = this.data['repairsTypeIds'] ? JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, ""): -1;  //需求类型ID
+                params['demandChargeIds'] = this.data['repairsTypeIds'] ? JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, "") : -1;  //需求类型ID
                 params['visitCost'] = parseFloat(params.visitCost * 100).toFixed(0) || 0;  //预支付费用
-                
+
                 params['clientAddressId'] = -1;  //用户地址ID
                 params['shopName'] = params.shopName || -1;  //门店名称
                 params['contactName'] = params.contactName || -1;  //联系人名称
@@ -2059,7 +2033,7 @@ window.addEventListener('pageshow', function (params) {
                 params['address'] = params.address || -1;  //详细地址
 
                 params['faultContent'] = params.faultContent || -1;  //故障信息
-                
+
                 params['machineBrandPic'] = params.machineBrandPic || -1;   //机器品牌图片
                 params['machineOverallPic'] = params.machineOverallPic || -1;  //机器整体图片
                 params['faultPartPic'] = params.faultPartPic || -1;  //故障部位图片
@@ -2067,7 +2041,7 @@ window.addEventListener('pageshow', function (params) {
 
                 // params['createTime'] = params.createTime || -1;   //工单创建时间
                 params['contactContent'] = params.contactContent || -1;   //联系登记内容
-                
+
                 // params['contactTime'] = params.contactTime || -1;   //联系时间
                 params['maintainerId'] = params.maintainerId || -1;  // 派单师傅ID
 
@@ -2076,8 +2050,8 @@ window.addEventListener('pageshow', function (params) {
 
                 params['partPayment'] = params.partPayment || 0;   //配件费用
                 params['completeContent'] = params.completeContent || -1;  // 回访记录
-                
-                params['facilityName'] = params.facilityName  || -1;    //工单设备名(选填)
+
+                params['facilityName'] = params.facilityName || -1;    //工单设备名(选填)
 
                 axios.post("create_work", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
@@ -2095,18 +2069,18 @@ window.addEventListener('pageshow', function (params) {
                     })
             },
 
-            next(params){
-                if(!this.tableRadios.machineId){
+            next(params) {
+                if (!this.tableRadios.machineId) {
                     return false;
                 }
-                if(this.active == 1 && !this.repairsid.repairsTypeId){
+                if (this.active == 1 && !this.repairsid.repairsTypeId) {
                     return false
                 }
                 console.log(this.data.repairsTypeIds)
-                if(this.active == 2){
-                    if(!this.data.repairsTypeIds || this.data.repairsTypeIds.length < 1)return false
+                if (this.active == 2) {
+                    if (!this.data.repairsTypeIds || this.data.repairsTypeIds.length < 1) return false
                 }
-                if(this.active == 2){
+                if (this.active == 2) {
                     this.activeName = '提交';
                 }
                 if (this.active++ > 2) {
@@ -2114,12 +2088,12 @@ window.addEventListener('pageshow', function (params) {
                 };
             },
 
-            repairsType(params){
+            repairsType(params) {
                 // repairsid
                 this.repairsid = params
             },
 
-            maintainer(params){
+            maintainer(params) {
                 // maintainerId
                 this.maintainerId = params
             },
@@ -2136,7 +2110,7 @@ window.addEventListener('pageshow', function (params) {
                     params: dataBlock
                 }).then(res => {
                     if (res.data.state == 200) {
-                        is.ISuccessfull = true;
+                        is.ISuccessfull(res.data.msg);
                         is.list();
                     } else {
                         is.IError(res.data.msg);
@@ -2151,19 +2125,19 @@ window.addEventListener('pageshow', function (params) {
              * 导出工单
              * **/
             exportwork(params) {
-                if(!params){
+                if (!params) {
                     this.errorExe = true;
-                    this.formDataTree = {status: ''};
+                    this.formDataTree = { status: '' };
                     this.formDataTree.status = -1;
                     return false;
                 }
-                params['startDate'] = params.time ? ym.init.getDateTime(params.time[0]).split(' ')[0]: null
-                params['endDate'] = params.time ? ym.init.getDateTime(params.time[1]).split(' ')[0]: null
+                params['startDate'] = params.time ? ym.init.getDateTime(params.time[0]).split(' ')[0] : null
+                params['endDate'] = params.time ? ym.init.getDateTime(params.time[1]).split(' ')[0] : null
                 delete params.time;
                 axios.post('export_work', qs.stringify(params)
                 ).then(res => {
                     if (res.data.state == 200) {
-                        is.ISuccessfull = true;
+                        is.ISuccessfull(res.data.msg);
                         parent.location.href = res.data.data.path;
                     } else {
                         is.IError(res.data.msg);
@@ -2174,7 +2148,7 @@ window.addEventListener('pageshow', function (params) {
                     })
             },
 
-            orderenit(params){
+            orderenit(params) {
                 if (params) {
                     let obj = {};
                     is.imageList = {
@@ -2182,76 +2156,76 @@ window.addEventListener('pageshow', function (params) {
                         faultPartPic: [],
                         machineOverallPic: []
                     };
-                    axios.get('work_commit_detail?workId='+params.workId).then(res => {
-                            if (res.data.state == 200) {
-                                Object.keys(res.data.data).forEach((item, index) => {
-                                    if(Object.values(res.data.data)[index] == -1){
-                                        obj[item] = "无";
-                                        if(item == 'machineBrandPic' || item == 'faultPartPic' || item == 'machineOverallPic'){
-                                            obj[item] = [];
-                                        }
-                                    }else{
-                                        obj[item] = Object.values(res.data.data)[index];
-                                        if(item == 'machineBrandPic'){
-                                            obj[item].split(',').forEach(e => {
-                                                is.imageList.machineBrandPic.push({ name: 'machineBrandPic', url: e }); // 图片
-                                            })
-                                            obj[item] = obj[item].split(',');
-                                        }
-                                        if(item == 'faultPartPic'){
-                                            obj[item].split(',').forEach(e => {
-                                                is.imageList.faultPartPic.push({ name: 'faultPartPic', url: e }); // 图片
-                                            })
-                                            obj[item] = obj[item].split(',');
-                                        }
-                                        if(item == 'machineOverallPic'){
-                                            obj[item].split(',').forEach(e => {
-                                                is.imageList.machineOverallPic.push({ name: 'machineOverallPic', url: e }); // 图片
-                                            })
-                                            obj[item] = obj[item].split(',');
-                                        }
+                    axios.get('work_commit_detail?workId=' + params.workId).then(res => {
+                        if (res.data.state == 200) {
+                            Object.keys(res.data.data).forEach((item, index) => {
+                                if (Object.values(res.data.data)[index] == -1) {
+                                    obj[item] = "无";
+                                    if (item == 'machineBrandPic' || item == 'faultPartPic' || item == 'machineOverallPic') {
+                                        obj[item] = [];
                                     }
-                                })
-                                
-                                let _arr_ = [];
-                                TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province].code) : null;
-                                TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city].code) : null;
-                                TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city][res.data.data.district].code) : null;
-                                obj['province'] = _arr_
+                                } else {
+                                    obj[item] = Object.values(res.data.data)[index];
+                                    if (item == 'machineBrandPic') {
+                                        obj[item].split(',').forEach(e => {
+                                            is.imageList.machineBrandPic.push({ name: 'machineBrandPic', url: e }); // 图片
+                                        })
+                                        obj[item] = obj[item].split(',');
+                                    }
+                                    if (item == 'faultPartPic') {
+                                        obj[item].split(',').forEach(e => {
+                                            is.imageList.faultPartPic.push({ name: 'faultPartPic', url: e }); // 图片
+                                        })
+                                        obj[item] = obj[item].split(',');
+                                    }
+                                    if (item == 'machineOverallPic') {
+                                        obj[item].split(',').forEach(e => {
+                                            is.imageList.machineOverallPic.push({ name: 'machineOverallPic', url: e }); // 图片
+                                        })
+                                        obj[item] = obj[item].split(',');
+                                    }
+                                }
+                            })
 
-                                this.enitpawstate = true;
-                                this.$nextTick(() => {
-                                    this.search({ url: "sys_machine_list" });  //设备分类列表
+                            let _arr_ = [];
+                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province].code) : null;
+                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city].code) : null;
+                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city][res.data.data.district].code) : null;
+                            obj['province'] = _arr_
+
+                            this.enitpawstate = true;
+                            this.$nextTick(() => {
+                                this.search({ url: "sys_machine_list" });  //设备分类列表
+                                setTimeout(() => {
+                                    this.forEnits.machineNames = this.options;
                                     setTimeout(() => {
-                                        this.forEnits.machineNames = this.options;
+                                        this.search({ url: "sys_repairs_type_list" });  //设备报修分类列表
                                         setTimeout(() => {
-                                            this.search({ url: "sys_repairs_type_list" });  //设备报修分类列表
+                                            this.forEnits.repairsTypeNames = this.options;
                                             setTimeout(() => {
-                                                this.forEnits.repairsTypeNames = this.options;
+                                                this.search({ url: "sys_demand_charge_list" });  //设备收费项目
                                                 setTimeout(() => {
-                                                    this.search({ url: "sys_demand_charge_list" });  //设备收费项目
-                                                    setTimeout(() => {
-                                                        this.forEnits.demandChargeNames = this.options;
-                                                    }, 1000)
-                                                }, 600)
-                                            }, 500)
-                                        }, 400)
-                                    }, 300)
-                                    
-                                    this.forEnits = obj;
-                                })
-                            } else {
-                                is.IError(res.data.msg);
-                            }
-                        })
+                                                    this.forEnits.demandChargeNames = this.options;
+                                                }, 1000)
+                                            }, 600)
+                                        }, 500)
+                                    }, 400)
+                                }, 300)
+
+                                this.forEnits = obj;
+                            })
+                        } else {
+                            is.IError(res.data.msg);
+                        }
+                    })
                     return false;
-                }else{
+                } else {
                     delete this.forEnits.machineNames;
                     delete this.forEnits.repairsTypeNames;
                     delete this.forEnits.demandChargeNames;
 
                     let provinces = this.forEnits.province;
-                    
+
                     this.forEnits.machineBrandPic = this.forEnits.machineBrandPic.length > 0 ? this.forEnits.machineBrandPic.toString() : '-1';
                     this.forEnits.machineOverallPic = this.forEnits.machineOverallPic.length > 0 ? this.forEnits.machineOverallPic.toString() : '-1';
                     this.forEnits.faultPartPic = this.forEnits.faultPartPic.length > 0 ? this.forEnits.faultPartPic.toString() : '-1';
@@ -2260,23 +2234,23 @@ window.addEventListener('pageshow', function (params) {
                     this.forEnits['district'] = this.forEnits.province ? CodeToText[this.forEnits.province[2]] : -1; //区
                     this.forEnits['province'] = this.forEnits.province ? CodeToText[this.forEnits.province[0]] : -1;  //省无地址ID 情况下必传
                     axios.post('edit_work_commit', qs.stringify(this.forEnits)
-                        ).then(res => {
-                            if (res.data.state == 200) {
-                                is.ISuccessfull();
-                                is.enitpawstate = false;
-                                is.list();
-                                delete this.data;
-                            } else {
-                                is.forEnits.province = provinces;  //缓存的地址
-                                is.IError(res.data.msg);
-                            }
+                    ).then(res => {
+                        if (res.data.state == 200) {
+                            is.ISuccessfull(res.data.msg);
+                            is.enitpawstate = false;
+                            is.list();
+                            delete this.data;
+                        } else {
+                            is.forEnits.province = provinces;  //缓存的地址
+                            is.IError(res.data.msg);
+                        }
+                    })
+                        .catch(function (error) {
+                            is.IError(error);
                         })
-                            .catch(function (error) {
-                                is.IError(error);
-                            })
                 }
             },
-            
+
 
             /**
              * 删除统一操作
@@ -2293,7 +2267,7 @@ window.addEventListener('pageshow', function (params) {
                             params: dataBlock
                         }).then(res => {
                             if (res.data.state == 200) {
-                                is.ISuccessfull = true;
+                                is.ISuccessfull(res.data.msg);
                                 is.list();
                             } else {
                                 this.IError(res.data.msg);

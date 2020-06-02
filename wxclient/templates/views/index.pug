@@ -1,0 +1,25 @@
+
+doctype html
+html(lang="en")
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0")
+  meta(http-equiv="X-UA-Compatible" content="ie=edge") 
+  meta(http-equiv="Pragma" content="no-cache")
+  meta(http-equiv="Cache-control" content="no-cache") 
+  meta(http-equiv="Cache" content="no-cache") 
+  head
+    title 咖速修
+    link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css") 
+  body
+    .container#app
+      //- van-overlay(:show="show")
+      //-   van-loading(size="24px") 加载中...
+      
+      van-skeleton(title :row="20" :loading="show")
+        .span 工单详情
+        van-cell-group
+        each item in [{name: '服务类型', value: '安装'},{name: '需求名称', value: '正常上门'},{name: '故障描述', value: '新设备安装 1.咖啡之翼V双头意式半自动咖啡机 V022003101'},{name: '门店名称', value: '湖南咖啡之翼品牌管理股份有限公司'}]
+          van-cell(title=item.name value=item.value)
+        .submit
+          van-button(round block type="info" native-type="submit" :loading="handling ? true : false") 提交
+    

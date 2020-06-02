@@ -1,0 +1,51 @@
+$width: 100%;
+html{
+    margin: 0;
+    padding: 0;
+    width: $width;
+    height: $width;
+    background-color: #f0f0ee;
+}
+body{
+    max-width: 640px;
+    min-width: 320px;
+    overflow-x: hidden;
+    margin: 0 auto;
+    font-size: 14px;
+    background-color: #fff;
+    height: $width;
+    position: relative;
+    input{
+        font-size: 14px;
+    }
+}
+@mixin overflow {
+    height: auto;
+    overflow: hidden;
+}
+@mixin width{
+    width : $width;
+}
+.container {
+    position: relative;
+    height: $width;
+    display: none;
+    // .van-loading{
+    //     text-align: center;
+    //     margin-top: 200px;
+    //     .van-loading__text{
+    //         color: white;
+    //     }
+    // }
+    .span{
+        display: inline-block;
+        padding: 10px 16px;
+        box-sizing: border-box;
+    }
+    .submit{
+        position: fixed;
+        bottom: 20px;
+        left: 5%;
+        width: $width - 10%;
+    }
+}
