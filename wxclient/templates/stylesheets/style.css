@@ -2,7 +2,6 @@ html {
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
   background-color: #f0f0ee;
 }
 
@@ -13,7 +12,6 @@ body {
   margin: 0 auto;
   font-size: 14px;
   background-color: #fff;
-  height: 100%;
   position: relative;
 }
 
@@ -35,7 +33,20 @@ body input {
 
 .container .submit {
   position: fixed;
-  bottom: 20px;
-  left: 5%;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  padding: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.22);
+}
+
+.container .submit button {
+  margin: 0 auto;
   width: 90%;
+}
+
+.container .van-cell-group {
+  margin-bottom: 64px;
 }
