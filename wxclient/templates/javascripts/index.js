@@ -19,8 +19,6 @@ axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token')
 //配置发送请求前的拦截器 可以设置token信息 
 axios.interceptors.request.use(
     config => {
-        axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : ''; // 设置请求头为 Authorization
-        console.log(sessionStorage.getItem('token'))
         // 在发送请求之前做什么
         if (config.method === "post") {
         } else {
@@ -63,6 +61,7 @@ window.onload = function (params) {
                 el: '#app',
                 data: {
                     show: true,
+                    loadingShow: false,
                     handling: false,
                     workList: [],
                     alias: new Map([
@@ -91,7 +90,25 @@ window.onload = function (params) {
                         ['maintainerPhone', '维修师傅电话'],
                         ['creationType', '创建类型'],
                         ['createTime', '创建时间']
-                    ])
+                    ]),
+                    creationType: new Map([
+                        [1, '手动提交(管理端)'],
+                        [2, '个人用户提交(小程序)'],
+                        [3, '企业用户提交(公众号)']
+                    ]),
+                    status: new Map([
+                        [1, '待沟通'],
+                        [2, '待派单'],
+                        [3, '已派单'],
+                        [4, '已完成'],
+                        [18, '已提交'],
+                        [19, '已取消']
+                    ]),
+                    submitName: '提交',
+                    contactShow: false,
+                    message: '',
+                    actions: [],
+                    matersShow: false
                 },
                 created: function () {
                     document.querySelector('.container').style.display = 'block';
@@ -108,14 +125,20 @@ window.onload = function (params) {
                             }))
                             .then(params => {
                                 if(params.data.state == 200){
-                                    sessionStorage.setItem('token', JSON.stringify({asset: params.data.data}))
-                                    this.orderDirection();
+                                    sessionStorage.setItem('token', JSON.stringify({asset: params.data.data}));
+                                    this.loadingShow = true;
+                                    setTimeout(() => {
+                                        this.orderDirection();
+                                    }, 1000)
                                 }else{
                                     if(/code/.test(params.data.msg)){
                                         vant.Toast('获取的指令已失效！请退出重试');
                                         return false;
                                     }
                                     vant.Toast(params.data.msg);
+                                    // https://www.zgksx.com/por/admin/login.htm
+                                    // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
+                                    /未绑定/g.test(params.data.msg) ? location.href = `https://www.zgksx.com/por/admin/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
                                 }
                             }).catch((error) => {
                                 vant.Toast('发生错误'+ JSON.stringify(error))
@@ -132,19 +155,35 @@ window.onload = function (params) {
                         return null;
                     },
                     orderDirection: function(){
+                        axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : ''; // 设置请求头为 Authorization
                         if(sessionStorage.getItem('work_id')){
                             axios.get('sys_work_detail', {
                                 params: {
                                     workId: sessionStorage.getItem('work_id')
                                 }
                             }).then(params => {
+                                this.loadingShow = false;
+                                this.workList = [];
                                 if (params.data.state == 200) {
                                     Object.keys(params.data.data).forEach((element, index) => {
                                         if(this.alias.get(element)){
-                                            this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index]})
+                                            if(element == 'machineBrandPic'|| element == 'machineOverallPic'|| element == 'faultPartPic'){
+                                                this.workList.push({name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index]})
+                                            }else{
+                                                if(element == 'creationType'){
+                                                    this.workList.push({name: this.alias.get(element), value: this.creationType.get(parseInt(Object.values(params.data.data)[index]))})
+                                                }else{
+                                                    if(element == 'status'){
+                                                        this.workList.push({name: this.alias.get(element), value: this.status.get(Object.values(params.data.data)[index]), anchor: Object.values(params.data.data)[index]})
+                                                    }else{
+                                                        this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index], tag: element})
+                                                    }
+                                                }
+                                                
+                                            }
                                         }
                                     })
-                                    // this.workList = params.data.data;
+                                    params.data.data.status == 1 ? this.submitName = '工单沟通' : params.data.data.status == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
                                 }else{
                                     vant.Toast(params.data.msg);
                                 }
@@ -152,11 +191,94 @@ window.onload = function (params) {
                                 vant.Toast(JSON.stringify(err));
                             })
                         }
-                        // vant.ImagePreview(['https://img.yzcdn.cn/vant/apple-1.jpg'])
+                    },
+                    submit(params){
+                        let workId = '';
+                        this.workList.map((element, index) => {
+                            element.tag == "workId" ? workId = element.value : null;
+                            if(element.anchor){
+                                switch(element.anchor){
+                                    case 1:
+                                        if(!this.message){
+                                            vant.Toast('请输入联络记录!');
+                                        }
+                                        axios.get('contact_work',{
+                                            params: {
+                                                contactContent  : this.message,
+                                                workId : workId
+                                            }
+                                        }).then(params => {
+                                            this.contactShow = false;
+                                            vant.Toast(params.data.msg);
+                                            this.orderDirection();
+                                        }).catch(err =>{
+                                            vant.Toast(JSON.stringify(err));
+                                        })
+                                        break;
+                                    case 2:
+                                        axios.get('send_work',{
+                                            params: {
+                                                maintainerId : params.id,
+                                                workId : workId
+                                            }
+                                        }).then(params => {
+                                            this.matersShow = false;
+                                            vant.Toast(params.data.msg);
+                                            this.orderDirection();
+                                        }).catch(err =>{
+                                            vant.Toast(JSON.stringify(err));
+                                        })
+                                        break;
+                                    default:
+                                        vant.Toast('出错了！');
+                                        break;
+                                }
+                            }
+                        })
+                    },
+                    submitView(){
+                        this.loadingShow = true;
+                        this.workList.map((element, index) => {
+                            if(element.anchor){
+                                switch(element.anchor){
+                                    case 1:
+                                        this.contactShow = true;
+                                        this.loadingShow = false;
+                                        break;
+                                    case 2:
+                                        this.matersShow = true;
+                                        axios.post('sys_maintainer_list',qs.stringify({
+                                            page: 1,
+                                            pageSize: 100
+                                        })).then(params => {
+                                            this.loadingShow = false;
+                                            if (params.data.state == 200) {
+                                                let __arr__ = [];
+                                                params.data.page.records.map((element, index) => {
+                                                    __arr__.push({
+                                                        name: element.maintainerName,
+                                                        subname: element.maintainerPhone,
+                                                        id: element.id
+                                                    })
+                                                })
+                                                this.actions = __arr__;
+                                            }else{
+                                                vant.Toast(params.data.msg);
+                                            }
+                                        }).catch(err =>{
+                                            vant.Toast(JSON.stringify(err));
+                                        })
+                                        break;
+                                    default:
+                                        WeixinJSBridge.call('closeWindow');
+                                        break;
+                                }
+                            }
+                        })
                     },
                     preview(params) {
-                        console.log(params);
-                    },
+                        vant.ImagePreview(params.split(','))
+                    }
                 },
             });
             // 通过 CDN 引入时不会自动注册 Lazyload 组件

@@ -11,53 +11,52 @@ html(lang="en")
     title 咖速修
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
   body(style="height: 130%;")
-    .module 
-      .router 努力加载中...
     .container#app
-      //- .free_view_circular
-      //-     .free_circular
-      van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false)
-        van-swipe-item
-            img(:src="image")
-      .machine.center
-        ul
-          li(@click="contentMsg = !contentMsg")
-            span 设备（必填）
-            .machineName
-              span {{ machine.machineName }}
-              van-icon(name="arrow" size="16")
-          li
-            span 门店名（必填）：
-            van-field(v-model="shopName")
-          li
-            span 联系人名称（必填）：
-            van-field(v-model="contactName")
-          li
-            span 联系人电话（必填）：
-            van-field(v-model="contactPhone" type="tel")
-          li
-            span 故障描述（必填）：
-            textarea(placeholder="请填写描述故障问题" v-model="faultContent")
-          li
-            span 机器铭牌图
-            .file
-              van-uploader(v-model="fileList" multiple :after-read="updataFile('machineBrandPic')" :before-delete="deleteFn('fileList')")
-          li
-            span 机器整体图
-            .file
-              van-uploader(v-model="fileLists" multiple :after-read="updataFile('machineOverallPic')" :before-delete="deleteFn('fileLists')")
-          li
-            span 问题部位图
-            .file
-              van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
-      //- van-action-sheet(v-model="contentMsg" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action)
-      van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
-        van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")
+      van-overlay(:show="loadingShow")
+        van-loading(size="24px") 加载中...
+      van-skeleton(title :row="20" :loading="show")
+        van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false)
+          van-swipe-item
+              img(:src="image")
+        .machine.center
+          ul
+            li(@click="contentMsg = !contentMsg")
+              span 设备（必填）
+              .machineName
+                span {{ machine.machineName }}
+                van-icon(name="arrow" size="16")
+            li
+              span 门店名（必填）：
+              van-field(v-model="shopName")
+            li
+              span 联系人名称（必填）：
+              van-field(v-model="contactName")
+            li
+              span 联系人电话（必填）：
+              van-field(v-model="contactPhone" type="tel")
+            li
+              span 故障描述（必填）：
+              textarea(placeholder="请填写描述故障问题" v-model="faultContent")
+            li
+              span 机器铭牌图
+              .file
+                van-uploader(v-model="fileList" multiple :after-read="updataFile('machineBrandPic')" :before-delete="deleteFn('fileList')")
+            li
+              span 机器整体图
+              .file
+                van-uploader(v-model="fileLists" multiple :after-read="updataFile('machineOverallPic')" :before-delete="deleteFn('fileLists')")
+            li
+              span 问题部位图
+              .file
+                van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
+        //- van-action-sheet(v-model="contentMsg" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action)
+        van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
+          van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")
 
-      van-button(round type="info" size="normal" @click="submit" :loading="handling ? true : false" ) 提交
-      
-      van-tabbar(v-model="active" @change="ourHref")
-          van-tabbar-item(icon="comment-o") 填写信息
-          van-tabbar-item(icon="todo-list-o") 我的工单
-          van-tabbar-item(icon="manager-o") 用户中心
+        van-button(round type="info" size="normal" @click="submit" :loading="handling ? true : false" ) 提交
+        
+        van-tabbar(v-model="active" @change="ourHref")
+            van-tabbar-item(icon="comment-o") 填写信息
+            van-tabbar-item(icon="todo-list-o") 我的工单
+            van-tabbar-item(icon="manager-o") 用户中心
       

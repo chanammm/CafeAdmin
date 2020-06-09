@@ -12,14 +12,17 @@ html(lang="en")
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css") 
   body
     .container#app
-      //- van-overlay(:show="show")
-      //-   van-loading(size="24px") 加载中...
+      van-overlay(:show="loadingShow")
+        van-loading(size="24px") 加载中...
       van-skeleton(title :row="20" :loading="show")
-        .span 工单详情
+        //- .span 工单详情
         van-cell-group
           van-cell(v-for="item in workList" :title="item.name" :value="item.value")
             template(#right-icon v-if="item.name == '机器铭牌图片' || item.name == '机器整体图片' || item.name == '故障部分图'")
-              van-icon(name="search" style="line-height: inherit;" @click="preview(item.value)")
+              van-icon(name="photo-o" style="line-height: inherit;" @click="preview(item.view)")
         .submit
-          van-button(round block type="info" native-type="submit" :loading="handling ? true : false") 提交
+          van-button(round block type="info" native-type="submit" :loading="handling ? true : false" @click="submitView") {{ submitName }}
+        van-action-sheet(v-model="contactShow" cancel-text="提交" @cancel="submit" description="填写沟通内容")
+          van-field(v-model="message" rows="2" autosize  type="textarea" maxlength="200" placeholder="请输入沟通内容" show-word-limit) 
+        van-action-sheet(v-model="matersShow" :actions="actions" @select="submit")
     

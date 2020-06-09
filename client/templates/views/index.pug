@@ -11,10 +11,10 @@ html(lang="en")
     title 咖速修
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
   body
-    .module
-      .router 努力加载中...
-    .container
-      #app
+    .container#app
+      van-overlay(:show="loadingShow")
+        van-loading(size="24px") 加载中...
+      van-skeleton(title :row="20" :loading="show")
         van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false )
             van-swipe-item
                 img(:src="image")

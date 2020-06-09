@@ -25,10 +25,20 @@ body input {
   display: none;
 }
 
+.container .van-loading {
+  text-align: center;
+  margin-top: 200px;
+}
+
+.container .van-loading .van-loading__text {
+  color: white;
+}
+
 .container .span {
   display: inline-block;
   padding: 10px 16px;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .container .submit {

@@ -34,6 +34,13 @@ body{
 .container {
     position: relative;
     height: $width;
+    .van-loading{
+        text-align: center;
+        margin-top: 200px;
+        .van-loading__text{
+            color: white;
+        }
+    }
     .free_view_circular{
         .free_circular{
             width: 100%;

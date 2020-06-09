@@ -30,17 +30,18 @@ body{
     position: relative;
     height: $width;
     display: none;
-    // .van-loading{
-    //     text-align: center;
-    //     margin-top: 200px;
-    //     .van-loading__text{
-    //         color: white;
-    //     }
-    // }
+    .van-loading{
+        text-align: center;
+        margin-top: 200px;
+        .van-loading__text{
+            color: white;
+        }
+    }
     .span{
         display: inline-block;
         padding: 10px 16px;
         box-sizing: border-box;
+        text-align: center;
     }
     .submit{
         position: fixed;

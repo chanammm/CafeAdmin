@@ -6,6 +6,11 @@ import qs from 'qs';
 
 const URLs = `https://admin.api.zgksx.com/`;
 const URLFiles = `https://file.zgksx.com/`;
+const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
+                ${ process.env.NODE_ENV == "development" ? "http://zgksx.com/por/anchor/" : location.href.split('?')[0]}
+                &response_type=code&scope=snsapi_base&state=
+                ${ process.env.NODE_ENV == "development" ? location.href.split('?')[0] : null}
+                #wechat_redirect`.replace(/ /g, '');
 
 axios.defaults.baseURL = URLs;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
@@ -27,7 +32,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
-            /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
+            // /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -88,16 +93,17 @@ window.onload = function (params) {
                     fileLists: [],
                     fileListss: [],
                     fileImages: [],
-                    handling: false
+                    handling: false,
+                    loadingShow: false,
+                    show: true
                 },
                 created: function () {
-                    document.querySelector('.module').style.display = 'none';
+                    this.loadingShow = true;
                     let _arr_ = [];
                     if (/content/.test(location.href)) {
                         axios.get('wechat_machine_list')
                             .then(params => {
                                 if (params.data.state == 200) {
-
                                     axios.post('sys_repairs_type_list', qs.stringify({
                                         page: 1,
                                         pageSize: 1000
@@ -138,14 +144,57 @@ window.onload = function (params) {
                                 vant.Toast(params.data.msg)
                             }
                         })
+                    }else{
+                        localStorage.getItem('secret') ? (() => {
+                            if(JSON.parse(localStorage.getItem('secret')).hasBind < 1) return false;
+                            location.href = `./content.html`;
+                        })() :!/code/g.test(location.href) ? location.href = wxUri : (() => {
+                            axios.post('admin_repairs_wechat_login', qs.stringify({
+                                code: this.getQueryString("code")
+                            }))
+                            .then(params => {
+                                if(params.data.state == 200){
+                                    localStorage.setItem('secret', JSON.stringify(params.data.data));
+                                    axios.defaults.headers.common['Authorization'] = params.data.data.loginResult.secret;
+                                    setTimeout(() => {
+                                        if(params.data.data.hasBind < 1 ){
+                                            location.href = `./index.html`;
+                                            return false;
+                                        }
+                                        location.href = `./content.html`
+                                    }, 1000)
+                                }else{
+                                    if(/code/.test(params.data.msg)){
+                                        vant.Toast('获取的指令已失效！请退出重试');
+                                        return false;
+                                    }
+                                    vant.Toast(params.data.msg);
+                                    // https://www.zgksx.com/por/admin/login.htm
+                                    // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
+                                    /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${ location.href.split('?')[0] }` : null;
+                                }
+                            }).catch((error) => {
+                                vant.Toast('发生错误'+ JSON.stringify(error))
+                            })
+                        })();
                     }
                     if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
                         this.$nextTick(function () {
                             document.querySelector('.van-tabbar').style.position = 'absolute';
                         })
                     }
+                    setTimeout(() => {
+                        this.show = false;
+                        this.loadingShow = false;
+                    }, 1000)
                 },
                 methods: {
+                    getQueryString(n){
+                        var reg = new RegExp("(^|&)" + n + "=([^&]*)(&|$)", "i");
+                        var e = window.location.search.substr(1).match(reg);
+                        if(e) return unescape(e[2]);
+                        return null;
+                    },
                     onSelect(params) {
                         this.machine = {
                             machineId: params.parentId,
@@ -195,7 +244,8 @@ window.onload = function (params) {
                         this.handling = true;
                         axios.post('admin_account_login', qs.stringify({
                             account: values.user,
-                            password: values.pass
+                            password: values.pass,
+                            wechatId: ''
                         }))
                             .then(params => {
                                 this.handling = false;
