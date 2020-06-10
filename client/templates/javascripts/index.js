@@ -32,7 +32,7 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
-            // /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
+            /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -68,11 +68,7 @@ window.onload = function (params) {
                     oldpwd: '',
                     image: '../images/banner.png',
                     contentMsg: false,
-                    items: [{
-                        text: '杭州',
-                        children: [],
-                    },
-                    ],
+                    items: [],
                     activeId: 1,
                     activeIndex: 0,
                     tag: 0,
@@ -95,14 +91,60 @@ window.onload = function (params) {
                     fileImages: [],
                     handling: false,
                     loadingShow: false,
-                    show: true
+                    show: true,
+                    workList: [],
+                    alias: new Map([
+                        ['workId', '工单号'],
+                        ['nickName', '微信昵称'],
+                        ['machineName', '设备名称'],
+                        ['facilityName', '设备别名'],
+                        ['repairsTypeName', '报修类型名称'],
+                        ['demandChargeName', '需求名称'],
+                        ['visitCostStr', '预支付费用'],
+                        ['shopName', '门店名称'],
+                        ['contactName', '联系人名称'],
+                        ['contactPhone', '联系人电话'],
+                        ['province', '省'],
+                        ['city', '市'],
+                        ['district', '区'],
+                        ['address', '详细地址'],
+                        ['faultContent', '故障描述'],
+                        ['machineBrandPic', '机器铭牌图片'],
+                        ['machineOverallPic', '机器整体图片'],
+                        ['faultPartPic', '故障部分图'],
+                        ['status', '状态'],
+                        ['maintainPaymentStr', '维修费用'],
+                        ['partPaymentStr', '配件费用'],
+                        ['maintainerName', '维修师傅'],
+                        ['maintainerPhone', '维修师傅电话'],
+                        ['creationType', '创建类型'],
+                        ['createTime', '创建时间']
+                    ]),
+                    creationType: new Map([
+                        [1, '手动提交(管理端)'],
+                        [2, '个人用户提交(小程序)'],
+                        [3, '企业用户提交(公众号)']
+                    ]),
+                    status: new Map([
+                        [1, '待沟通'],
+                        [2, '待派单'],
+                        [3, '已派单'],
+                        [4, '已完成'],
+                        [18, '已提交'],
+                        [19, '已取消']
+                    ]),
                 },
                 created: function () {
                     this.loadingShow = true;
                     let _arr_ = [];
                     if (/content/.test(location.href)) {
+                        this.thisPosition();
                         axios.get('wechat_machine_list')
                             .then(params => {
+                                setTimeout(() => {
+                                    this.show = false;
+                                    this.loadingShow = false;
+                                }, 1000)
                                 if (params.data.state == 200) {
                                     axios.post('sys_repairs_type_list', qs.stringify({
                                         page: 1,
@@ -132,67 +174,112 @@ window.onload = function (params) {
                                 } else {
                                     vant.Toast(params.data.msg)
                                 };
-                            });
+                            }).catch((error) => {
+                                console.info(error)
+                                this.loadingShow = false;
+                                vant.Toast('发生错误' + JSON.stringify(error))
+                            })
                     } else if (/order/.test(location.href)) {
+                        this.thisPosition();
                         this.onLoad();
                     } else if (/user/.test(location.href)) {
+                        this.thisPosition();
                         axios.get('sys_admin_detail').then(params => {
-                            if (params.data.state == 200){
+                            setTimeout(() => {
+                                this.show = false;
+                                this.loadingShow = false;
+                            }, 1000)
+                            if (params.data.state == 200) {
                                 this.username = params.data.data.adminName;
                                 this.phone = params.data.data.phone;
-                            }else{
+                            } else {
                                 vant.Toast(params.data.msg)
                             }
                         })
-                    }else{
+                    } else if (/details/.test(location.href)) {
+                        axios.get('sys_work_detail?workId='+ this.getQueryString('workId')).then(params => {
+                            setTimeout(() => {
+                                this.show = false;
+                                this.loadingShow = false;
+                            }, 1000)
+                            if (params.data.state == 200) {
+                                this.workList = [];
+                                Object.keys(params.data.data).forEach((element, index) => {
+                                    if(this.alias.get(element)){
+                                        if(element == 'machineBrandPic'|| element == 'machineOverallPic'|| element == 'faultPartPic'){
+                                            this.workList.push({name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index]})
+                                        }else{
+                                            if(element == 'creationType'){
+                                                this.workList.push({name: this.alias.get(element), value: this.creationType.get(parseInt(Object.values(params.data.data)[index]))})
+                                            }else{
+                                                if(element == 'status'){
+                                                    this.workList.push({name: this.alias.get(element), value: this.status.get(Object.values(params.data.data)[index]), anchor: Object.values(params.data.data)[index]})
+                                                }else{
+                                                    this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index], tag: element})
+                                                }
+                                            }
+                                            
+                                        }
+                                    }
+                                })
+                            } else {
+                                vant.Toast('获取数据异常！请重试')
+                            }
+                        })
+                    } else {
+                        setTimeout(() => { this.show = false; }, 1200);
+                        if(window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;
                         localStorage.getItem('secret') ? (() => {
-                            if(JSON.parse(localStorage.getItem('secret')).hasBind < 1) return false;
+                            // 0 未绑定 1 已绑定
+                            if (/hasBind/g.test(localStorage.getItem('secret'))) {
+                                sessionStorage.setItem('wechatId', JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId);
+                                if (JSON.parse(localStorage.getItem('secret')).hasBind < 1) return false;
+                                localStorage.setItem('secret', JSON.parse(localStorage.getItem('secret')).loginResult.secret);
+                            }
                             location.href = `./content.html`;
-                        })() :!/code/g.test(location.href) ? location.href = wxUri : (() => {
+                        })() : !/code/g.test(location.href) ? location.href = wxUri : (() => {
                             axios.post('admin_repairs_wechat_login', qs.stringify({
                                 code: this.getQueryString("code")
                             }))
-                            .then(params => {
-                                if(params.data.state == 200){
-                                    localStorage.setItem('secret', JSON.stringify(params.data.data));
-                                    axios.defaults.headers.common['Authorization'] = params.data.data.loginResult.secret;
-                                    setTimeout(() => {
-                                        if(params.data.data.hasBind < 1 ){
-                                            location.href = `./index.html`;
+                                .then(params => {
+                                    if (params.data.state == 200) {
+                                        if (params.data.data.hasBind < 1) {
+                                            localStorage.setItem('secret', JSON.stringify(params.data.data));
                                             return false;
                                         }
-                                        location.href = `./content.html`
-                                    }, 1000)
-                                }else{
-                                    if(/code/.test(params.data.msg)){
-                                        vant.Toast('获取的指令已失效！请退出重试');
-                                        return false;
+                                        localStorage.setItem('secret', params.data.data.loginResult.secret);
+                                        location.href = `./content.html`;
+                                    } else {
+                                        if (/code/.test(params.data.msg)) {
+                                            vant.Toast('获取的指令已失效！请退出重试');
+                                            return false;
+                                        }
+                                        vant.Toast(params.data.msg);
+                                        // https://www.zgksx.com/por/admin/login.htm
+                                        // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
+                                        /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${location.href.split('?')[0]}` : null;
                                     }
-                                    vant.Toast(params.data.msg);
-                                    // https://www.zgksx.com/por/admin/login.htm
-                                    // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
-                                    /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${ location.href.split('?')[0] }` : null;
-                                }
-                            }).catch((error) => {
-                                vant.Toast('发生错误'+ JSON.stringify(error))
-                            })
+                                }).catch((error) => {
+                                    console.info(error)
+                                    vant.Toast('发生错误' + JSON.stringify(error))
+                                })
                         })();
                     }
-                    if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
-                        this.$nextTick(function () {
-                            document.querySelector('.van-tabbar').style.position = 'absolute';
-                        })
-                    }
-                    setTimeout(() => {
-                        this.show = false;
-                        this.loadingShow = false;
-                    }, 1000)
                 },
                 methods: {
-                    getQueryString(n){
+                    thisPosition(){
+                        if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+                            setTimeout(() => {
+                                this.$nextTick(function () {
+                                    document.querySelector('.van-tabbar').style.position = 'absolute';
+                                })
+                            }, 1100)
+                        }
+                    },
+                    getQueryString(n) {
                         var reg = new RegExp("(^|&)" + n + "=([^&]*)(&|$)", "i");
                         var e = window.location.search.substr(1).match(reg);
-                        if(e) return unescape(e[2]);
+                        if (e) return unescape(e[2]);
                         return null;
                     },
                     onSelect(params) {
@@ -211,7 +298,7 @@ window.onload = function (params) {
                             machineOverallPic: [],
                             faultPartPic: []
                         }
-                        if(this.fileImages.length > 0){
+                        if (this.fileImages.length > 0) {
                             this.fileImages.forEach(item => {
                                 pic[item.isImage.key].push(item.url);
                             })
@@ -228,12 +315,12 @@ window.onload = function (params) {
                             faultPartPic: pic.faultPartPic.toString()
                         }))
                             .then(params => {
-                                this.handling = false;
+                                setTimeout(() => {
+                                    this.handling = false;
+                                }, 1000);
                                 if (params.data.state == 200) {
                                     vant.Toast(params.data.msg);
-                                    setTimeout(() => {
-                                        location.href = './order.html';
-                                    }, 1000);
+                                    location.href = './order.html';
                                 } else {
                                     vant.Toast(params.data.msg)
                                 };
@@ -245,7 +332,7 @@ window.onload = function (params) {
                         axios.post('admin_account_login', qs.stringify({
                             account: values.user,
                             password: values.pass,
-                            wechatId: ''
+                            wechatId: sessionStorage.getItem('wechatId') || '',
                         }))
                             .then(params => {
                                 this.handling = false;
@@ -258,7 +345,11 @@ window.onload = function (params) {
                             });
                     },
 
-                    updataSubmit(){
+                    preview(params) {
+                        vant.ImagePreview(params.split(','))
+                    },
+
+                    updataSubmit() {
                         this.handling = true;
                         axios.post('edit_current_admin', qs.stringify({
                             adminName: this.username,
@@ -270,10 +361,10 @@ window.onload = function (params) {
                                 this.handling = false;
                                 if (params.data.state == 200) {
                                     localStorage.clear();
-                                    vant.Toast(params.data.msg+ '，修改成功，请重新登陆');
+                                    vant.Toast(params.data.msg + '，修改成功，请重新登陆');
                                     setTimeout(() => {
                                         location.href = './index.html';
-                                    },1500);
+                                    }, 1500);
                                 } else {
                                     vant.Toast(params.data.msg)
                                 };
@@ -282,6 +373,10 @@ window.onload = function (params) {
 
                     ourHref(params) {
                         params < 1 ? location.href = './content.html' : params > 1 ? location.href = './user.html' : location.href = './order.html';
+                    },
+
+                    page(params){
+                        location.href = `./details.html?workId=${params}`
                     },
 
                     onLoad() {
@@ -297,6 +392,8 @@ window.onload = function (params) {
                             }
                         })
                             .then(params => {
+                                this.show = false;
+                                this.loadingShow = false;
                                 if (params.data.state == 200) {
                                     params.data.page.records.map((element, index) => {
                                         params.data.page.records[index]['work'] = '工单号：' + element.workId;
@@ -387,7 +484,7 @@ window.onload = function (params) {
                                                     //         }
                                                     //     })
                                                     // })
-                                                    this.fileImages.push({ url: response.data.data.path, isImage: {key: params, localName: file.file.name} });
+                                                    this.fileImages.push({ url: response.data.data.path, isImage: { key: params, localName: file.file.name } });
                                                 }, 1000)
                                             } else {
                                                 vant.Toast(response.data.msg)
@@ -452,10 +549,10 @@ window.onload = function (params) {
                     },
 
                     deleteFn(params) {
-                        return file =>{
+                        return file => {
                             let _arr_ = [];
                             this.fileImages.forEach(element => {
-                                if(file.file.name != element.isImage.localName){
+                                if (file.file.name != element.isImage.localName) {
                                     _arr_.push(element)
                                 }
                             })
