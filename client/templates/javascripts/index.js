@@ -32,7 +32,12 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
-            /未登录/.test(response.data.msg) ? location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html') : [];
+            setTimeout(() => {
+                if(/未登录/.test(response.data.msg)){
+                    localStorage.clear();
+                    location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html');
+                };
+            }, 1000)
             return Promise.resolve(response);
         } else {
             return Promise.reject(response);
@@ -138,6 +143,7 @@ window.onload = function (params) {
                     this.loadingShow = true;
                     let _arr_ = [];
                     if (/content/.test(location.href)) {
+                        this.containers();
                         this.thisPosition();
                         axios.get('wechat_machine_list')
                             .then(params => {
@@ -180,9 +186,11 @@ window.onload = function (params) {
                                 vant.Toast('发生错误' + JSON.stringify(error))
                             })
                     } else if (/order/.test(location.href)) {
+                        this.containers();
                         this.thisPosition();
                         this.onLoad();
                     } else if (/user/.test(location.href)) {
+                        this.containers();
                         this.thisPosition();
                         axios.get('sys_admin_detail').then(params => {
                             setTimeout(() => {
@@ -197,6 +205,7 @@ window.onload = function (params) {
                             }
                         })
                     } else if (/details/.test(location.href)) {
+                        this.containers();
                         axios.get('sys_work_detail?workId='+ this.getQueryString('workId')).then(params => {
                             setTimeout(() => {
                                 this.show = false;
@@ -228,6 +237,7 @@ window.onload = function (params) {
                         })
                     } else {
                         setTimeout(() => { this.show = false; }, 1200);
+                        this.containers();
                         if(window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;
                         localStorage.getItem('secret') ? (() => {
                             // 0 未绑定 1 已绑定
@@ -255,9 +265,9 @@ window.onload = function (params) {
                                             return false;
                                         }
                                         vant.Toast(params.data.msg);
-                                        // https://www.zgksx.com/por/admin/login.htm
-                                        // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
-                                        /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${location.href.split('?')[0]}` : null;
+                                        setTimeout(() => {
+                                            /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${location.href.split('?')[0]}` : null;
+                                        }, 1000);
                                     }
                                 }).catch((error) => {
                                     console.info(error)
@@ -267,6 +277,11 @@ window.onload = function (params) {
                     }
                 },
                 methods: {
+                    containers(){
+                        setTimeout(() => {
+                            document.querySelector('.container').style.display = 'block';
+                        }, 1000)
+                    },
                     thisPosition(){
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
                             setTimeout(() => {
@@ -583,5 +598,5 @@ window.onload = function (params) {
             }
             console.info(error);
         }
-    }, 0)
+    }, 200)
 }

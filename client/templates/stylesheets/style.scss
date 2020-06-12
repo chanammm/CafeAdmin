@@ -32,6 +32,7 @@ body{
     width : $width;
 }
 .container {
+    display: none;
     position: relative;
     height: $width;
     .van-loading{
