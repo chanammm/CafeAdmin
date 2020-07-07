@@ -98,6 +98,7 @@ window.onload = function (params) {
                     loadingShow: false,
                     show: true,
                     workList: [],
+                    logs: [],
                     alias: new Map([
                         ['workId', '工单号'],
                         ['nickName', '微信昵称'],
@@ -232,7 +233,27 @@ window.onload = function (params) {
                                     }
                                 })
                             } else {
+                                vant.Toast('获取数据异常！请重试');
+                                setTimeout(() => {
+                                    location.href = './order.html';
+                                }, 500)
+                            }
+                        })
+                    } else if (/logs/.test(location.href)) {
+                        this.containers();
+                        axios.get('work_log_list?workId='+ this.getQueryString('workId')).then(params => {
+                            setTimeout(() => {
+                                this.show = false;
+                                this.loadingShow = false;
+                            }, 1000)
+                            if (params.data.state == 200) {
+                                this.logs = [];
+                                this.logs = params.data.list;
+                            } else {
                                 vant.Toast('获取数据异常！请重试')
+                                setTimeout(() => {
+                                    location.href = './order.html';
+                                }, 500)
                             }
                         })
                     } else {
@@ -242,7 +263,6 @@ window.onload = function (params) {
                         localStorage.getItem('secret') ? (() => {
                             // 0 未绑定 1 已绑定
                             if (/hasBind/g.test(localStorage.getItem('secret'))) {
-                                sessionStorage.setItem('wechatId', JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId);
                                 if (JSON.parse(localStorage.getItem('secret')).hasBind < 1) return false;
                                 localStorage.setItem('secret', JSON.parse(localStorage.getItem('secret')).loginResult.secret);
                             }
@@ -281,6 +301,9 @@ window.onload = function (params) {
                         setTimeout(() => {
                             document.querySelector('.container').style.display = 'block';
                         }, 1000)
+                    },
+                    href(){
+                        location.href = './logs.html?workId=' + this.getQueryString('workId');
                     },
                     thisPosition(){
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
@@ -344,10 +367,19 @@ window.onload = function (params) {
 
                     onSubmit(values) {
                         this.handling = true;
+                        let wechatIds = "";
+                        if(localStorage.getItem('secret')){
+                            try {
+                                if(JSON.parse(localStorage.getItem('secret')).wechatResult) wechatIds = JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId;
+                            } catch (error) {
+                                console.info(error);
+                            }
+                            
+                        }
                         axios.post('admin_account_login', qs.stringify({
                             account: values.user,
                             password: values.pass,
-                            wechatId: sessionStorage.getItem('wechatId') || '',
+                            wechatId: wechatIds,
                         }))
                             .then(params => {
                                 this.handling = false;
@@ -598,5 +630,5 @@ window.onload = function (params) {
             }
             console.info(error);
         }
-    }, 200)
+    }, 500)
 }

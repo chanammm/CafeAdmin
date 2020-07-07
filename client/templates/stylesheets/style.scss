@@ -20,6 +20,10 @@ body{
     input{
         font-size: 14px;
     }
+    h3, p{
+        margin: 0;
+        padding: 0;
+    }
 }
 @mixin widthOrder {
     width: $option;
@@ -204,4 +208,7 @@ body{
         color: white;
         transform: translateY(200px);
     }
+}
+.btn{
+    margin-top: 30px;
 }

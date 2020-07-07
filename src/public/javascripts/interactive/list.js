@@ -1764,12 +1764,26 @@ window.addEventListener('pageshow', function (params) {
             contactorder(params) {
                 if (!params.contactContent) {
                     this.adoptModule = true;
-                    this.DataVisible['workId'] = params.workId;
+                    this.DataVisible = {
+                        options: [],
+                        workId: params.workId,
+                        status: params.status
+                    };
+                    // 2020-07-07  增加1.1.0 增加可以切换通过沟通后修改报修类型
+                    if(params.status > 1) return;
+                    this.search({ url: "sys_repairs_type_list" });
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            this.DataVisible.options = this.options;
+                            this.DataVisible.repairsTypeId = params.repairsTypeId;
+                        },500)
+                    })
                     return false;
                 }
-                axios.get("contact_work", {
+                axios.get(params.status > 1 ? "continue_work_contact" :"contact_work", {
                     params: {
                         workId: params.workId,
+                        repairsTypeId: params.repairsTypeId,
                         contactContent: params.contactContent
                     }
                 }).then(res => {
@@ -1939,7 +1953,14 @@ window.addEventListener('pageshow', function (params) {
                                 let __arr__ = [];
                                 process.data.page.records.reverse().forEach(record => {
                                     record.createName = record.createName == -1 ? '客户端创建' : record.createName;
-                                    record['create'] = record.logType == 1 ? '确认登记：' + record.createName : record.logType == 2 ? '联络登记：' + record.createName : record.logType == 3 ? '派单登记：' + record.createName : record.logType == 4 ? '回访登记：' + record.createName : record.logType == 17 ? '编辑登记：' + record.createName : record.logType == 18 ? '提交登记：' + record.createName : '取消登记：' + record.createName;
+                                    record['create'] = record.logType == 1 ? 
+                                    '确认登记：' + record.createName : record.logType == 2 ? 
+                                    '联络登记：' + record.createName : record.logType == 3 ? 
+                                    '派单登记：' + record.createName : record.logType == 4 ? 
+                                    '派单登记：' + record.createName : record.logType == 5 ? 
+                                    '继续联络登记：' + record.createName : record.logType == 17 ? 
+                                    '编辑登记：' + record.createName : record.logType == 18 ? 
+                                    '提交登记：' + record.createName : '取消登记：' + record.createName;
                                     record.create = record.create + '，' + record.createTime;
                                     __arr__.push(record);
                                 })
@@ -2062,6 +2083,7 @@ window.addEventListener('pageshow', function (params) {
                         this.list();
                     } else {
                         is.IError(res.data.msg);
+                        this.active = 2;
                     }
                 })
                     .catch(function (error) {

@@ -18,10 +18,11 @@ html(lang="en")
         van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false)
           van-swipe-item
               img(:src="image")
-        van-cell-group
-          van-cell(v-for="item in workList" :title="item.name" :value="item.value")
-            template(#right-icon v-if="item.name == '机器铭牌图片' || item.name == '机器整体图片' || item.name == '故障部分图'")
-              van-icon(name="photo-o" style="line-height: inherit;" @click="preview(item.view)")
-          van-button(round type="info" class="btn" @click="href") 查看日志
+        .text(style="border-left: 3px solid red;margin-left: 10px;padding-left: 10px;margin-bottom: 20px;") 状态日志：
+        van-steps(direction="vertical" :active="0" active-color="red")
+          van-step(v-for="(item, index) in logs" v:key="index")
+            h3 {{ (item.logType == 1 ? "确认登记：": item.logType == 1 ? "确认登记：": item.logType == 2 ? "联络登记：": item.logType == 3 ? "派单登记：": item.logType == 4 ? "回访登记：": item.logType == 5 ? "继续联络：": item.logType == 17 ? "编辑登记：": item.logType == 18 ? "提交登记：": "取消登记：") + item.createName }}
+            p {{ item.logContent }}
+            p {{ item.createTime }}
           
           

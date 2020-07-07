@@ -158,6 +158,14 @@
                                 </el-radio-group>
                             </el-form-item>
 
+                            <el-form-item label="工单推送短信">
+                                <el-radio-group v-model="formData.isSendSms">
+                                    <el-radio :label="1">是</el-radio>
+                                    <el-radio :label="0">否</el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+
+
                             <!-- <el-form-item label="设备分类" prop="machineId">
                                 <el-table :data="tableDatass" @current-change="getTemplateRow"
                                 tooltip-effect="dark" height="300px">
