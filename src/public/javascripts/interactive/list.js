@@ -246,9 +246,16 @@ window.addEventListener('pageshow', function (params) {
                  * * underway_work_list  进行中工单
                  * * cancel_work_list  已取消工单
                  * **/
-                // if(uri == 'sys_work_order_list'){
-                //     params.uri ? _yri_ = params.uri : null;
-                // }
+                // 2020-07-13  工单增加搜索 报修类型
+                if(uri == 'sys_work_list'){  
+                    axios.post('sys_repairs_type_list', qs.stringify({page: 1, pageSize: 20})).then(params => {
+                        if (params.data.state == 200) {
+                            this.$nextTick(function () {
+                                this.listSearch['repairsTypeIds'] = params.data.page.records;
+                            })
+                        }
+                    })
+                }
 
                 it.loading = true;
                 params['page'] = !bool ? (() => {
@@ -1957,7 +1964,7 @@ window.addEventListener('pageshow', function (params) {
                                     '确认登记：' + record.createName : record.logType == 2 ? 
                                     '联络登记：' + record.createName : record.logType == 3 ? 
                                     '派单登记：' + record.createName : record.logType == 4 ? 
-                                    '派单登记：' + record.createName : record.logType == 5 ? 
+                                    '完成登记：' + record.createName : record.logType == 5 ? 
                                     '继续联络登记：' + record.createName : record.logType == 17 ? 
                                     '编辑登记：' + record.createName : record.logType == 18 ? 
                                     '提交登记：' + record.createName : '取消登记：' + record.createName;

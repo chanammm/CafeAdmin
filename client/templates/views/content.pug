@@ -35,20 +35,24 @@ html(lang="en")
               span 联系人电话（必填）：
               van-field(v-model="contactPhone" type="tel")
             li
-              span 故障描述（必填）：
+              span 上门备注（必填）：
               textarea(placeholder="请填写描述故障问题" v-model="faultContent")
             li
-              span 机器铭牌图
+              span 上传视频
               .file
-                van-uploader(v-model="fileList" multiple :after-read="updataFile('machineBrandPic')" :before-delete="deleteFn('fileList')")
-            li
-              span 机器整体图
-              .file
-                van-uploader(v-model="fileLists" multiple :after-read="updataFile('machineOverallPic')" :before-delete="deleteFn('fileLists')")
-            li
-              span 问题部位图
-              .file
-                van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
+                van-uploader(v-model="fileList" accept="video/*" multiple :after-read="test")
+            //- li
+            //-   span 机器铭牌图
+            //-   .file
+            //-     van-uploader(v-model="fileList" multiple :after-read="updataFile('machineBrandPic')" :before-delete="deleteFn('fileList')")
+            //- li
+            //-   span 机器整体图
+            //-   .file
+            //-     van-uploader(v-model="fileLists" multiple :after-read="updataFile('machineOverallPic')" :before-delete="deleteFn('fileLists')")
+            //- li
+            //-   span 问题部位图
+            //-   .file
+            //-     van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
         //- van-action-sheet(v-model="contentMsg" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action)
         van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
           van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")

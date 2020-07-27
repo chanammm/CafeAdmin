@@ -8,7 +8,7 @@ const URLs = `https://admin.api.zgksx.com/`;
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
                 ${ process.env.NODE_ENV == "development" ? "http://zgksx.com/por/anchor/" : location.href.split('?')[0]}
-                &response_type=code&scope=snsapi_base&state=
+                &response_type=code&scope=snsapi_userinfo&state=
                 ${ process.env.NODE_ENV == "development" ? location.href.split('?')[0] : null}
                 #wechat_redirect`.replace(/ /g, '');
 
@@ -90,7 +90,10 @@ window.onload = function (params) {
                     loading: false,
                     finished: false,
                     refreshing: false,
-                    fileList: [],
+                    fileList: [{
+                        status: 'uploading',
+                        message: '上传中...',
+                    }],
                     fileLists: [],
                     fileListss: [],
                     fileImages: [],
@@ -139,6 +142,8 @@ window.onload = function (params) {
                         [18, '已提交'],
                         [19, '已取消']
                     ]),
+                    search: "",  //工单列表的查询字段
+                    secrHeight: `height:${window.innerHeight - 151 }px;overflow: auto;`,  //工单内容高度
                 },
                 created: function () {
                     this.loadingShow = true;
@@ -435,7 +440,8 @@ window.onload = function (params) {
                             params: {
                                 status: this.tag > 0 ? this.tag : '',
                                 page: this.num,
-                                pageSize: 10
+                                pageSize: 20,
+                                key: this.search
                             }
                         })
                             .then(params => {
@@ -447,18 +453,18 @@ window.onload = function (params) {
                                         params.data.page.records[index]['contact'] = '联系人：' + element.contactName + '，联系电话：' + element.contactPhone;
                                         params.data.page.records[index]['src'] = 'https://www.zgksx.com/file/machinePic/041509001276628133.png';
                                     })
-                                    this.list = params.data.page.records;
+                                    this.list.length > 0 ? this.list = this.list.concat(params.data.page.records) : this.list = params.data.page.records;
+
                                     // 加载状态结束
                                     this.loading = false;
                                     this.removex();
                                     this.num++;
+
                                     if (params.data.page.records.length < 10) this.finished = true;
 
                                 } else if (params.data.state == 300) {   //数据空
                                     this.loading = false;
                                     this.finished = true;
-                                    this.list = [];
-                                    this.num = 1;
                                 } else {
                                     this.loading = false;
                                     this.finished = true;
@@ -483,11 +489,25 @@ window.onload = function (params) {
                         // 重新加载数据
                         // 将 loading 设置为 true，表示处于加载状态
                         this.loading = true;
+                        this.num = 1;
                         this.onLoad();
                     },
 
+                    test(file){
+                        console.log(file)
+                        file.status = 'uploading';
+                        file.message = '上传中...';
+                    },
+
                     updataFile(params) {
+                        
                         return file => {
+                            console.log(file)
+                            file.status = 'uploading';
+                            file.message = '上传中...';
+
+                            return false;
+                            
                             file.status = 'uploading';
                             var localFile = file.file;
                             var reader = new FileReader();
