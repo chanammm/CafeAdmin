@@ -33,7 +33,7 @@ axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
             setTimeout(() => {
-                if(/未登录/.test(response.data.msg)){
+                if (/未登录/.test(response.data.msg)) {
                     localStorage.clear();
                     location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html');
                 };
@@ -72,6 +72,7 @@ window.onload = function (params) {
                     phone: '',
                     oldpwd: '',
                     image: '../images/banner.png',
+                    detailsImages: '../images/details.png',
                     contentMsg: false,
                     items: [],
                     activeId: 1,
@@ -83,51 +84,52 @@ window.onload = function (params) {
                     contactName: '',
                     contactPhone: '',
                     faultContent: '',
+                    visitingTime: '',
                     machine: {
-                        machineName: '选择设备'
+                        machineName: '选择服务'
                     },
                     list: [],
                     loading: false,
                     finished: false,
                     refreshing: false,
-                    fileList: [{
-                        status: 'uploading',
-                        message: '上传中...',
-                    }],
+                    fileList: [],
                     fileLists: [],
                     fileListss: [],
                     fileImages: [],
                     handling: false,
                     loadingShow: false,
                     show: true,
-                    workList: [],
+                    workList: {},
                     logs: [],
                     alias: new Map([
                         ['workId', '工单号'],
-                        ['nickName', '微信昵称'],
-                        ['machineName', '设备名称'],
-                        ['facilityName', '设备别名'],
-                        ['repairsTypeName', '报修类型名称'],
+                        ['exName', '需求信息'],  // 断点 分层
                         ['demandChargeName', '需求名称'],
-                        ['visitCostStr', '预支付费用'],
+                        ['repairsTypeName', '报修类型名称'],
+                        ['products', '产品名称'],  // 新增
+                        ['faultContent', '故障描述'],
+                        ['video', '视频附件'],  //新增
+                        ['shopNames', '门店信息'],  // 断点 分层
                         ['shopName', '门店名称'],
+                        ['contactNames', '联系人信息'],  // 断点 分层
                         ['contactName', '联系人名称'],
                         ['contactPhone', '联系人电话'],
+                        ['maintainerNames', '师傅信息'],  // 断点 分层
+                        ['maintainerName', '维修师傅'],
+                        ['maintainerPhone', '维修师傅电话'],
+                        ['orderName', '订单信息'],  // 断点 分层
+                        ['createTime', '创建时间'],
+                        ['creationType', '创建类型'],
+                        ['nickName', '微信昵称'],
+                        ['maintainPaymentStr', '维修金额'],
+                        ['machineName', '设备名称'],
+                        ['visitCostStr', '预支付费用'],
+                        ['partPaymentStr', '配件费用'],
                         ['province', '省'],
                         ['city', '市'],
                         ['district', '区'],
                         ['address', '详细地址'],
-                        ['faultContent', '故障描述'],
-                        ['machineBrandPic', '机器铭牌图片'],
-                        ['machineOverallPic', '机器整体图片'],
-                        ['faultPartPic', '故障部分图'],
                         ['status', '状态'],
-                        ['maintainPaymentStr', '维修费用'],
-                        ['partPaymentStr', '配件费用'],
-                        ['maintainerName', '维修师傅'],
-                        ['maintainerPhone', '维修师傅电话'],
-                        ['creationType', '创建类型'],
-                        ['createTime', '创建时间']
                     ]),
                     creationType: new Map([
                         [1, '手动提交(管理端)'],
@@ -143,7 +145,15 @@ window.onload = function (params) {
                         [19, '已取消']
                     ]),
                     search: "",  //工单列表的查询字段
-                    secrHeight: `height:${window.innerHeight - 151 }px;overflow: auto;`,  //工单内容高度
+                    secrHeight: `height:${window.innerHeight - 151}px;overflow: auto;`,  //工单内容高度
+                    video: false,  // 是否预览视频
+                    videoFile: "",
+                    projects: [], //产品数组
+                    bottomFooter: `bottom: 0px`,
+                    minDate: new Date(2020, 0, 1),
+                    maxDate: new Date(2030, 10, 1),
+                    currentDate: new Date(),
+                    timeMsg: false,
                 },
                 created: function () {
                     this.loadingShow = true;
@@ -212,31 +222,33 @@ window.onload = function (params) {
                         })
                     } else if (/details/.test(location.href)) {
                         this.containers();
-                        axios.get('sys_work_detail?workId='+ this.getQueryString('workId')).then(params => {
+                        axios.get('sys_work_detail?workId=' + this.getQueryString('workId')).then(params => {
                             setTimeout(() => {
                                 this.show = false;
                                 this.loadingShow = false;
                             }, 1000)
                             if (params.data.state == 200) {
-                                this.workList = [];
+                                this.workList = {};
                                 Object.keys(params.data.data).forEach((element, index) => {
-                                    if(this.alias.get(element)){
-                                        if(element == 'machineBrandPic'|| element == 'machineOverallPic'|| element == 'faultPartPic'){
-                                            this.workList.push({name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index]})
-                                        }else{
-                                            if(element == 'creationType'){
-                                                this.workList.push({name: this.alias.get(element), value: this.creationType.get(parseInt(Object.values(params.data.data)[index]))})
-                                            }else{
-                                                if(element == 'status'){
-                                                    this.workList.push({name: this.alias.get(element), value: this.status.get(Object.values(params.data.data)[index]), anchor: Object.values(params.data.data)[index]})
-                                                }else{
-                                                    this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index], tag: element})
-                                                }
+                                //     if (this.alias.get(element)) {
+                                //         if (element == 'machineBrandPic' || element == 'machineOverallPic' || element == 'faultPartPic') {
+                                //             this.workList.push({ name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index] })
+                                //         } else {
+                                            if (element == 'creationType') {
+                                                params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
                                             }
-                                            
-                                        }
-                                    }
+                                //             } else {
+                                            if (element == 'status') {
+                                                params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
+                                            } else {
+                                                params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
+                                            }
+                                //             }
+
+                                //         }
+                                //     }
                                 })
+                                this.workList = params.data.data;
                             } else {
                                 vant.Toast('获取数据异常！请重试');
                                 setTimeout(() => {
@@ -246,7 +258,7 @@ window.onload = function (params) {
                         })
                     } else if (/logs/.test(location.href)) {
                         this.containers();
-                        axios.get('work_log_list?workId='+ this.getQueryString('workId')).then(params => {
+                        axios.get('work_log_list?workId=' + this.getQueryString('workId')).then(params => {
                             setTimeout(() => {
                                 this.show = false;
                                 this.loadingShow = false;
@@ -264,7 +276,7 @@ window.onload = function (params) {
                     } else {
                         setTimeout(() => { this.show = false; }, 1200);
                         this.containers();
-                        if(window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;
+                        if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;
                         localStorage.getItem('secret') ? (() => {
                             // 0 未绑定 1 已绑定
                             if (/hasBind/g.test(localStorage.getItem('secret'))) {
@@ -302,20 +314,24 @@ window.onload = function (params) {
                     }
                 },
                 methods: {
-                    containers(){
+                    containers() {
                         setTimeout(() => {
                             document.querySelector('.container').style.display = 'block';
                         }, 1000)
                     },
-                    href(){
-                        location.href = './logs.html?workId=' + this.getQueryString('workId');
+                    href(params) {
+                        location.href = `./${params}.html?workId=` + this.getQueryString('workId');
                     },
-                    thisPosition(){
+                    thisPosition() {
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
                             setTimeout(() => {
                                 this.$nextTick(function () {
                                     document.querySelector('.van-tabbar').style.position = 'absolute';
                                 })
+                                // 2020-07-28
+                                console.log(document.querySelector(".center").offsetHeight)
+                                console.log(window.innerHeight)
+                                this.bottomFooter = `bottom: -${(document.querySelector(".center").offsetHeight - window.innerHeight) / 2}px`
                             }, 1100)
                         }
                     },
@@ -335,17 +351,12 @@ window.onload = function (params) {
                     },
 
                     submit() {
+                        console.log(this.projects);  // 产品名称
+                        console.log(this.visitingTime);  // 预计上门时间
+                        console.log(this.videoFile);  // 视频文件
+                        return false;
                         this.handling = true;
-                        let pic = {
-                            machineBrandPic: [],
-                            machineOverallPic: [],
-                            faultPartPic: []
-                        }
-                        if (this.fileImages.length > 0) {
-                            this.fileImages.forEach(item => {
-                                pic[item.isImage.key].push(item.url);
-                            })
-                        }
+                        
                         axios.post('wechat_commit_work', qs.stringify({
                             machineId: this.machine.machineId,
                             repairsTypeId: this.machine.repairsTypeId,
@@ -373,13 +384,13 @@ window.onload = function (params) {
                     onSubmit(values) {
                         this.handling = true;
                         let wechatIds = "";
-                        if(localStorage.getItem('secret')){
+                        if (localStorage.getItem('secret')) {
                             try {
-                                if(JSON.parse(localStorage.getItem('secret')).wechatResult) wechatIds = JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId;
+                                if (JSON.parse(localStorage.getItem('secret')).wechatResult) wechatIds = JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId;
                             } catch (error) {
                                 console.info(error);
                             }
-                            
+
                         }
                         axios.post('admin_account_login', qs.stringify({
                             account: values.user,
@@ -427,7 +438,7 @@ window.onload = function (params) {
                         params < 1 ? location.href = './content.html' : params > 1 ? location.href = './user.html' : location.href = './order.html';
                     },
 
-                    page(params){
+                    page(params) {
                         location.href = `./details.html?workId=${params}`
                     },
 
@@ -492,80 +503,152 @@ window.onload = function (params) {
                         this.num = 1;
                         this.onLoad();
                     },
-
-                    test(file){
-                        console.log(file)
-                        file.status = 'uploading';
-                        file.message = '上传中...';
+                    onOversize(file) {
+                        vant.Toast('文件大小不能超过 50M');
                     },
 
-                    updataFile(params) {
-                        
-                        return file => {
-                            console.log(file)
-                            file.status = 'uploading';
-                            file.message = '上传中...';
+                    // 一下为 2020-07-27 启用视频上传
+                    updataVideo(file) {
+                        file.status = 'uploading';
+                        file.message = '上传中';
+                        var localFile = file.file, reader = new FileReader(), content;
+                        reader.onload = (event) => {
+                            content = event.target.result;
+                            let _$file = new FormData();
+                            _$file.append('file', localFile, 'machine_' + Math.random() + '.mp4');
+                            axios({
+                                method: "POST",
+                                url: URLFiles + 'video_file_upload',
+                                data: _$file,
+                                processData: false,
+                                traditional: true,
+                                contentType: false,
+                                headers: {
+                                    "Content-Type": false
+                                },
+                                transformRequest: [function (data) {
+                                    return data
+                                }],
+                            }).then(
+                                response => {
+                                    if (response.data.state == 200) {
+                                        vant.Toast('上传成功！');
+                                        this.videoFile = response.data.data.path;
+                                        this.video = true;
+                                    } else {
+                                        vant.Toast(response.data.msg)
+                                    }
+                                }
+                            ).catch((error) => {
+                                console.log(error);
+                            })
+                        };
+                        reader.onerror = function () {
+                            vant.Toast("error");
+                        };
+                        reader.readAsDataURL(localFile, "UTF-8");
 
-                            return false;
-                            
+                    },
+
+                    // 2020-07-27 追加内容
+                    vistingTimeFn(){
+                        this.timeMsg = true;
+                    },
+                    submitTime(params){
+                        this.visitingTime = this.getDateTime(params);
+                        this.timeMsg = false;
+                    },
+                    getDateTime(data) {
+                        var date = new Date(data);   //如果date为10位不需要乘1000
+                        var Y = date.getFullYear() + '-';
+                        var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+                        var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+                        var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+                        var m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+                        var s = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+                
+                        return Y + M + D + h + m + s;
+                    },
+                    addProduct(){
+                        this.projects.push({name: ''});
+                        if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+                            this.bottomFooter = `bottom: -${document.querySelector(".center").offsetHeight - window.innerHeight}px`
+                        }
+                    },
+
+                    deleteProduct(item){
+                        this.projects.forEach((project, index) => {
+                            if(item == index){
+                                // 删除下标 为 item 的数据
+                                this.projects.splice(index, 1);
+                            }
+                        })
+                        if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+                            this.bottomFooter = `bottom: -${(this.projects.length + 1)* 85}px`
+                        }
+                    },
+                    
+                    // 一下为 2020-07-27 取消图片上传方法
+                    updataFile(params) {
+                        return file => {
                             file.status = 'uploading';
                             var localFile = file.file;
                             var reader = new FileReader();
                             var content;
-                            let arr = [];
                             reader.onload = (event) => {
                                 content = event.target.result;
-                                compress(content, 450, (contentFile) => {
-                                    let _$file = new FormData();
-                                    _$file.append('file', contentFile, 'machineNumber_' + Math.random() + '.png');
-                                    axios({
-                                        method: "POST",
-                                        url: URLFiles + 'picture_file_upload',
-                                        data: _$file,
-                                        processData: false,
-                                        traditional: true,
-                                        contentType: false,
-                                        headers: {
-                                            "Content-Type": false
-                                        },
-                                        transformRequest: [function (data) {
-                                            return data
-                                        }],
-                                        onUploadProgress: function (progressEvent) { //原生获取上传进度的事件
-                                            if (progressEvent.lengthComputable) {
-                                            }
+                                // compress(content, 450, (contentFile) => {
+                                let _$file = new FormData();
+                                _$file.append('file', localFile, 'machineNumber_' + Math.random() + '.png');
+                                axios({
+                                    method: "POST",
+                                    url: URLFiles + 'picture_file_upload',
+                                    data: _$file,
+                                    processData: false,
+                                    traditional: true,
+                                    contentType: false,
+                                    headers: {
+                                        "Content-Type": false
+                                    },
+                                    transformRequest: [function (data) {
+                                        return data
+                                    }],
+                                    onUploadProgress: function (progressEvent) { //原生获取上传进度的事件
+                                        if (progressEvent.lengthComputable) {
                                         }
-                                    }).then(
-                                        response => {
-                                            if (response.data.state == 200) {
-                                                setTimeout(() => {
-                                                    file.status = 'done';
-                                                    // this.fileImages.forEach(element => {
-                                                    //     arr = this.fileList.concat(this.fileLists, this.fileListss);  //合并数组
-                                                    //     arr.forEach(repeat => {
-                                                    //         console.log(repeat.file.name)
-                                                    //         console.log(element.isImage.localName)
-                                                    //         if(repeat.file.name == element.isImage.localName){
-                                                    //             vant.Toast('这个图片已经上传过了!');
-                                                    //             return false;
-                                                    //         }
-                                                    //     })
-                                                    // })
-                                                    this.fileImages.push({ url: response.data.data.path, isImage: { key: params, localName: file.file.name } });
-                                                }, 1000)
-                                            } else {
-                                                vant.Toast(response.data.msg)
-                                            }
+                                    }
+                                }).then(
+                                    response => {
+                                        if (response.data.state == 200) {
+                                            setTimeout(() => {
+                                                file.status = 'done';
+                                                // this.fileImages.forEach(element => {
+                                                //     arr = this.fileList.concat(this.fileLists, this.fileListss);  //合并数组
+                                                //     arr.forEach(repeat => {
+                                                //         console.log(repeat.file.name)
+                                                //         console.log(element.isImage.localName)
+                                                //         if(repeat.file.name == element.isImage.localName){
+                                                //             vant.Toast('这个图片已经上传过了!');
+                                                //             return false;
+                                                //         }
+                                                //     })
+                                                // })
+                                                this.fileImages.push({ url: response.data.data.path, isImage: { key: params, localName: file.file.name } });
+                                            }, 1000)
+                                        } else {
+                                            vant.Toast(response.data.msg)
                                         }
-                                    ).catch((error) => {
-                                        console.log(error);
-                                    })
+                                    }
+                                ).catch((error) => {
+                                    console.log(error);
                                 })
+                                // })
                             };
                             reader.onerror = function () {
-                                alert("error");
+                                vant.Toast("error");
                             };
                             reader.readAsDataURL(localFile, "UTF-8");
+
                             function compress(content, size, callback) {  //压缩拍摄上传
                                 if (content.length <= size * 1024) {
                                     callback(dataURItoBlob(content));

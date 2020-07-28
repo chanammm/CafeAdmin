@@ -63,7 +63,7 @@ window.onload = function (params) {
                     show: true,
                     loadingShow: false,
                     handling: false,
-                    workList: [],
+                    workList: {},
                     alias: new Map([
                         ['workId', '工单号'],
                         ['nickName', '微信昵称'],
@@ -108,7 +108,9 @@ window.onload = function (params) {
                     contactShow: false,
                     message: '',
                     actions: [],
-                    matersShow: false
+                    matersShow: false,
+                    submitType: sessionStorage.getItem('rs_type') ? false : true, // 鉴别进入的权限类型
+                    detailsImages: '../images/details.png'
                 },
                 created: function () {
                     document.querySelector('.container').style.display = 'block';
@@ -117,6 +119,7 @@ window.onload = function (params) {
                         return false;
                     }else{
                         /work_id/.test(location.href) ? sessionStorage.setItem('work_id', this.getQueryString('work_id')) : null;
+                        /rs_type=enterprise/.test(location.href) ? sessionStorage.setItem('rs_type', "dz-enterprise") : null;
                     }
                     setTimeout(() => {
                         sessionStorage.getItem('token') ? this.orderDirection() :!/code/g.test(location.href) ? location.href = wxUri : (() => {
@@ -165,24 +168,35 @@ window.onload = function (params) {
                                 this.loadingShow = false;
                                 this.workList = [];
                                 if (params.data.state == 200) {
-                                    Object.keys(params.data.data).forEach((element, index) => {
-                                        if(this.alias.get(element)){
-                                            if(element == 'machineBrandPic'|| element == 'machineOverallPic'|| element == 'faultPartPic'){
-                                                this.workList.push({name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index]})
-                                            }else{
-                                                if(element == 'creationType'){
-                                                    this.workList.push({name: this.alias.get(element), value: this.creationType.get(parseInt(Object.values(params.data.data)[index]))})
-                                                }else{
-                                                    if(element == 'status'){
-                                                        this.workList.push({name: this.alias.get(element), value: this.status.get(Object.values(params.data.data)[index]), anchor: Object.values(params.data.data)[index]})
-                                                    }else{
-                                                        this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index], tag: element})
-                                                    }
-                                                }
+                                    // Object.keys(params.data.data).forEach((element, index) => {
+                                    //     if(this.alias.get(element)){
+                                    //         if(element == 'machineBrandPic'|| element == 'machineOverallPic'|| element == 'faultPartPic'){
+                                    //             this.workList.push({name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index]})
+                                    //         }else{
+                                    //             if(element == 'creationType'){
+                                    //                 this.workList.push({name: this.alias.get(element), value: this.creationType.get(parseInt(Object.values(params.data.data)[index]))})
+                                    //             }else{
+                                    //                 if(element == 'status'){
+                                    //                     this.workList.push({name: this.alias.get(element), value: this.status.get(Object.values(params.data.data)[index]), anchor: Object.values(params.data.data)[index]})
+                                    //                 }else{
+                                    //                     this.workList.push({name: this.alias.get(element), value: Object.values(params.data.data)[index] == -1 ? '无': Object.values(params.data.data)[index], tag: element})
+                                    //                 }
+                                    //             }
                                                 
-                                            }
+                                    //         }
+                                    //     }
+                                    // })
+                                    Object.keys(params.data.data).forEach((element, index) => {
+                                        if (element == 'creationType') {
+                                            params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
+                                        }
+                                        if (element == 'status') {
+                                            params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
+                                        } else {
+                                            params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
                                         }
                                     })
+                                        this.workList = params.data.data;
                                     params.data.data.status == 1 ? this.submitName = '工单沟通' : params.data.data.status == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
                                 }else{
                                     vant.Toast(params.data.msg);

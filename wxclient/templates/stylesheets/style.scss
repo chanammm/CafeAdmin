@@ -59,5 +59,8 @@ body{
     }
     .van-cell-group{
         margin-bottom: 64px;
+        .cell_border{
+            border-top: 10px solid #F0F0F0
+        }
     }
 }

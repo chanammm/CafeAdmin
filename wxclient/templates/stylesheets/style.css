@@ -60,3 +60,7 @@ body input {
 .container .van-cell-group {
   margin-bottom: 64px;
 }
+
+.container .van-cell-group .cell_border {
+  border-top: 10px solid #F0F0F0;
+}
