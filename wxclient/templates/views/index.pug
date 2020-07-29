@@ -32,7 +32,7 @@ html(lang="en")
               span(class="custom-title" style="font-weight: blod;") 需求信息
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
-          van-cell(title="产品名称" :value="workList.products")
+          van-cell(title="产品名称" :value="workList.facilityName")
           van-cell(title="故障描述" :value="workList.faultContent")
           van-cell
             template(#title)
@@ -63,6 +63,10 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 订单信息
+          van-cell(:value="workList.parentId" v-if="workList.parentId != -1")
+            template(#title)
+              span(class="custom-title") 父级工单号
+              van-tag(mark type="success") 二
           van-cell(title="创建时间" :value="workList.createTime")
           van-cell(title="创建类型" :value="workList.creationType")
           van-cell(title="微信昵称" :value="workList.nickName")
@@ -70,7 +74,14 @@ html(lang="en")
           van-cell(title="设备名称" :value="workList.machineName")
           van-cell(title="预支付费用" :value="workList.visitCostStr")
           van-cell(title="配件费用" :value="workList.partPaymentStr")
+          van-cell(title="期待上门时间" :value="workList.visitingTime")
           van-cell(title="状态" :value="workList.status")
+          div(style="padding: 10px 16px;box-sizing: border-box;") 工单日志：
+            van-steps(direction="vertical" :active="0")
+              van-step(v-for="(item, index) in workList.logs" v:key="index")
+                h3 {{ (item.logType == 1 ? "确认登记：": item.logType == 1 ? "确认登记：": item.logType == 2 ? "联络登记：": item.logType == 3 ? "派单登记：": item.logType == 4 ? "回访登记：": item.logType == 5 ? "继续联络：": item.logType == 17 ? "编辑登记：": item.logType == 18 ? "提交登记：": "取消登记：") + item.createName }}
+                p {{ item.logContent }}
+                p {{ item.createTime }}
         .submit(v-if="submitType")
           van-button(round block type="info" native-type="submit" :loading="handling ? true : false" @click="submitView") {{ submitName }}
         van-action-sheet(v-model="contactShow" cancel-text="提交" @cancel="submit" description="填写沟通内容")

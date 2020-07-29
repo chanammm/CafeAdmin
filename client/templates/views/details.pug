@@ -27,7 +27,7 @@ html(lang="en")
               span(class="custom-title" style="font-weight: blod;") 需求信息
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
-          van-cell(title="产品名称" :value="workList.products")
+          van-cell(title="产品名称" :value="workList.facilityName")
           van-cell(title="故障描述" :value="workList.faultContent")
           van-cell
             template(#title)
@@ -58,6 +58,10 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 订单信息
+          van-cell(:value="workList.parentId" v-if="workList.parentId != -1")
+            template(#title)
+              span(class="custom-title") 父级工单号
+              van-tag(mark type="success") 二
           van-cell(title="创建时间" :value="workList.createTime")
           van-cell(title="创建类型" :value="workList.creationType")
           van-cell(title="微信昵称" :value="workList.nickName")
@@ -65,6 +69,7 @@ html(lang="en")
           van-cell(title="设备名称" :value="workList.machineName")
           van-cell(title="预支付费用" :value="workList.visitCostStr")
           van-cell(title="配件费用" :value="workList.partPaymentStr")
+          van-cell(title="期待上门时间" :value="workList.visitingTime")
           van-cell(title="状态" :value="workList.status")
           div(style="width: 100%;margin-bottom: 20px;height: auto;overflow: hidden;")
             van-button(round type="info" class="btn" @click="href('order')" style="width: 40%; float: left;") 返回上一页

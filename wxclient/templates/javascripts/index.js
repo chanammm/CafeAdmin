@@ -110,7 +110,8 @@ window.onload = function (params) {
                     actions: [],
                     matersShow: false,
                     submitType: sessionStorage.getItem('rs_type') ? false : true, // 鉴别进入的权限类型
-                    detailsImages: '../images/details.png'
+                    detailsImages: '../images/details.png',
+                    logs: [],  // 日志
                 },
                 created: function () {
                     document.querySelector('.container').style.display = 'block';
@@ -166,7 +167,7 @@ window.onload = function (params) {
                                 }
                             }).then(params => {
                                 this.loadingShow = false;
-                                this.workList = [];
+                                this.workList = {};
                                 if (params.data.state == 200) {
                                     // Object.keys(params.data.data).forEach((element, index) => {
                                     //     if(this.alias.get(element)){
@@ -190,7 +191,19 @@ window.onload = function (params) {
                                         if (element == 'creationType') {
                                             params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
                                         }
+                                        if(element == 'facilityName'){
+                                            let arr = [];
+                                            try {
+                                                JSON.parse(Object.values(params.data.data)[index]).map((element, index) => {
+                                                    arr.push(element.name);
+                                                })
+                                                params.data.data[element] =  arr.toString().replace(/\[\]/g, '');
+                                            } catch (error) {
+                                                console.info(error)
+                                            }
+                                        }
                                         if (element == 'status') {
+                                            params.data.data['anchor'] =  Object.values(params.data.data)[index]; // 状态值
                                             params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
                                         } else {
                                             params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
@@ -198,6 +211,13 @@ window.onload = function (params) {
                                     })
                                         this.workList = params.data.data;
                                     params.data.data.status == 1 ? this.submitName = '工单沟通' : params.data.data.status == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
+
+                                    // 2020-07-29 更新 追加日志
+                                    axios.get('work_log_list?workId=' + this.workList.workId).then(params => {
+                                        if (params.data.state == 200) {
+                                            this.$set(this.workList, 'logs', params.data.list);
+                                        }
+                                    })
                                 }else{
                                     vant.Toast(params.data.msg);
                                 }
@@ -207,88 +227,82 @@ window.onload = function (params) {
                         }
                     },
                     submit(params){
-                        let workId = '';
-                        this.workList.map((element, index) => {
-                            element.tag == "workId" ? workId = element.value : null;
-                            if(element.anchor){
-                                switch(element.anchor){
-                                    case 1:
-                                        if(!this.message){
-                                            vant.Toast('请输入联络记录!');
+                        if(this.workList.anchor){
+                            switch(this.workList.anchor){
+                                case 1:
+                                    if(!this.message){
+                                        vant.Toast('请输入联络记录!');
+                                    }
+                                    axios.get('contact_work',{
+                                        params: {
+                                            contactContent  : this.message,
+                                            workId : this.workList.workId
                                         }
-                                        axios.get('contact_work',{
-                                            params: {
-                                                contactContent  : this.message,
-                                                workId : workId
-                                            }
-                                        }).then(params => {
-                                            this.contactShow = false;
-                                            vant.Toast(params.data.msg);
-                                            this.orderDirection();
-                                        }).catch(err =>{
-                                            vant.Toast(JSON.stringify(err));
-                                        })
-                                        break;
-                                    case 2:
-                                        axios.get('send_work',{
-                                            params: {
-                                                maintainerId : params.id,
-                                                workId : workId
-                                            }
-                                        }).then(params => {
-                                            this.matersShow = false;
-                                            vant.Toast(params.data.msg);
-                                            this.orderDirection();
-                                        }).catch(err =>{
-                                            vant.Toast(JSON.stringify(err));
-                                        })
-                                        break;
-                                    default:
-                                        vant.Toast('出错了！');
-                                        break;
-                                }
+                                    }).then(params => {
+                                        this.contactShow = false;
+                                        vant.Toast(params.data.msg);
+                                        this.orderDirection();
+                                    }).catch(err =>{
+                                        vant.Toast(JSON.stringify(err));
+                                    })
+                                    break;
+                                case 2:
+                                    axios.get('send_work',{
+                                        params: {
+                                            maintainerId : params.id,
+                                            workId : this.workList.workId
+                                        }
+                                    }).then(params => {
+                                        this.matersShow = false;
+                                        vant.Toast(params.data.msg);
+                                        this.orderDirection();
+                                    }).catch(err =>{
+                                        vant.Toast(JSON.stringify(err));
+                                    })
+                                    break;
+                                default:
+                                    vant.Toast('出错了！');
+                                    break;
                             }
-                        })
+                        }
                     },
                     submitView(){
                         this.loadingShow = true;
-                        this.workList.map((element, index) => {
-                            if(element.anchor){
-                                switch(element.anchor){
-                                    case 1:
-                                        this.contactShow = true;
+                        if(this.workList.anchor){
+                            switch(this.workList.anchor){
+                                case 1:  // 沟通框
+                                    this.contactShow = true;
+                                    this.loadingShow = false;
+                                    break;
+                                case 2:  // 派单框
+                                    this.matersShow = true;
+                                    axios.post('sys_maintainer_list',qs.stringify({
+                                        page: 1,
+                                        pageSize: 100
+                                    })).then(params => {
                                         this.loadingShow = false;
-                                        break;
-                                    case 2:
-                                        this.matersShow = true;
-                                        axios.post('sys_maintainer_list',qs.stringify({
-                                            page: 1,
-                                            pageSize: 100
-                                        })).then(params => {
-                                            this.loadingShow = false;
-                                            if (params.data.state == 200) {
-                                                let __arr__ = [];
-                                                params.data.page.records.map((element, index) => {
-                                                    __arr__.push({
-                                                        name: element.maintainerName,
-                                                        subname: element.maintainerPhone,
-                                                        id: element.id
-                                                    })
+                                        if (params.data.state == 200) {
+                                            let __arr__ = [];
+                                            params.data.page.records.map((element, index) => {
+                                                __arr__.push({
+                                                    name: element.maintainerName,
+                                                    subname: element.maintainerPhone,
+                                                    id: element.id
                                                 })
-                                                this.actions = __arr__;
-                                            }else{
-                                                vant.Toast(params.data.msg);
-                                            }
-                                        }).catch(err =>{
-                                            vant.Toast(JSON.stringify(err));
-                                        })
-                                        break;
-                                    default:
-                                        WeixinJSBridge.call('closeWindow');
-                                        break;
-                                }
+                                            })
+                                            this.actions = __arr__;
+                                        }else{
+                                            vant.Toast(params.data.msg);
+                                        }
+                                    }).catch(err =>{
+                                        vant.Toast(JSON.stringify(err));
+                                    })
+                                    break;
+                                default:
+                                    WeixinJSBridge.call('closeWindow');
+                                    break;
                             }
-                        })
+                        }
                     },
                     preview(params) {
                         vant.ImagePreview(params.split(','))

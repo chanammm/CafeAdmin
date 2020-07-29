@@ -64,3 +64,8 @@ body input {
 .container .van-cell-group .cell_border {
   border-top: 10px solid #F0F0F0;
 }
+
+.container .van-cell-group .van-step__title h3, .container .van-cell-group .van-step__title p {
+  margin: 0;
+  padding: 0;
+}

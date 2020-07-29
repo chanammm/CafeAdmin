@@ -33,7 +33,9 @@ html(lang="en")
                       van-card(:desc="item.contact" :title="item.workId" :num="item.createTime" thumb="../images/order.png")
                         template(#tags)
                             div(style="display: block;") 门店名称：{{ item.shopName }}
+                            div(style="display: block;") 期望上门时间：{{ item.visitingTime }}
                             van-tag(plain type="danger") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
+                            van-tag(type="success" style="display: table-cell; float: right;" v-if="item.status == 4" @click.stop="tryAgain(item.workId)") 点击再次提交工单
         van-tabbar(v-model="active" @change="ourHref")
           van-tabbar-item(icon="comment-o") 填写信息
           van-tabbar-item(icon="todo-list-o") 我的工单

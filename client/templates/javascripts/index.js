@@ -161,16 +161,16 @@ window.onload = function (params) {
                     if (/content/.test(location.href)) {
                         this.containers();
                         this.thisPosition();
-                        axios.get('wechat_machine_list')
+                        axios.get('wechat_machine_list')  //查看设备列表
                             .then(params => {
                                 setTimeout(() => {
                                     this.show = false;
                                     this.loadingShow = false;
                                 }, 1000)
                                 if (params.data.state == 200) {
-                                    axios.post('sys_repairs_type_list', qs.stringify({
+                                    axios.post('sys_repairs_type_list', qs.stringify({  //查看报修分类列表
                                         page: 1,
-                                        pageSize: 1000
+                                        pageSize: 20
                                     }))
                                         .then(res => {
                                             if (res.data.state == 200) {
@@ -201,6 +201,32 @@ window.onload = function (params) {
                                 this.loadingShow = false;
                                 vant.Toast('发生错误' + JSON.stringify(error))
                             })
+                            // 2020-07-29 更新 如果是追加工单 则执行以下操作
+                            /**
+                             * path: 查询上一层的订单信息
+                             * auth: 生成新的捆绑上一工单的订单
+                             * **/
+                            if(this.getQueryString('workId')){
+                                axios.get('sys_work_detail?workId=' + this.getQueryString('workId')).then(params => {
+                                    if (params.data.state == 200) {
+                                        this.machine = {
+                                            machineId: params.data.data.machineId,
+                                            repairsTypeId: params.data.data.repairsTypeId,
+                                            machineName: params.data.data.machineName + '>' + params.data.data.repairsTypeName
+                                        };
+                                        this.shopName = params.data.data.shopName;
+                                        this.contactName = params.data.data.contactName;
+                                        this.contactPhone = params.data.data.contactPhone;
+                                        this.projects = JSON.parse(params.data.data.facilityName);
+                                        this.visitingTime = params.data.data.visitingTime;
+                                        this.faultContent = params.data.data.faultContent;
+                                         params.data.data.video != -1 ? this.video = params.data.data.video : null;
+                                    } else {
+                                        vant.Toast('获取上一订单数据失败');
+                                    }
+                                })
+                            }
+                            
                     } else if (/order/.test(location.href)) {
                         this.containers();
                         this.thisPosition();
@@ -238,6 +264,17 @@ window.onload = function (params) {
                                                 params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
                                             }
                                 //             } else {
+                                            if(element == 'facilityName'){
+                                                let arr = [];
+                                                try {
+                                                    JSON.parse(Object.values(params.data.data)[index]).map((element, index) => {
+                                                        arr.push(element.name);
+                                                    })
+                                                    params.data.data[element] =  arr.toString().replace(/\[\]/g, '');
+                                                } catch (error) {
+                                                    console.info(error)
+                                                }
+                                            }
                                             if (element == 'status') {
                                                 params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
                                             } else {
@@ -329,8 +366,6 @@ window.onload = function (params) {
                                     document.querySelector('.van-tabbar').style.position = 'absolute';
                                 })
                                 // 2020-07-28
-                                console.log(document.querySelector(".center").offsetHeight)
-                                console.log(window.innerHeight)
                                 this.bottomFooter = `bottom: -${(document.querySelector(".center").offsetHeight - window.innerHeight) / 2}px`
                             }, 1100)
                         }
@@ -351,12 +386,7 @@ window.onload = function (params) {
                     },
 
                     submit() {
-                        console.log(this.projects);  // 产品名称
-                        console.log(this.visitingTime);  // 预计上门时间
-                        console.log(this.videoFile);  // 视频文件
-                        return false;
                         this.handling = true;
-                        
                         axios.post('wechat_commit_work', qs.stringify({
                             machineId: this.machine.machineId,
                             repairsTypeId: this.machine.repairsTypeId,
@@ -364,9 +394,10 @@ window.onload = function (params) {
                             contactName: this.contactName,
                             contactPhone: this.contactPhone,
                             faultContent: this.faultContent,
-                            machineBrandPic: pic.machineBrandPic.toString(),
-                            machineOverallPic: pic.machineOverallPic.toString(),
-                            faultPartPic: pic.faultPartPic.toString()
+                            parentId: this.getQueryString('workId') || "", 
+                            video: this.videoFile || -1, // 视频文件
+                            visitingTime: this.visitingTime || -1,// 预计上门时间
+                            facilityName: JSON.stringify(this.projects) || -1// 产品名称
                         }))
                             .then(params => {
                                 setTimeout(() => {
@@ -380,7 +411,18 @@ window.onload = function (params) {
                                 };
                             })
                     },
-
+                    
+                    /**
+                     * path : order
+                     * tag: status = 4
+                     * **/
+                    tryAgain(params){  //再次提交工单
+                        location.href = './content.html?workId='+ params;
+                    },
+                    /**
+                     * path : index
+                     * tag: wx/pwd login
+                     * **/
                     onSubmit(values) {
                         this.handling = true;
                         let wechatIds = "";
@@ -570,7 +612,7 @@ window.onload = function (params) {
                         return Y + M + D + h + m + s;
                     },
                     addProduct(){
-                        this.projects.push({name: ''});
+                        this.projects.push({name: '', _id: new Date().getTime()});
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
                             this.bottomFooter = `bottom: -${document.querySelector(".center").offsetHeight - window.innerHeight}px`
                         }
@@ -733,5 +775,5 @@ window.onload = function (params) {
             }
             console.info(error);
         }
-    }, 500)
+    }, 0)
 }

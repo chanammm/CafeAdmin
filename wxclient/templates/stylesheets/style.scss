@@ -62,5 +62,11 @@ body{
         .cell_border{
             border-top: 10px solid #F0F0F0
         }
+        .van-step__title{
+            h3,p{
+                margin: 0;
+                padding: 0;
+            }
+        }
     }
 }
