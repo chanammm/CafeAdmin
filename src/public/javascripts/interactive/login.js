@@ -56,7 +56,10 @@ new Vue({
                         };
                         localStorage.setItem('uri', JSON.stringify({ uri: '../index.htm?hash:ix', title: '首页' }));
                         sessionStorage.setItem("token", JSON.stringify({ asset: params.data }));
-                        ym.init.GETURI('outch_wx') ? location.href = ym.init.GETURI('outch_wx'): null;  // 如果是手机端调起 回归手机端路径
+                        if(ym.init.GETURI('outch_wx')){
+                            sessionStorage.setItem('author', JSON.stringify({ au: ym.init.COMPILESTR.encryption(user.value), as: ym.init.COMPILESTR.encryption(pwd.value) }));  // 临时缓存一下账号信息
+                            location.href = ym.init.GETURI('outch_wx');
+                        };  // 如果是手机端调起回归手机端路径
                         axios.defaults.headers.common['Authorization'] = JSON.parse(sessionStorage.getItem('token')).asset.secret; // 设置请求头为 Authorization
                         axios.post('admin_role_permissions').then(params => {  // 页面权限
                             if(params.data.data.pagePermissions.length < 1){

@@ -3,11 +3,12 @@ import '../stylesheets/style.min.css';
 import './router';
 import axios from 'axios';
 import qs from 'qs';
-
+// const pathAuthor = "https://www.zgksx.com/por/admin/login.htm";
+const pathAuthor = "http://192.168.0.168:8080/cafeadmin/src/dist/login.htm";
 const URLs = `https://admin.api.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
                 ${ process.env.NODE_ENV == "development" ? "http://zgksx.com/por/anchor/" : location.href.split('?')[0]}
-                &response_type=code&scope=snsapi_base&state=
+                &response_type=code&scope=snsapi_userinfo&state=
                 ${ process.env.NODE_ENV == "development" ? location.href.split('?')[0] : null}
                 #wechat_redirect`.replace(/ /g, '');
 
@@ -123,6 +124,10 @@ window.onload = function (params) {
                         /rs_type=enterprise/.test(location.href) ? sessionStorage.setItem('rs_type', "dz-enterprise") : null;
                     }
                     setTimeout(() => {
+                        if (!sessionStorage.getItem('token') && window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') {
+                            location.href = `${pathAuthor}?outch_wx=${ location.href }`;
+                            return false;
+                        };  // 不是微信浏览器的情况下
                         sessionStorage.getItem('token') ? this.orderDirection() :!/code/g.test(location.href) ? location.href = wxUri : (() => {
                             axios.post('admin_wechat_login', qs.stringify({
                                 code: this.getQueryString("code")
@@ -140,9 +145,7 @@ window.onload = function (params) {
                                         return false;
                                     }
                                     vant.Toast(params.data.msg);
-                                    // https://www.zgksx.com/por/admin/login.htm
-                                    // /未绑定/g.test(params.data.msg) ? location.href = `http://192.168.0.168:8080/cafeadmin/src/dist/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
-                                    /未绑定/g.test(params.data.msg) ? location.href = `https://www.zgksx.com/por/admin/login.htm?outch_wx=${ location.href.split('?')[0] }` : null;
+                                    /未绑定/g.test(params.data.msg) ? location.href = `${pathAuthor}?outch_wx=${ location.href }` : null;
                                 }
                             }).catch((error) => {
                                 vant.Toast('发生错误'+ JSON.stringify(error))

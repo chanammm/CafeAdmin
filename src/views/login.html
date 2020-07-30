@@ -11,7 +11,7 @@
 	<script src="//at.alicdn.com/t/font_1049864_8hiytz865e6.js"></script>
 	<script src="../public/javascripts/plugin/vue.js"></script>
 	<script src="../public/javascripts/plugin/element.min.js"></script>
-	<title>咖速修管理平台——登录</title>
+	<title>统一登陆平台</title>
     <link rel="icon" href="../dist/images/icon.ico" type="image/x-icon" />
 </head>
 
@@ -21,15 +21,14 @@
 			<div class="login" v-loading.fullscreen.lock="loading">
 				<!-- Login -->
 				<form class="login-form" id="box-login" autocomplete="off">
-					<h2>欢迎使用咖速修管理平台</h2>
+					<h2></h2>
 					<div class="login-input">
 						<em>
 							<svg class="icon icon_user" aria-hidden="true">
 								<use xlink:href="#ym-icon-user"></use>
 							</svg>
 						</em>
-						<el-input v-model="user.name" id="user" placeholder="请输入用户名">
-						</el-input>
+						<el-input v-model="user.name" id="user" placeholder="请输入用户名"></el-input>
 					</div>
 					<div class="login-input login-pwd">
 						<em>
@@ -55,6 +54,13 @@
 			</div>
 		</template>
 	</div>
+	
+		
+	<style>
+		.el-input__inner{
+			border-radius: 0 !important;
+		}
+	</style>
 
 </body>
 

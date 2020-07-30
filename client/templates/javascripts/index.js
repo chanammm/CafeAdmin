@@ -4,7 +4,13 @@ import './router';
 import axios from 'axios';
 import qs from 'qs';
 
-const URLs = `https://admin.api.zgksx.com/`;
+const URLs = `http://192.168.0.104:8080/`;
+const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
+const toPath = "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
+// const URLs = `https://admin.api.zgksx.com/`;
+// const pathLogin = "https://www.zgksx.com/por/admin/";
+// const toPath = "http://zgksx.com/por/dz/index.html";
+
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
                 ${ process.env.NODE_ENV == "development" ? "http://zgksx.com/por/anchor/" : location.href.split('?')[0]}
@@ -16,7 +22,7 @@ axios.defaults.baseURL = URLs;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8';
 axios.defaults.crossDomain = true;
 // axios.defaults.withCredentials = true;  //设置cross跨域 并设置访问权限 允许跨域携带cookie信息
-axios.defaults.headers.common['Authorization'] = localStorage.getItem('secret') || ''; // 设置请求头为 Authorization
+axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : ''; // 设置请求头为 Authorization
 //配置发送请求前的拦截器 可以设置token信息 
 axios.interceptors.request.use(
     config => {
@@ -34,8 +40,8 @@ axios.interceptors.response.use(
         if (response.status === 200) {
             setTimeout(() => {
                 if (/未登录/.test(response.data.msg)) {
-                    localStorage.clear();
-                    location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html');
+                    // location.href = location.href.replace(location.href.substring(location.href.lastIndexOf('/')), '/index.html');
+                    location.href = `${pathLogin}login.htm?outch_wx=${toPath}`;
                 };
             }, 1000)
             return Promise.resolve(response);
@@ -153,7 +159,7 @@ window.onload = function (params) {
                     minDate: new Date(2020, 0, 1),
                     maxDate: new Date(2030, 10, 1),
                     currentDate: new Date(),
-                    timeMsg: false,
+                    timeMsg: false
                 },
                 created: function () {
                     this.loadingShow = true;
@@ -217,9 +223,9 @@ window.onload = function (params) {
                                         this.shopName = params.data.data.shopName;
                                         this.contactName = params.data.data.contactName;
                                         this.contactPhone = params.data.data.contactPhone;
-                                        this.projects = JSON.parse(params.data.data.facilityName);
-                                        this.visitingTime = params.data.data.visitingTime;
-                                        this.faultContent = params.data.data.faultContent;
+                                        this.projects = params.data.data.facilityName != -1 ? JSON.parse(params.data.data.facilityName): [];
+                                        // this.visitingTime = params.data.data.visitingTime;
+                                        // this.faultContent = params.data.data.faultContent;
                                          params.data.data.video != -1 ? this.video = params.data.data.video : null;
                                     } else {
                                         vant.Toast('获取上一订单数据失败');
@@ -287,7 +293,7 @@ window.onload = function (params) {
                                 })
                                 this.workList = params.data.data;
                             } else {
-                                vant.Toast('获取数据异常！请重试');
+                                // vant.Toast('获取数据异常！请重试');
                                 setTimeout(() => {
                                     location.href = './order.html';
                                 }, 500)
@@ -304,7 +310,7 @@ window.onload = function (params) {
                                 this.logs = [];
                                 this.logs = params.data.list;
                             } else {
-                                vant.Toast('获取数据异常！请重试')
+                                // vant.Toast('获取数据异常！请重试');
                                 setTimeout(() => {
                                     location.href = './order.html';
                                 }, 500)
@@ -313,12 +319,15 @@ window.onload = function (params) {
                     } else {
                         setTimeout(() => { this.show = false; }, 1200);
                         this.containers();
-                        if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;
-                        localStorage.getItem('secret') ? (() => {
+                        if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') return false;  // 不是微信浏览器的情况下
+                        sessionStorage.getItem('token') ? (() => {
                             // 0 未绑定 1 已绑定
-                            if (/hasBind/g.test(localStorage.getItem('secret'))) {
-                                if (JSON.parse(localStorage.getItem('secret')).hasBind < 1) return false;
-                                localStorage.setItem('secret', JSON.parse(localStorage.getItem('secret')).loginResult.secret);
+                            if (sessionStorage.getItem('wechatId')) {
+                                this.onSubmit({
+                                    account: this.decrypt(JSON.parse(sessionStorage.getItem('author')).au),
+                                    password: this.decrypt(JSON.parse(sessionStorage.getItem('author')).as)
+                                });
+                                return false;
                             }
                             location.href = `./content.html`;
                         })() : !/code/g.test(location.href) ? location.href = wxUri : (() => {
@@ -328,10 +337,12 @@ window.onload = function (params) {
                                 .then(params => {
                                     if (params.data.state == 200) {
                                         if (params.data.data.hasBind < 1) {
-                                            localStorage.setItem('secret', JSON.stringify(params.data.data));
+                                            sessionStorage.setItem('wechatId', params.data.data.wechatResult.wechatId);
+                                            location.href = `${pathLogin}login.htm?outch_wx=${toPath}`;   // 调用统一登陆页面
                                             return false;
                                         }
-                                        localStorage.setItem('secret', params.data.data.loginResult.secret);
+                                        params.data.data['secret'] = params.data.data.loginResult.secret;  // 提取层级
+                                        sessionStorage.setItem('token', JSON.stringify({asset: params.data.data}));
                                         location.href = `./content.html`;
                                     } else {
                                         if (/code/.test(params.data.msg)) {
@@ -340,7 +351,7 @@ window.onload = function (params) {
                                         }
                                         vant.Toast(params.data.msg);
                                         setTimeout(() => {
-                                            /未绑定/g.test(params.data.msg) ? location.href = `./index.htm?outch_wx=${location.href.split('?')[0]}` : null;
+                                            location.href = `${pathLogin}login.htm?outch_wx=${toPath}`;
                                         }, 1000);
                                     }
                                 }).catch((error) => {
@@ -351,6 +362,14 @@ window.onload = function (params) {
                     }
                 },
                 methods: {
+                    decrypt: function (_e) {  // 解密字符串
+                        _e = unescape(_e);
+                        var c = String.fromCharCode(_e.charCodeAt(0) - _e.length);
+                        for (var i = 1; i < _e.length; i++) {
+                            c += String.fromCharCode(_e.charCodeAt(i) - c.charCodeAt(i - 1));
+                        }
+                        return c;
+                    },
                     containers() {
                         setTimeout(() => {
                             document.querySelector('.container').style.display = 'block';
@@ -423,29 +442,25 @@ window.onload = function (params) {
                      * path : index
                      * tag: wx/pwd login
                      * **/
-                    onSubmit(values) {
+                    onSubmit(params, bool) {
                         this.handling = true;
-                        let wechatIds = "";
-                        if (localStorage.getItem('secret')) {
-                            try {
-                                if (JSON.parse(localStorage.getItem('secret')).wechatResult) wechatIds = JSON.parse(localStorage.getItem('secret')).wechatResult.wechatId;
-                            } catch (error) {
-                                console.info(error);
-                            }
-
-                        }
                         axios.post('admin_account_login', qs.stringify({
-                            account: values.user,
-                            password: values.pass,
-                            wechatId: wechatIds,
+                            account: params.account,
+                            password: params.password,
+                            wechatId: sessionStorage.getItem('wechatId') || "",
                         }))
-                            .then(params => {
+                            .then(res => {
                                 this.handling = false;
-                                if (params.data.state == 200) {
-                                    localStorage.setItem('secret', params.data.data.secret);
+                                sessionStorage.removeItem('token');
+                                if (res.data.state == 200) {
+                                    sessionStorage.setItem('token', JSON.stringify({asset: res.data.data}));
                                     location.href = './content.html';
                                 } else {
-                                    vant.Toast(params.data.msg)
+                                    sessionStorage.removeItem('wechatId');
+                                    !bool ? this.onSubmit(params, true) : null;  // 重启请求
+                                    setTimeout(() => {
+                                        vant.Toast(res.data.msg)
+                                    },1000)
                                 };
                             });
                     },

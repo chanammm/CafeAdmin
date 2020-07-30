@@ -69,3 +69,10 @@ body input {
   margin: 0;
   padding: 0;
 }
+
+.container .van-cell-group .logs {
+  display: inline-block;
+  width: 100%;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}

@@ -1774,7 +1774,8 @@ window.addEventListener('pageshow', function (params) {
                     this.DataVisible = {
                         options: [],
                         workId: params.workId,
-                        status: params.status
+                        status: params.status,
+                        repairsTypeId: ""
                     };
                     // 2020-07-07  增加1.1.0 增加可以切换通过沟通后修改报修类型
                     if(params.status > 1) return;

@@ -68,5 +68,11 @@ body{
                 padding: 0;
             }
         }
+        .logs{
+            display: inline-block;
+            width: $width;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
     }
 }
