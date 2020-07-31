@@ -278,7 +278,7 @@ window.addEventListener('pageshow', function (params) {
                                     xml.push(element);
                                 }
                             })
-                        } else {
+                        }else {
                             // if (uri == "sys_machine_offer_explain_list") {
                             //     // data.page.records[]
                             //     data.page.records.forEach((element, index) => {
@@ -286,6 +286,19 @@ window.addEventListener('pageshow', function (params) {
                             //     })
                             // }
                             data.page.total ? it.total = parseInt(data.page.total) : null;
+                            if (uri == 'sys_work_list'){
+                                data.page.records.forEach((element, index) => {
+                                    let factName = [];
+                                    try {
+                                        JSON.parse(element.facilityName).forEach((facility, index) => {
+                                            factName.push(facility.name);
+                                        })
+                                    } catch (error) {
+                                        factName.push(element.facilityName)
+                                    }
+                                    data.page.records[index]['facilityName'] = factName.toString().replace(/\[\]/g, '');
+                                })
+                            }
                             xml = data.page.records;
                         }
                     } else {
@@ -1769,16 +1782,17 @@ window.addEventListener('pageshow', function (params) {
              * 工单沟通
              * **/
             contactorder(params) {
-                if (!params.contactContent) {
+                if (!params.contactContent) {  // 打开详情窗口
                     this.adoptModule = true;
                     this.DataVisible = {
                         options: [],
                         workId: params.workId,
                         status: params.status,
+                        facilityName: params.facilityName,
                         repairsTypeId: ""
                     };
                     // 2020-07-07  增加1.1.0 增加可以切换通过沟通后修改报修类型
-                    if(params.status > 1) return;
+                    // if(params.status > 1) return;  // 2020-07-31 去除限制修改类型，每次提交日志都可以修改报修类型
                     this.search({ url: "sys_repairs_type_list" });
                     this.$nextTick(() => {
                         setTimeout(() => {
@@ -1792,6 +1806,7 @@ window.addEventListener('pageshow', function (params) {
                     params: {
                         workId: params.workId,
                         repairsTypeId: params.repairsTypeId,
+                        facilityName: params.facilityName,
                         contactContent: params.contactContent
                     }
                 }).then(res => {
@@ -1973,8 +1988,19 @@ window.addEventListener('pageshow', function (params) {
                                     __arr__.push(record);
                                 })
                                 res.data.data['logs'] = __arr__;
+
+                                // 2020-07-31 更新设备详情
+                                let factName = [];
+                                try {
+                                    JSON.parse(res.data.data.facilityName).forEach((facility, index) => {
+                                        factName.push(facility.name);
+                                    })
+                                } catch (error) {
+                                    factName.push(res.data.data.facilityName)
+                                }
+                                res.data.data['facilityName'] = factName.toString().replace(/\[\]/g, '');
+                                
                                 this.formData = res.data.data;
-                                console.log(this.formData)
                             } else {
                                 is.IError(process.data.msg);
                             }
@@ -2241,6 +2267,17 @@ window.addEventListener('pageshow', function (params) {
                                         }, 500)
                                     }, 400)
                                 }, 300)
+
+                                // 2020-07-31 更新设备详情
+                                let factName = [];
+                                try {
+                                    JSON.parse(obj.facilityName).forEach((facility, index) => {
+                                        factName.push(facility.name);
+                                    })
+                                } catch (error) {
+                                    factName.push(obj.facilityName)
+                                }
+                                obj['facilityName'] = factName.toString().replace(/\[\]/g, '');
 
                                 this.forEnits = obj;
                             })

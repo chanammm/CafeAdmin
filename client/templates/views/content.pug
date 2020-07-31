@@ -68,7 +68,7 @@ html(lang="en")
               .file(v-if="!video")
                 van-uploader(v-model="fileList" accept="video/*" multiple :after-read="updataVideo" :max-count="1" :max-size="50 * 1024 * 1024" @oversize="onOversize")
               .video_file(v-if="video")
-                video(:src="videoFile" controls="controls" width="100" height="100px")
+                video(:src="videoFile" controls="controls" width="200" height="200")
                 van-tag(type="danger" size="medium" class="video_file_tag" @click="video = false; videoFile = ''; fileList = []") 删除视频
 
             //- li

@@ -213,6 +213,10 @@
                             </div>
                         </el-form-item>
 
+                        <el-form-item label="视频：" prop="video">
+                            <video :src="formData.video" style="width: 200px; height: 200px;" controls="controls"></video>
+                        </el-form-item>
+
 
                         <div>门店信息：</div>
                         <div style="border-bottom: 1px solid #ccc; width: 100%;margin-top: 3px;"></div>
@@ -447,10 +451,10 @@
                         <el-form-item label="沟通内容" prop="contactContent">
                             <el-input type="textarea" v-model="DataVisible.contactContent"></el-input>
                         </el-form-item>
-                        <el-form-item label="机器设备名(选填)" prop="facilityName">
+                        <el-form-item label="设备名(多设备','分隔)" prop="facilityName">
                             <el-input v-model="DataVisible.facilityName"></el-input>
                         </el-form-item>
-                        <el-form-item label="更改报修类型(选填)" prop="repairsTypeId" v-if="DataVisible.status < 2">
+                        <el-form-item label="更改报修类型(选填)" prop="repairsTypeId">
                             <div style="font-size: 10px; color: #ccc;">*请先填写沟通内容</div>
                             <el-select v-model="DataVisible.repairsTypeId" placeholder="请选择">
                                 <el-option

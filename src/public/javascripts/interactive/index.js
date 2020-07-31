@@ -87,11 +87,11 @@ new Vue({
             if (tag[i].lowers) {
                 tag[i].lowers.forEach((element, index) => {
                     if (process.env.NODE_ENV == "development") {
-                        _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:iforx${parseInt(13 * num / 2)}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
+                        _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:${sessionStorage.getItem('dataTime')}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
                             </el-menu-item>`;
                     } else {
                         element.requestUri = `/por/admin/views/${element.requestUri.substring(element.requestUri.lastIndexOf('/') + 1).split('.')[0]}`;
-                        _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:iforx${parseInt(13 * num / 2)}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
+                        _tag += `<el-menu-item v-on:click=Href({'uri':'${element.requestUri}.html?hash:${sessionStorage.getItem('dataTime')}','title':'${element.permissionName}'}) index="${i + '-' + index}">${element.permissionName}
                             </el-menu-item>`;
                     }
                 })
@@ -312,6 +312,25 @@ new Vue({
                 .catch(function (error) {
                     is.IError(error);
                 })
+        },
+        
+        // 缓存清除
+        updataSession(){
+            this.$confirm('此操作将清除缓存并且需要重新登陆, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+              }).then(() => {
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+                this.$message({
+                  type: 'success',
+                  message: '清除成功，请重新登陆！'
+                });
+                setTimeout(function () {
+                    location.href = '../../login.htm?hash:err(o012)';
+                }, 500)
+              });
         }
 
 

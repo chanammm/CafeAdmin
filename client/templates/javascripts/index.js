@@ -4,12 +4,12 @@ import './router';
 import axios from 'axios';
 import qs from 'qs';
 
-const URLs = `http://192.168.0.104:8080/`;
-const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
-const toPath = "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
-// const URLs = `https://admin.api.zgksx.com/`;
-// const pathLogin = "https://www.zgksx.com/por/admin/";
-// const toPath = "http://zgksx.com/por/dz/index.html";
+// const URLs = `http://192.168.0.104:8080/`;
+// const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
+// const toPath = "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
+const URLs = `https://admin.api.zgksx.com/`;
+const pathLogin = "http://zgksx.com/por/admin/";
+const toPath = "http://zgksx.com/por/dz/index.html";
 
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
@@ -405,6 +405,10 @@ window.onload = function (params) {
                     },
 
                     submit() {
+                        if(!this.faultContent || !this.machine.machineId || !this.machine.repairsTypeId ||!this.shopName|| !this.contactPhone||!this.contactName){
+                            vant.Toast('请填写完整信息')
+                            return false;
+                        }
                         this.handling = true;
                         axios.post('wechat_commit_work', qs.stringify({
                             machineId: this.machine.machineId,
@@ -415,7 +419,7 @@ window.onload = function (params) {
                             faultContent: this.faultContent,
                             parentId: this.getQueryString('workId') || "", 
                             video: this.videoFile || -1, // 视频文件
-                            visitingTime: this.visitingTime || -1,// 预计上门时间
+                            visitingTime: this.visitingTime || null,// 预计上门时间
                             facilityName: JSON.stringify(this.projects) || -1// 产品名称
                         }))
                             .then(params => {

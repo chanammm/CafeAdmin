@@ -3,8 +3,9 @@ import '../stylesheets/style.min.css';
 import './router';
 import axios from 'axios';
 import qs from 'qs';
-// const pathAuthor = "https://www.zgksx.com/por/admin/login.htm";
-const pathAuthor = "http://192.168.0.168:8080/cafeadmin/src/dist/login.htm";
+const pathAuthor = "http://zgksx.com/por/admin/login.htm";
+const toPath = "http://zgksx.com/por/anchor/bet/index.html";
+
 const URLs = `https://admin.api.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
                 ${ process.env.NODE_ENV == "development" ? "http://zgksx.com/por/anchor/" : location.href.split('?')[0]}
@@ -125,7 +126,7 @@ window.onload = function (params) {
                     }
                     setTimeout(() => {
                         if (!sessionStorage.getItem('token') && window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger') {
-                            location.href = `${pathAuthor}?outch_wx=${ location.href }`;
+                            location.href = `${pathAuthor}?outch_wx=${ toPath }`;
                             return false;
                         };  // 不是微信浏览器的情况下
                         sessionStorage.getItem('token') ? this.orderDirection() :!/code/g.test(location.href) ? location.href = wxUri : (() => {
@@ -145,7 +146,7 @@ window.onload = function (params) {
                                         return false;
                                     }
                                     vant.Toast(params.data.msg);
-                                    /未绑定/g.test(params.data.msg) ? location.href = `${pathAuthor}?outch_wx=${ location.href }` : null;
+                                    /未绑定/g.test(params.data.msg) ? location.href = `${pathAuthor}?outch_wx=${ toPath }` : null;
                                 }
                             }).catch((error) => {
                                 vant.Toast('发生错误'+ JSON.stringify(error))

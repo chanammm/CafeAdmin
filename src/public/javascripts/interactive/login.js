@@ -69,6 +69,7 @@ new Vue({
                             }
                             sessionStorage.setItem('_a', JSON.stringify({ _u: ':hash(iox*)', _i: user.value }))  //管理员信息
                             sessionStorage.setItem('tag', JSON.stringify(params.data.data.pagePermissions));
+                            sessionStorage.setItem('dataTime', new Date().getTime()); // 暂存的链接随机数
                             setTimeout(() => {
                                 location.href = "./views/common/index.htm?hash:" + ym.init.GETRANDOM(8);
                             }, 500);
