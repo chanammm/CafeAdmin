@@ -213,7 +213,21 @@
                             </div>
                         </el-form-item>
 
-                        <el-form-item label="视频：" prop="video">
+                        <el-form-item label="图片" prop="faultDiagram">
+                            <div v-for="(item,i) in formData.faultDiagram">
+                                <el-image :src="item" :preview-src-list="formData.srcList"
+                                    style="width: 50px; height: 50px; float: left;" lazy>
+                                    <div slot="placeholder" class="image-slot">
+                                        加载中<span class="dot">...</span>
+                                    </div>
+                                    <div slot="error">
+                                        <img style="width:40px" src="http://zgksx.com/images/error_image.png" />
+                                    </div>
+                                </el-image>
+                            </div>
+                        </el-form-item>
+
+                        <el-form-item v-if="formData.video != -1" label="视频：" prop="video">
                             <video :src="formData.video" style="width: 200px; height: 200px;" controls="controls"></video>
                         </el-form-item>
 

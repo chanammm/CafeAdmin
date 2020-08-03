@@ -214,7 +214,7 @@ window.onload = function (params) {
                                         }
                                     })
                                         this.workList = params.data.data;
-                                    params.data.data.status == 1 ? this.submitName = '工单沟通' : params.data.data.status == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
+                                    params.data.data.anchor == 1 ? this.submitName = '工单沟通' : params.data.data.anchor == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
 
                                     // 2020-07-29 更新 追加日志
                                     axios.get('work_log_list?workId=' + this.workList.workId).then(params => {

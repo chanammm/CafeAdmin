@@ -1,15 +1,22 @@
 "use strict";
 import '../stylesheets/style.min.css';
-import './router';
+// import './router';
 import axios from 'axios';
 import qs from 'qs';
+import '@vant/touch-emulator';
+import areaList from './area';
 
-// const URLs = `http://192.168.0.104:8080/`;
-// const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
-// const toPath = "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
 const URLs = `https://admin.api.zgksx.com/`;
+
+// const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
+// const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
+// ? location.href 
+// : "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
+
 const pathLogin = "http://zgksx.com/por/admin/";
-const toPath = "http://zgksx.com/por/dz/index.html";
+const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
+? location.href 
+: "http://zgksx.com/por/dz/index.html";
 
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
@@ -69,7 +76,7 @@ if (!Object.values) Object.values = function (obj) {  //对于 object values 的
 window.onload = function (params) {
     setTimeout(() => {
         try {
-            new Vue({
+             new Vue({
                 el: '#app',
                 data: {
                     active: /order/.test(location.href) ? 1 : /user/.test(location.href) ? 2 : 0,
@@ -86,11 +93,6 @@ window.onload = function (params) {
                     tag: 0,
                     num: 1,
                     machineList: [],
-                    shopName: '',
-                    contactName: '',
-                    contactPhone: '',
-                    faultContent: '',
-                    visitingTime: '',
                     machine: {
                         machineName: '选择服务'
                     },
@@ -159,14 +161,23 @@ window.onload = function (params) {
                     minDate: new Date(2020, 0, 1),
                     maxDate: new Date(2030, 10, 1),
                     currentDate: new Date(),
-                    timeMsg: false
+                    timeMsg: false,
+                    areaList,
+                    addressMsg: false,
+                    formData:{
+                        shopName: '',
+                        contactName: '',
+                        contactPhone: '',
+                        citys: '',
+                        address: ''
+                    }
                 },
                 created: function () {
                     this.loadingShow = true;
                     let _arr_ = [];
                     if (/content/.test(location.href)) {
                         this.containers();
-                        this.thisPosition();
+                        // this.thisPosition();
                         axios.get('wechat_machine_list')  //查看设备列表
                             .then(params => {
                                 setTimeout(() => {
@@ -220,13 +231,66 @@ window.onload = function (params) {
                                             repairsTypeId: params.data.data.repairsTypeId,
                                             machineName: params.data.data.machineName + '>' + params.data.data.repairsTypeName
                                         };
-                                        this.shopName = params.data.data.shopName;
-                                        this.contactName = params.data.data.contactName;
-                                        this.contactPhone = params.data.data.contactPhone;
-                                        this.projects = params.data.data.facilityName != -1 ? JSON.parse(params.data.data.facilityName): [];
-                                        // this.visitingTime = params.data.data.visitingTime;
-                                        // this.faultContent = params.data.data.faultContent;
-                                         params.data.data.video != -1 ? this.video = params.data.data.video : null;
+                                        this.formData.shopName = params.data.data.shopName;
+                                        this.formData.contactName = params.data.data.contactName;
+                                        this.formData.contactPhone = params.data.data.contactPhone;
+                                        try {
+                                            JSON.parse(params.data.data.facilityName).forEach(element => {  //处理还未更改过的产品依然是JSON数组状态
+                                                this.projects.push({
+                                                    name: element
+                                                })
+                                            })
+                                        } catch (error) {
+                                            if(params.data.data.facilityName != -1){  //存在修改过的产品
+                                                params.data.data.facilityName.split(',').forEach(element => {
+                                                    this.projects.push({
+                                                        name: element
+                                                    })
+                                                })
+                                            }else{
+                                                this.projects = [];
+                                            }
+                                        }
+                                        this.formData.citys = params.data.data.province && params.data.data.province != -1? params.data.data.province+','+params.data.data.city+','+params.data.data.district:'';
+                                        this.formData.address = params.data.data.address != -1 ? params.data.data.address: '';
+
+                                        try {
+                                            if(params.data.data.faultDiagram != -1){
+                                                params.data.data.faultDiagram.split(',').forEach(element =>{
+                                                    this.fileList.push({
+                                                        url: element
+                                                    });
+                                                    this.fileImages.push({ url: element, isImage: { key: "faultDiagram", localName: element } });
+                                                })
+                                            }
+                                            
+                                            // params.data.data.machineBrandPic.split(',').forEach(element =>{
+                                            //     this.fileList.push({
+                                            //         url: element
+                                            //     });
+                                            //     this.fileImages.push({ url: element, isImage: { key: "machineBrandPic", localName: element } });
+                                            // })
+                                            params.data.data.machineOverallPic.split(',').forEach(element =>{
+                                                this.fileLists.push({
+                                                    url: element
+                                                })
+                                                this.fileImages.push({ url: element, isImage: { key: "machineOverallPic", localName: element } });
+                                            })
+                                            params.data.data.faultPartPic.split(',').forEach(element =>{
+                                                this.fileListss.push({
+                                                    url: element
+                                                })
+                                                this.fileImages.push({ url: element, isImage: { key: "faultPartPic", localName: element } });
+                                            })
+                                        } catch (error) {
+                                            //
+                                        }
+                                        // // this.visitingTime = params.data.data.visitingTime;
+                                        // // this.faultContent = params.data.data.faultContent;
+                                         if(params.data.data.video != -1){
+                                            this.videoFile = params.data.data.video;
+                                            this.video = true;
+                                         };
                                     } else {
                                         vant.Toast('获取上一订单数据失败');
                                     }
@@ -362,6 +426,20 @@ window.onload = function (params) {
                     }
                 },
                 methods: {
+                    formatter(type, val) {  // 时间组件过滤器
+                        if(type === 'year'){
+                            return `${val}年`
+                        }else if (type === 'month') {
+                            return `${val}月`;
+                        } else if (type === 'day') {
+                            return `${val}日`;
+                        }else if (type === 'hour'){
+                            return `${val}时`
+                        }else if(type === 'minute'){
+                            return `${val}分`
+                        }
+                        return val;
+                    },
                     decrypt: function (_e) {  // 解密字符串
                         _e = unescape(_e);
                         var c = String.fromCharCode(_e.charCodeAt(0) - _e.length);
@@ -385,7 +463,9 @@ window.onload = function (params) {
                                     document.querySelector('.van-tabbar').style.position = 'absolute';
                                 })
                                 // 2020-07-28
-                                this.bottomFooter = `bottom: -${(document.querySelector(".center").offsetHeight - window.innerHeight) / 2}px`
+                                document.querySelector(".center") ?
+                                this.bottomFooter = `top: ${document.querySelector(".center").offsetHeight + document.querySelector('.my-swipe').offsetHeight + 100}px`
+                                : null;
                             }, 1100)
                         }
                     },
@@ -405,22 +485,38 @@ window.onload = function (params) {
                     },
 
                     submit() {
-                        if(!this.faultContent || !this.machine.machineId || !this.machine.repairsTypeId ||!this.shopName|| !this.contactPhone||!this.contactName){
+                        if(!this.machine.machineId || !this.machine.repairsTypeId ||!this.formData.shopName|| !this.formData.contactPhone||!this.formData.contactName){
                             vant.Toast('请填写完整信息')
                             return false;
                         }
                         this.handling = true;
+                        let pic = {
+                            machineBrandPic: [],
+                            machineOverallPic: [],
+                            faultPartPic: [],
+                            faultDiagram: []
+                        }
+                        if(this.fileImages.length > 0){
+                            this.fileImages.forEach(item => {
+                                pic[item.isImage.key].push(item.url);
+                            })
+                        }
                         axios.post('wechat_commit_work', qs.stringify({
                             machineId: this.machine.machineId,
                             repairsTypeId: this.machine.repairsTypeId,
-                            shopName: this.shopName,
-                            contactName: this.contactName,
-                            contactPhone: this.contactPhone,
-                            faultContent: this.faultContent,
+                            shopName: this.formData.shopName,
+                            contactName: this.formData.contactName,
+                            contactPhone: this.formData.contactPhone,
+                            faultContent: this.formData.faultContent || -1,
                             parentId: this.getQueryString('workId') || "", 
                             video: this.videoFile || -1, // 视频文件
-                            visitingTime: this.visitingTime || null,// 预计上门时间
-                            facilityName: JSON.stringify(this.projects) || -1// 产品名称
+                            visitingTime: this.formData.visitingTime || null,// 预计上门时间
+                            facilityName: JSON.stringify(this.projects) || -1,// 产品名称
+                            faultDiagram: pic.faultDiagram.toString(),
+                            province: this.formData.citys ? this.formData.citys.split(',')[0]: -1,
+                            district: this.formData.citys ? this.formData.citys.split(',')[2]: -1,
+                            city: this.formData.citys ? this.formData.citys.split(',')[1]: -1,
+                            address: this.formData.address|| -1,
                         }))
                             .then(params => {
                                 setTimeout(() => {
@@ -568,6 +664,19 @@ window.onload = function (params) {
                         vant.Toast('文件大小不能超过 50M');
                     },
 
+                    // 2020-8-3 追加地址
+                    region(params){
+                        this.addressMsg = !this.addressMsg;
+                        if(params){  // 提交地址
+                            this.formData['citys'] = [];
+                            params.forEach((element, index) => {
+                                this.formData.citys.push(element.name);
+                            })
+                            this.formData.citys = this.formData.citys.toString().replace(/\[\]/g, '');
+                            return false;
+                        }
+                    },
+
                     // 一下为 2020-07-27 启用视频上传
                     updataVideo(file) {
                         file.status = 'uploading';
@@ -616,7 +725,7 @@ window.onload = function (params) {
                         this.timeMsg = true;
                     },
                     submitTime(params){
-                        this.visitingTime = this.getDateTime(params);
+                        this.formData.visitingTime = this.getDateTime(params);
                         this.timeMsg = false;
                     },
                     getDateTime(data) {
@@ -633,7 +742,7 @@ window.onload = function (params) {
                     addProduct(){
                         this.projects.push({name: '', _id: new Date().getTime()});
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
-                            this.bottomFooter = `bottom: -${document.querySelector(".center").offsetHeight - window.innerHeight}px`
+                            // this.bottomFooter = `bottom: -${document.querySelector(".center").offsetHeight - window.innerHeight}px`
                         }
                     },
 
@@ -645,11 +754,11 @@ window.onload = function (params) {
                             }
                         })
                         if (!/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
-                            this.bottomFooter = `bottom: -${(this.projects.length + 1)* 85}px`
+                            // this.bottomFooter = `bottom: -${(this.projects.length + 1)* 85}px`
                         }
                     },
                     
-                    // 一下为 2020-07-27 取消图片上传方法
+                    // 一下为 2020-07-27 取消图片上传方法  2020-8-3 恢复图片上传
                     updataFile(params) {
                         return file => {
                             file.status = 'uploading';
@@ -763,8 +872,14 @@ window.onload = function (params) {
                         return file => {
                             let _arr_ = [];
                             this.fileImages.forEach(element => {
-                                if (file.file.name != element.isImage.localName) {
-                                    _arr_.push(element)
+                                try {
+                                    if (file.file.name != element.isImage.localName) {
+                                        _arr_.push(element)
+                                    }
+                                } catch (error) {
+                                    if (file.url != element.url) {
+                                        _arr_.push(element)
+                                    }
                                 }
                             })
                             this.fileImages = _arr_;

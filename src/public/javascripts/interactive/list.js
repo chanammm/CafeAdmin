@@ -1964,6 +1964,14 @@ window.addEventListener('pageshow', function (params) {
                         } else {
                             res.data.data.machineOverallPic = '无';
                         }
+                        if (res.data.data.faultDiagram != -1) {
+                            res.data.data.faultDiagram = res.data.data.faultDiagram.split(',')
+                            let __arr__3 = res.data.data.faultDiagram;
+                            __arr__ = combine(__arr__, __arr__3);
+                            console.log(__arr__3)
+                        } else {
+                            res.data.data.faultDiagram = '无';
+                        }
                         res.data.data['srcList'] = __arr__;
 
                         // 查询工单日志

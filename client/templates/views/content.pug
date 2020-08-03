@@ -9,6 +9,8 @@ html(lang="en")
   meta(http-equiv="Cache" content="no-cache") 
   head
     title 咖速修
+    script(src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/vant@2.8/lib/vant.min.js")
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
     style(lang = "scss").
       .van-loading{
@@ -17,7 +19,7 @@ html(lang="en")
       .van-uploader__mask-message{
           font-size: 12px !important;
       }
-  body(style="height: 130%;")
+  body
     .container#app
       van-overlay(:show="loadingShow")
         van-loading(size="24px") 加载中...
@@ -36,17 +38,20 @@ html(lang="en")
             .hr
             .title_name 客户信息
             li
-              span 客户名称：
-              van-field(v-model="shopName")
+              span 门店名称：
+              van-field(v-model="formData.shopName")
             li
               span 联系人：
-              van-field(v-model="contactName")
+              van-field(v-model="formData.contactName")
             li
               span 联系电话：
-              van-field(v-model="contactPhone" type="tel")
-            //- li
-            //-   span 联系地址：
-            //-   van-field
+              van-field(v-model="formData.contactPhone" type="tel")
+            li
+              span 地区：
+              van-field(style="height: 45px;width: 100%" v-model="formData.citys" @click="region()" readonly )
+            li
+              span 详细地址：
+              van-field(v-model="formData.address")
             .hr
             .title_name 产品明细（半自动或奶泡机需填写编号）
             li(v-for="(item, index) in projects" v-bind:keys="index")
@@ -58,19 +63,22 @@ html(lang="en")
               | 添加产品
             li
               span 期望上门时间：
-              van-field(v-model="visitingTime" @click="vistingTimeFn")
+              van-field(v-model="formData.visitingTime" @click="vistingTimeFn")
             li
               span 上门备注：
-              textarea(placeholder="请填写备注信息" v-model="faultContent")
+              textarea(placeholder="请填写备注信息" v-model="formData.faultContent")
             .hr
             .title_name 上传视频：
             li
               .file(v-if="!video")
-                van-uploader(v-model="fileList" accept="video/*" multiple :after-read="updataVideo" :max-count="1" :max-size="50 * 1024 * 1024" @oversize="onOversize")
+                van-uploader(accept="video/*" multiple :after-read="updataVideo" :max-count="1" :max-size="50 * 1024 * 1024" @oversize="onOversize")
               .video_file(v-if="video")
                 video(:src="videoFile" controls="controls" width="200" height="200")
-                van-tag(type="danger" size="medium" class="video_file_tag" @click="video = false; videoFile = ''; fileList = []") 删除视频
-
+                van-tag(type="danger" size="medium" class="video_file_tag" @click="video = false; videoFile = '';") 删除视频
+            li
+              span 图片
+              .file
+                van-uploader(v-model="fileList" multiple :after-read="updataFile('faultDiagram')" :before-delete="deleteFn('fileList')")
             //- li
             //-   span 机器铭牌图
             //-   .file
@@ -82,7 +90,7 @@ html(lang="en")
             //- li
             //-   span 问题部位图
             //-   .file
-            //-     van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
+                van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
             //- van-action-sheet(v-model="contentMsg" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action)
           van-button(round type="info" size="normal" @click="submit" :loading="handling ? true : false" ) 提交
         van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
@@ -93,8 +101,11 @@ html(lang="en")
                 title="选择完整时间"
                 :min-date="minDate"
                 :max-date="maxDate"
-                @confirm="submitTime")
-        
+                @confirm="submitTime"
+                :formatter="formatter")
+        van-popup(v-model="addressMsg" position="bottom" :style="{ height: '40%' }")
+          van-area(title="地区选择" :area-list="areaList" @confirm="region")
+
         van-tabbar(v-model="active" @change="ourHref" :style="bottomFooter")
             van-tabbar-item(icon="comment-o") 填写信息
             van-tabbar-item(icon="todo-list-o") 我的工单

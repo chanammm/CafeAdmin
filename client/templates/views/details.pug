@@ -9,6 +9,8 @@ html(lang="en")
   meta(http-equiv="Cache" content="no-cache") 
   head
     title 咖速修
+    script(src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/vant@2.8/lib/vant.min.js")
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css")
   body
     .container#app
@@ -28,17 +30,21 @@ html(lang="en")
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
           van-cell(title="产品名称" :value="workList.facilityName")
-          van-cell(title="故障描述" :value="workList.faultContent")
-          van-cell
+          van-cell(title="备注" :value="workList.faultContent")
+          van-cell(v-if="workList.video != '无'")
             template(#title)
               span(class="custom-title" style="font-weight: blod;") 视频附件
               video(:src="workList.video" controls="controls" width="200" height="200" style="display: block;")
+          van-cell(title="图片")
+            van-image(style="width: 100px;margin-top:2px;" :src="workList.faultDiagram")
+
 
           van-cell(class="cell_border")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 门店信息
           van-cell(title="门店名称" :value="workList.shopName")
+          van-cell(title="门店地址" :value="workList.province+'/'+workList.city+'/'+workList.district+'/'+workList.address")
 
           van-cell(class="cell_border")
             template(#title)
@@ -58,7 +64,7 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 订单信息
-          van-cell(:value="workList.parentId" v-if="workList.parentId != -1")
+          van-cell(:value="workList.parentId" v-if="workList.parentId != '无'")
             template(#title)
               span(class="custom-title") 父级工单号
               van-tag(mark type="success") 二
