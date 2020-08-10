@@ -34,6 +34,7 @@
                             placeholder="请选择">
                             <el-option label="工单号" value="workId"></el-option>
                             <el-option label="联系人名称" value="contactName"></el-option>
+                            <el-option label="联系人电话" value="contactPhone"></el-option>
                         </el-select>
                     </el-input>
 
@@ -51,6 +52,13 @@
                         <el-select v-model="listSearch.repairsTypeId" slot="prepend" placeholder="请选择">
                             <el-option v-for="(repairsTypeId, index) in listSearch.repairsTypeIds" :key="index" :label="repairsTypeId.repairsTypeName" :value="repairsTypeId.repairsTypeId"></el-option>
                         </el-select>
+                    </div>
+                    <div class="_search_centent" v-show="more">
+                        <el-button>时间区间</el-button>
+                        <el-date-picker v-model="listSearch.time" type="daterange" unlink-panels
+                            range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                            :picker-options="pickerOptions">
+                        </el-date-picker>
                     </div>
 
                     <div class="more_search el-icon-circle-plus-outline" v-show="!more" @click="more = !more">
@@ -323,7 +331,7 @@
                         <el-form-item label="状态日志" prop="logs">
                             <div style="height:300px; line-height:0 !important;overflow-y: scroll;">
                                 <el-steps direction="vertical" :active="1" >
-                                    <el-step icon="el-icon-success" v-for="(item, i) in formData.logs" :title="item.create" :description="item.logContent"></el-step>
+                                    <el-step icon="el-icon-success" v-for="(item, i) in formData.logs" v-bind:key="i" :title="item.create" :description="item.logContent"></el-step>
                                 </el-steps>
                               </div>
                         </el-form-item>

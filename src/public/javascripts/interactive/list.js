@@ -232,7 +232,6 @@ window.addEventListener('pageshow', function (params) {
                 this.list(this.pageparams ? this.pageparams : null, true);
             },
             list(params = {}, bool) {
-                console.log(params)
                 let _data_ = {}, it = this, xml = [];
                 if (params) {
                     it.pageparams = params; //保存搜索条件
@@ -247,7 +246,7 @@ window.addEventListener('pageshow', function (params) {
                  * * cancel_work_list  已取消工单
                  * **/
                 // 2020-07-13  工单增加搜索 报修类型
-                if(uri == 'sys_work_list'){  
+                if(uri == 'sys_work_list'){
                     axios.post('sys_repairs_type_list', qs.stringify({page: 1, pageSize: 20})).then(params => {
                         if (params.data.state == 200) {
                             this.$nextTick(function () {
@@ -255,6 +254,10 @@ window.addEventListener('pageshow', function (params) {
                             })
                         }
                     })
+                    if(params.time){  // 2020-8-10 工单更新追加 日期搜索
+                        params['start'] = ym.init.getDateTime(params.time[0]).split(' ')[0];
+                        params['end'] = ym.init.getDateTime(params.time[1]).split(' ')[0];
+                    }
                 }
 
                 it.loading = true;
@@ -262,7 +265,7 @@ window.addEventListener('pageshow', function (params) {
                     it.currentPage = 1;
                     return it.currentPage
                 })() : it.page;
-                params['pageSize'] = 20;
+                params['pageSize'] = this.pageSize;
                 _data_ = qs.stringify(params);
                 axios.post(uri, _data_).then(params => {
                     let data = params.data;
@@ -2202,6 +2205,7 @@ window.addEventListener('pageshow', function (params) {
                 ).then(res => {
                     if (res.data.state == 200) {
                         is.ISuccessfull(res.data.msg);
+                        this.errorExe = false;
                         parent.location.href = res.data.data.path;
                     } else {
                         is.IError(res.data.msg);

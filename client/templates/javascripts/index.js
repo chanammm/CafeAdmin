@@ -485,7 +485,7 @@ window.onload = function (params) {
                     },
 
                     submit() {
-                        if(!this.machine.machineId || !this.machine.repairsTypeId ||!this.formData.shopName|| !this.formData.contactPhone||!this.formData.contactName){
+                        if(!this.machine.machineId || !this.machine.repairsTypeId ||!this.formData.shopName){
                             vant.Toast('请填写完整信息')
                             return false;
                         }
@@ -505,14 +505,14 @@ window.onload = function (params) {
                             machineId: this.machine.machineId,
                             repairsTypeId: this.machine.repairsTypeId,
                             shopName: this.formData.shopName,
-                            contactName: this.formData.contactName,
-                            contactPhone: this.formData.contactPhone,
+                            contactName: this.formData.contactName || -1,
+                            contactPhone: this.formData.contactPhone || -1,
                             faultContent: this.formData.faultContent || -1,
-                            parentId: this.getQueryString('workId') || "", 
+                            parentId: this.getQueryString('workId') || -1, 
                             video: this.videoFile || -1, // 视频文件
                             visitingTime: this.formData.visitingTime || null,// 预计上门时间
                             facilityName: JSON.stringify(this.projects) || -1,// 产品名称
-                            faultDiagram: pic.faultDiagram.toString(),
+                            faultDiagram: pic.faultDiagram.toString() || -1,
                             province: this.formData.citys ? this.formData.citys.split(',')[0]: -1,
                             district: this.formData.citys ? this.formData.citys.split(',')[2]: -1,
                             city: this.formData.citys ? this.formData.citys.split(',')[1]: -1,
