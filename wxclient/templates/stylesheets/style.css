@@ -50,6 +50,7 @@ body input {
   padding: 10px;
   box-sizing: border-box;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.22);
+  z-index: 3;
 }
 
 .container .submit button {

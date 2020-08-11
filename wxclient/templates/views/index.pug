@@ -9,6 +9,8 @@ html(lang="en")
   meta(http-equiv="Cache" content="no-cache") 
   head
     title 咖速修
+    script(src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js")
+    script(src="https://cdn.jsdelivr.net/npm/vant@2.8/lib/vant.min.js")
     link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.8/lib/index.css") 
   body
     .container#app
@@ -44,6 +46,7 @@ html(lang="en")
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 门店信息
           van-cell(title="门店名称" :value="workList.shopName")
+          van-cell(title="门店地址" :value="workList.objAddress")
 
           van-cell(class="cell_border")
             template(#title)
@@ -84,7 +87,10 @@ html(lang="en")
                 p {{ item.logContent }}
                 p {{ item.createTime }}
         .submit(v-if="submitType")
-          van-button(round block type="info" native-type="submit" :loading="handling ? true : false" @click="submitView") {{ submitName }}
+          van-button(round block type="info" native-type="submit" :loading="handling ? true : false" @click="submitViews") 操作
+        
+        van-action-sheet(v-model="test" :actions="subTags" @select="submitView")
+
         van-action-sheet(v-model="contactShow" cancel-text="提交" @cancel="submit" description="填写沟通内容")
           van-field(v-model="message" rows="2" autosize  type="textarea" maxlength="200" placeholder="请输入沟通内容" show-word-limit) 
         van-action-sheet(v-model="matersShow" :actions="actions" @select="submit")

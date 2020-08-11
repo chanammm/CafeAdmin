@@ -89,9 +89,21 @@
                                 {{ scope.row.createName == -1 ? '个人用户提交(小程序)' : scope.row.createName }}
                             </template>
                         </el-table-column>
-                        <el-table-column prop="shopName" label="门店名称"></el-table-column>
-                        <el-table-column prop="contactName" label="联系人名称"></el-table-column>
-                        <el-table-column prop="contactPhone" label="联系人电话"></el-table-column>
+                        <el-table-column prop="shopName" label="门店名称">
+                            <template slot-scope="scope">
+                                {{ scope.row.shopName == -1 ? '无' : scope.row.shopName }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="contactName" label="联系人名称">
+                            <template slot-scope="scope">
+                                {{ scope.row.contactName == -1 ? '无' : scope.row.contactName }}
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="contactPhone" label="联系人电话">
+                            <template slot-scope="scope">
+                                {{ scope.row.contactPhone == -1 ? '无' : scope.row.contactPhone }}
+                            </template>
+                        </el-table-column>
 
                         <el-table-column prop="status" label="工单状态">
                             <template slot-scope="scope">
@@ -171,9 +183,9 @@
                             {{formData.demandChargeName == -1 ? "无" : formData.demandChargeName}}
                         </el-form-item>
 
-                        <el-form-item label="故障描述：" prop="faultContent">
+                        <el-form-item label="备注/故障描述：" prop="faultContent">
                             <!-- <el-input v-model="formData.faultContent"></el-input> -->
-                            {{formData.faultContent}}
+                            {{formData.faultContent == -1 ? "无" : formData.faultContent}}
                         </el-form-item>
 
                         <el-form-item label="故障部分图：" prop="faultPartPic">
@@ -248,10 +260,10 @@
                         </el-form-item>
                         <el-form-item label="联系地址：">
                             {{ 
-                                formData.province == -1 ? "未知/" : formData.province + 
-                                formData.city == -1 ? "未知/" : formData.city + 
-                                formData.district == -1 ? "未知/" : formData.district + 
-                                formData.address == -1 ? "未知" : formData.address 
+                                (formData.province == -1 ? "未知/" : formData.province) + 
+                                (formData.city == -1 ? "未知/" : formData.city) + 
+                                (formData.district == -1 ? "未知/" : formData.district) + 
+                                (formData.address == -1 ? "未知" : formData.address )
                             }}
                         </el-form-item>
 
@@ -260,12 +272,12 @@
 
                         <el-form-item label="联系人名称：" prop="contactName">
                             <!-- <el-input v-model="formData.contactName"></el-input> -->
-                            {{formData.contactName}}
+                            {{formData.contactName == -1 ? '无' : formData.contactName}}
                         </el-form-item>
 
                         <el-form-item label="联系人电话：" prop="contactPhone">
                             <!-- <el-input v-model="formData.contactPhone"></el-input> -->
-                            {{formData.contactPhone}}
+                            {{formData.contactPhone == -1 ? '无' : formData.contactPhone}}
                         </el-form-item>
 
                         <div>师傅信息：</div>

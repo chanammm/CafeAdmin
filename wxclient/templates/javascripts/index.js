@@ -1,6 +1,6 @@
 "use strict";
 import '../stylesheets/style.min.css';
-import './router';
+// import './router';
 import axios from 'axios';
 import qs from 'qs';
 const pathAuthor = "http://zgksx.com/por/admin/login.htm";
@@ -114,6 +114,14 @@ window.onload = function (params) {
                     submitType: sessionStorage.getItem('rs_type') ? false : true, // 鉴别进入的权限类型
                     detailsImages: '../images/details.png',
                     logs: [],  // 日志
+                    test: false,
+                    subTags: [{
+                        name: '工单沟通',
+                        id: 1
+                    },{
+                        name: '工单派单',
+                        id: 2
+                    }]
                 },
                 created: function () {
                     document.querySelector('.container').style.display = 'block';
@@ -211,10 +219,18 @@ window.onload = function (params) {
                                             params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
                                         } else {
                                             params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
+                                            // 2020-08-11 更新门店地址
+                                            params.data.data['objAddress'] = params.data.data['province'] == '无' ? '无' : `${params.data.data['province']}/${params.data.data['city']}/${params.data.data['district']}/${params.data.data['address']}`
                                         }
                                     })
-                                        this.workList = params.data.data;
-                                    params.data.data.anchor == 1 ? this.submitName = '工单沟通' : params.data.data.anchor == 2 ? this.submitName = '工单派单' : this.submitName = '退出';
+                                    this.workList = params.data.data;
+                                    // 2020-08-11 更新为可以再次沟通
+                                    params.data.data.anchor == 1 ? this.submitName = '工单沟通' : params.data.data.anchor == 2 ? this.submitName = '工单派单' : this.submitName = '填写日志';
+
+                                    //2020-08-11 更新追加内容
+                                    if(params.data.data.anchor == 19){  // 取消状态
+                                        this.submitName = '退出';
+                                    }
 
                                     // 2020-07-29 更新 追加日志
                                     axios.get('work_log_list?workId=' + this.workList.workId).then(params => {
@@ -237,7 +253,7 @@ window.onload = function (params) {
                                     if(!this.message){
                                         vant.Toast('请输入联络记录!');
                                     }
-                                    axios.get('contact_work',{
+                                    axios.get('contact_work',{  // 联系内容
                                         params: {
                                             contactContent  : this.message,
                                             workId : this.workList.workId
@@ -246,35 +262,61 @@ window.onload = function (params) {
                                         this.contactShow = false;
                                         vant.Toast(params.data.msg);
                                         this.orderDirection();
+                                        this.test = false;
                                     }).catch(err =>{
                                         vant.Toast(JSON.stringify(err));
                                     })
                                     break;
                                 case 2:
-                                    axios.get('send_work',{
-                                        params: {
-                                            maintainerId : params.id,
-                                            workId : this.workList.workId
-                                        }
-                                    }).then(params => {
-                                        this.matersShow = false;
-                                        vant.Toast(params.data.msg);
-                                        this.orderDirection();
-                                    }).catch(err =>{
-                                        vant.Toast(JSON.stringify(err));
-                                    })
+                                    try {
+                                        axios.get('send_work',{  // 派单
+                                            params: {
+                                                maintainerId : params.id,
+                                                workId : this.workList.workId
+                                            }
+                                        }).then(params => {
+                                            this.matersShow = false;
+                                            this.test = false;
+                                            vant.Toast(params.data.msg);
+                                            this.orderDirection();
+                                            this.subTags = [{
+                                                name: '填写日志',
+                                                id: 1
+                                            }]
+                                        }).catch(err =>{
+                                            vant.Toast(JSON.stringify(err));
+                                        })
+                                    } catch (error) {
+                                        console.info('不存在id')
+                                    }
                                     break;
                                 default:
-                                    vant.Toast('出错了！');
+                                    // vant.Toast('出错了！');
                                     break;
+                            }
+                            if(this.message && this.workList.anchor > 1){
+                                axios.get('continue_work_contact',{  // 填写日志
+                                    params: {
+                                        contactContent : this.message,
+                                        workId : this.workList.workId
+                                    }
+                                }).then(params => {
+                                    this.contactShow = false;
+                                    vant.Toast(params.data.msg);
+                                    this.orderDirection();
+                                    this.test = false;
+                                }).catch(err =>{
+                                    vant.Toast(JSON.stringify(err));
+                                })
                             }
                         }
                     },
-                    submitView(){
+                    submitView(params){
                         this.loadingShow = true;
                         if(this.workList.anchor){
-                            switch(this.workList.anchor){
+                            switch(params.id){ 
                                 case 1:  // 沟通框
+                                    this.message = ""; //清空原有的输入
                                     this.contactShow = true;
                                     this.loadingShow = false;
                                     break;
@@ -306,6 +348,26 @@ window.onload = function (params) {
                                     WeixinJSBridge.call('closeWindow');
                                     break;
                             }
+                        }
+                    },
+                    submitViews(){
+                        this.test = !this.test;
+                        if(this.workList.anchor > 1 && this.workList.anchor < 19){
+                            this.subTags = [{
+                                name: '填写日志',
+                                id: 1
+                            }]
+                            if(this.workList.anchor == 2){
+                                this.subTags.push({
+                                    name: '工单派单',
+                                    id: 2
+                                })
+                            }
+                        }else if(this.workList.anchor == 1){
+                            this.subTags = [{
+                                name: '工单沟通',
+                                id: 1
+                            }]
                         }
                     },
                     preview(params) {

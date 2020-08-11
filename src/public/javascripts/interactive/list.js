@@ -2254,12 +2254,16 @@ window.addEventListener('pageshow', function (params) {
                                     }
                                 }
                             })
-
-                            let _arr_ = [];
-                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province].code) : null;
-                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city].code) : null;
-                            TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province][res.data.data.city][res.data.data.district].code) : null;
-                            obj['province'] = _arr_
+                            
+                            try {
+                                let _arr_ = [];
+                                TextToCode[res.data.data.province] ? _arr_.push(TextToCode[res.data.data.province].code) : null;
+                                !TextToCode[res.data.data.province] ? null: res.data.data.province == res.data.data.city ? _arr_.push(TextToCode[res.data.data.province]['市辖区'].code):_arr_.push(TextToCode[res.data.data.province][res.data.data.city].code);
+                                !TextToCode[res.data.data.province] ? null: res.data.data.province == res.data.data.city ? _arr_.push(TextToCode[res.data.data.province]['市辖区'][res.data.data.district].code) : _arr_.push(TextToCode[res.data.data.province][res.data.data.city][res.data.data.district].code);
+                                obj['province'] = _arr_
+                            } catch (error) {
+                                console.info(error)
+                            }
 
                             this.enitpawstate = true;
                             this.$nextTick(() => {
