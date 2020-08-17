@@ -34,9 +34,10 @@ html(lang="en")
                     van-cell(v-for="item in list" :key="item" @click="page(item.workId)")
                       van-card(:desc="item.contact" :title="'工单号：' + item.workId" :num="item.createTime" thumb="../images/order.png")
                         template(#tags)
+                            div(style="display: block;") 保修类型：{{ item.repairsTypeName }}
                             div(style="display: block;") 门店名称：{{ item.shopName }}
-                            div(style="display: block;") 期望上门时间：{{ item.visitingTime }}
-                            van-tag(plain type="danger") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
+                            div(style="display: block;") 期望上门时间：{{ item.visitingTime || "无" }}
+                            van-tag(plain :type="item.status == 4 ? 'success' : 'danger'") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
                             van-button(plain hairline type="primary" size="small" style="margin:6px 0;width:100%;" v-if="item.status == 4" @click.stop="tryAgain(item.workId)") 再次提交工单
         van-tabbar(v-model="active" @change="ourHref")
           van-tabbar-item(icon="comment-o") 填写信息

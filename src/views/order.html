@@ -66,7 +66,7 @@
                     </div>
                     <div class="more_search el-icon-remove-outline" v-show="more" @click="more = !more"> 收起 </div>
 
-                    <el-button icon="el-icon-search" class="_search_btn" @click="list(listSearch)">搜索
+                    <el-button icon="el-icon-search" class="_search_btn" @click="page=1; list(listSearch)">搜索
                     </el-button>
                 </el-form>
                 <el-form>
@@ -84,6 +84,11 @@
                             </template>
                         </el-table-column>
                         <el-table-column prop="repairsTypeName" label="售后类型"></el-table-column>
+                        <el-table-column prop="visitingTime" label="期望上门时间">
+                            <template slot-scope="scope">
+                                {{ scope.row.visitingTime||'无' }}
+                            </template>
+                        </el-table-column>
                         <el-table-column prop="createName" label="创建者">
                             <template slot-scope="scope">
                                 {{ scope.row.createName == -1 ? '个人用户提交(小程序)' : scope.row.createName }}
@@ -186,6 +191,10 @@
                         <el-form-item label="备注/故障描述：" prop="faultContent">
                             <!-- <el-input v-model="formData.faultContent"></el-input> -->
                             {{formData.faultContent == -1 ? "无" : formData.faultContent}}
+                        </el-form-item>
+
+                        <el-form-item label="期望上门时间：" prop="visitingTime">
+                            {{formData.visitingTime || '无'}}
                         </el-form-item>
 
                         <el-form-item label="故障部分图：" prop="faultPartPic">

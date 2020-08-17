@@ -261,10 +261,14 @@ window.addEventListener('pageshow', function (params) {
                 }
 
                 it.loading = true;
-                params['page'] = !bool ? (() => {
-                    it.currentPage = 1;
-                    return it.currentPage
-                })() : it.page;
+                // params['page'] = !bool ? (() => {
+                //     it.currentPage = 1;
+                //     return it.currentPage
+                // })() : it.page;
+                // 2020-8-17
+                params['page'] = it.page || 1;
+                it.currentPage = params['page'];
+
                 params['pageSize'] = this.pageSize;
                 _data_ = qs.stringify(params);
                 axios.post(uri, _data_).then(params => {
@@ -1771,7 +1775,7 @@ window.addEventListener('pageshow', function (params) {
                         this.UpdateVisible = false;
                         this.dialogVisible = false;
                         this.ISuccessfull(res.data.msg);
-                        this.list();
+                        this.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1817,7 +1821,7 @@ window.addEventListener('pageshow', function (params) {
                         this.ISuccessfull(res.data.msg);
                         this.adoptModule = false;
                         this.UpdateTableAndVisible = false;
-                        this.list();
+                        this.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1849,7 +1853,7 @@ window.addEventListener('pageshow', function (params) {
                         this.SearchTableAndVisible = false;
                         this.UpdateTableAndVisible = false;
                         this.tableRadio = [];
-                        this.list();
+                        this.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1884,7 +1888,7 @@ window.addEventListener('pageshow', function (params) {
                         this.ISuccessfull(res.data.msg);
                         this.TableAndVisible = false;
                         this.UpdateTableAndVisible = false;
-                        this.list();
+                        this.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -1925,7 +1929,7 @@ window.addEventListener('pageshow', function (params) {
                         this.ISuccessfull(res.data.msg);
                         this.detailTableAndVisible = false;
                         this.UpdateTableAndVisible = false;
-                        this.list();
+                        this.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -2178,7 +2182,7 @@ window.addEventListener('pageshow', function (params) {
                 }).then(res => {
                     if (res.data.state == 200) {
                         is.ISuccessfull(res.data.msg);
-                        is.list();
+                        is.list(this.pageparams);
                     } else {
                         is.IError(res.data.msg);
                     }
@@ -2321,7 +2325,7 @@ window.addEventListener('pageshow', function (params) {
                         if (res.data.state == 200) {
                             is.ISuccessfull(res.data.msg);
                             is.enitpawstate = false;
-                            is.list();
+                            is.list(this.pageparams);
                             delete this.data;
                         } else {
                             is.forEnits.province = provinces;  //缓存的地址
@@ -2351,7 +2355,7 @@ window.addEventListener('pageshow', function (params) {
                         }).then(res => {
                             if (res.data.state == 200) {
                                 is.ISuccessfull(res.data.msg);
-                                is.list();
+                                is.list(this.pageparams);
                             } else {
                                 this.IError(res.data.msg);
                             }
