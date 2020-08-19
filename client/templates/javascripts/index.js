@@ -8,15 +8,15 @@ import areaList from './area';
 
 const URLs = `https://admin.api.zgksx.com/`;
 
-// const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
-// const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
-// ? location.href 
-// : "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
-
-const pathLogin = "http://zgksx.com/por/admin/";
+const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
 const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
 ? location.href 
-: "http://zgksx.com/por/dz/index.html";
+: "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
+
+// const pathLogin = "http://zgksx.com/por/admin/";
+// const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
+// ? location.href 
+// : "http://zgksx.com/por/dz/index.html";
 
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
