@@ -12,13 +12,21 @@ export default {
 </script>
 
 <style>
-html, body, .container {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-  }
+html,
+body,
+.container {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  max-width: 640px;
+  min-width: 320px;
+  margin: 0 auto;
+  background: #eeeeee;
+}
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

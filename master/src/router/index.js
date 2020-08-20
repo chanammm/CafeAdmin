@@ -3,6 +3,9 @@ import Router from 'vue-router'
 import Order from '@/views/Order/index'
 import Login from '@/views/login/index'
 import Details from '@/views/details/index'
+import User from '@/views/user/index'
+import Chat from '@/views/chat/index'
+import Winchat from '@/views/winchat/index'
 
 Vue.use(Router)
 
@@ -31,6 +34,30 @@ const URL = new Router({
       component: Details,
       meta: {
         title: '工单详情'
+      }
+    },
+    {
+      path: '/user',
+      name: 'user',
+      component: User,
+      meta: {
+        title: '个人中心'
+      }
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: Chat,
+      meta: {
+        title: '在线沟通'
+      }
+    },
+    {
+      path: '/winchat',
+      name: 'winchat',
+      component: Winchat,
+      meta: {
+        title: '在线沟通'
       }
     }
   ]

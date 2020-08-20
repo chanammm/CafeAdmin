@@ -35,7 +35,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .container{
     background: linear-gradient(180deg,rgba(84,207,238,1) 0%,rgba(74,144,226,1) 100%) no-repeat;
     .logind{
