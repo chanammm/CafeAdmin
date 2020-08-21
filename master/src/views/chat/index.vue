@@ -137,25 +137,23 @@ export default {
         position: fixed;
         bottom: 0;
         left: 0;
+        display: flex;
         .van-image{
-            float: left;
-            width: 35px;
-            height: 35px;
             margin: 8px;
+            flex: 1;
         }
         .van-field{
-            float: left;
-            width: 62%;
             background: #D9DBE7;
             border-radius: 20px;
-            margin-top: 8px;
+            margin-top: 6px;
+            margin-bottom: 6px;
             padding: 6px 16px;
+            flex: 7;
         }
         .van-button{
-            float: right;
-            margin: 8px 10px;
-            width: 20%;
+            margin: 6px 10px;
             height: 35px;
+            flex: 1;
         }
     }
 }

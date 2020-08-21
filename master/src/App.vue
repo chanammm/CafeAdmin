@@ -5,7 +5,6 @@
 </template>
 
 <script>
-import '@/plugin/index'
 export default {
   name: 'App'
 }

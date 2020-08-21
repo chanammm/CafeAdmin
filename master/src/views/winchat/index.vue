@@ -105,7 +105,7 @@ body{
         }
     }
     .chat{
-        margin-bottom: 60px;
+        margin-bottom: 260px;
         .youChat {
             width: 100%;
             padding: 20px 10px;

@@ -31,7 +31,9 @@ export default {
       this.$router.push('order')
     }
   },
-  created () {}
+  created () {
+    console.log(this.getQueryStringFn)
+  }
 }
 </script>
 
