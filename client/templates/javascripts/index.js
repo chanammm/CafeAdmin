@@ -373,6 +373,13 @@ window.onload = function (params) {
                             if (params.data.state == 200) {
                                 this.logs = [];
                                 this.logs = params.data.list;
+                                this.$nextTick(function () {
+                                    setTimeout(() => {
+                                        document.querySelector('#goBack').onclick = () => {
+                                            location.href = './details.html?workId='+ this.getQueryString('workId')
+                                        }
+                                    }, 1000)
+                                })
                             } else {
                                 // vant.Toast('获取数据异常！请重试');
                                 setTimeout(() => {

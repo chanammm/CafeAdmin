@@ -1,5 +1,5 @@
 <template lang="pug">
-    .container
+    .container#login(style="display: none;")
       mixin article(title)
         .article
             .article-wrapper
@@ -11,8 +11,8 @@
       .logo
         van-image(:src="logo"  width="193" height="185")
       .logind
-        van-field(v-model="user" input-align="center" placeholder="请输入账号")
-        van-field(v-model="pwd" type="password" input-align="center" placeholder="请输入密码")
+        van-field(v-model="user.name" input-align="center" placeholder="请输入账号")
+        van-field(v-model="user.pwd" type="password" input-align="center" placeholder="请输入密码")
         van-button(type="primary" block @click="submit") 登陆
 </template>
 
@@ -22,17 +22,36 @@ export default {
   data () {
     return {
       logo: './static/images/logo.png',
-      user: '',
-      pwd: ''
+      user: {}
     }
   },
   methods: {
     submit () {
-      this.$router.push('order')
+      this.api.httpRequest({
+        url: 'maintainer_account_login',
+        methods: 'POST',
+        data: {
+          account: this.user.name,
+          password: this.user.pwd,
+          wechatId: ''
+        }
+      })
+      .then(res => {
+        if (!res.data.state != 200) {//eslint-disable-line
+          this.$toast('登陆失败，请联系管理员')
+          return false
+        }
+        this.$router.push('order')
+      })
     }
   },
   created () {
     console.log(this.getQueryStringFn)
+    if (sessionStorage.getItem('token') == 'false') {//eslint-disable-line
+      setTimeout(() => {
+        document.querySelector('#login').setAttribute('style', 'display: block;')
+      }, 1000)
+    }
   }
 }
 </script>

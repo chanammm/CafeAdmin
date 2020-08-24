@@ -5,18 +5,21 @@ import App from './App'
 import router from './router'
 import '@/plugin/index'
 import getQueryStringFn from '@/api/wxlogin'
+import api from './api'
 
 Vue.config.productionTip = false
 
 Vue.mixin({
   data () {
     return {
-      getQueryStringFn: ''
+      getQueryStringFn: '',
+      api: ''
     }
   },
   methods: {},
   created () {
       this.getQueryStringFn = getQueryStringFn
+      this.api = api
   }
 })
 
