@@ -27,11 +27,12 @@ if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'microm
               location.href = location.href.split('?')[0]
               return false
             };
-            alert('登陆异常！')
+            sessionStorage.setItem('token', JSON.stringify({asset: { secret: '' }, bool: true}))
+            alert('登陆异常，请尝试账号登陆')
             return false
           } else {
             if (params.data.data.hasBind < 1) {//eslint-disable-line
-              sessionStorage.setItem('token', false)
+              sessionStorage.setItem('token', JSON.stringify({asset: params.data.data, bool: true}))
               location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin: URL.proxy // 待定
             } else {
               // 直接登陆 保存 sessionstrong secret

@@ -1,25 +1,24 @@
 <template lang="pug">
   div
-    van-search(v-model="search" placeholder='请输入搜索关键词')
-    van-tabs(v-model="tags" sticky)
-      van-tab(title='全部')
-        ul
-          li(v-for="(list, index) in lists" v-bind:key="index")
-            .title
-              p 服务类型：{{ list.title }}
-              p 工单号：{{ list.workId }}
-                a(@click="page(list.workId)") 查看详情
-            p 联系人名称：{{ list.name }}
-            p 联系人电话：{{ list.phone }}
-            p 设备名称：{{ list.productName }}
-            p 联系地址：{{ list.address }}
-            van-button(round type='info' block) 已上门
-      van-tab(title='待上门')
-        van-empty(description="暂无工单" :image="empty")
-      van-tab(title="维修中")
-        van-empty(description="暂无工单" :image="empty")
-      van-tab(title="已完成")
-        van-empty(description="暂无工单" :image="empty")
+    van-search(v-model="search" placeholder='请输入搜索关键词' @input="num = 1;lists = []; orderList()")
+    van-tabs(v-model="tags" sticky @click="num = 1;lists = []; orderList()")
+      each item in [{name:'全部', id: 0},{name: "待上门", id: 1},{name: "维修中", id: 2},{name: "已完成", id: 3}]
+        van-tab(title=item.name)
+          van-pull-refresh(v-model="refreshing" @refresh="onRefresh")
+            //- finished-text="没有更多了"
+            van-list(v-model="loading" :finished="finished" @load="orderList()")
+              ul
+                li(v-for="(list, index) in lists" v-bind:key="index")
+                  .title
+                    p 服务类型：{{ list.repairsTypeName }}
+                    p 工单号：{{ list.workId }}
+                      a(@click="page(list.workId)") 查看详情
+                  p 联系人名称：{{ list.contactName }}
+                  p 联系人电话：{{ list.contactPhone }}
+                  p 设备名称：{{ list.facilityName != -1 ? list.facilityName : '无' }}
+                  p 联系地址：{{ list.province+list.city+list.district+list.address }}
+                  van-button(round type='info' block @click="goToHome(list.workId)") 已上门
+          van-empty(description="暂无工单" :image="empty" v-if="lists.length < 1")
     van-tabbar(v-model="active")
       van-tabbar-item(name="order" replace icon="balance-list" to="/order") 工单
       van-tabbar-item(name="user" replace icon="manager" to="/user") 我的
@@ -31,36 +30,77 @@ export default {
   data () {
     return {
       active: 'order',
+      loading: false,
+      finished: false,
+      refreshing: false,
+      num: 1,
       search: '',
-      tags: '',
-      lists: [{
-        title: 'labu',
-        workId: 20202020202020,
-        name: 'labuy',
-        phone: 13111111111,
-        productName: 'lay content active',
-        address: 'GDS tianhequ Ns 888'
-      }, {
-        title: 'labu',
-        workId: 20202020202020,
-        name: 'labuy',
-        phone: 13111111111,
-        productName: 'lay content active',
-        address: 'GDS tianhequ Ns 888'
-      }, {
-        title: 'labu',
-        workId: 20202020202020,
-        name: 'labuy',
-        phone: 13111111111,
-        productName: 'lay content active',
-        address: 'GDS tianhequ Ns 888'
-      }],
+      tags: 0,
+      lists: [],
       empty: '/static/images/empty.png'
     }
   },
   methods: {
     page (params) {
       this.$router.push({path: 'details', query: { workId: params }})
+    },
+    goToHome (params) {
+      this.api.httpRequest({
+        url: 'work_complete_repair',
+        methods: 'POST',
+        data: {
+              workId: params
+          }
+      })
+      .then(params => {
+        if (params.data.state != 200) {//eslint-disable-line
+          this.$toast(params.data.msg)
+          return false
+        }
+        this.onRefresh()
+      })
+    },
+    onRefresh () {
+        this.finished = false
+        this.loading = true
+        this.lists = []
+        this.num = 1
+        this.orderList()
+    },
+    orderList () {
+      if (this.refreshing) {
+          this.lists = []
+          this.refreshing = false
+      }
+      this.api.httpRequest({
+        url: 'work_page',
+        methods: 'GET',
+        data: {
+              status: this.tags,
+              page: this.num,
+              pageSize: 10,
+              workId: this.search
+          }
+      })
+        .then(params => {
+            this.show = false
+            this.loadingShow = false
+            if (params.data.state == 200) {//eslint-disable-line
+                this.lists.length > 0 ? this.lists = this.lists.concat(params.data.page.records) : this.lists = params.data.page.records
+                // 加载状态结束
+                this.loading = false
+                this.num++
+                if (params.data.page.records.length < 10) this.finished = true
+            } else if (params.data.state == 300) {//eslint-disable-line
+                this.loading = false
+                this.finished = true
+            } else {
+                this.loading = false
+                this.finished = true
+                this.num = 1
+                this.$toast(params.data.msg)
+            }
+        })
     }
   },
   created () {}

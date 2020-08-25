@@ -9,9 +9,9 @@
                 van-image(:src="yourImage")
                 .your_text 你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来
                     .time 10:00
-            .meChat
-                .me_text 你快点
-                    .time 10:00
+            .meChat(v-for="(item, index) in myChat")
+                .me_text {{ item.content }}
+                    .time {{ item.createTime }}
             .meChat
                 .me_text 你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来你快点派个师傅过来
                     .time 10:00
@@ -48,21 +48,66 @@
         .send
             van-image(:src="photo")
             van-field(type="text" v-model="chatText" placeholder="输入内容")
-            van-button(color="#A4ABC0") 发送
+            van-button(color="#A4ABC0" @click="websocketsend") 发送
 </template>
 
 <script>
 export default {
-  name: 'chat',
-  data () {
-    return {
-      yourImage: '/static/images/you_image.png',
-      photo: '/static/images/photo.png',
-      chatText: ''
+    name: 'chat',
+    data () {
+        return {
+            yourImage: '/static/images/you_image.png',
+            photo: '/static/images/photo.png',
+            chatText: '',
+            myChat: [],
+            youChat: [],
+            bscok: null
+        }
+    },
+    methods: {
+        initWebSocket () {
+            // const ws = `ws://192.168.0.112:8089/websocket/051410000312476666?token=${JSON.parse(sessionStorage.getItem('token')).asset.secret}`
+            const ws = `ws://192.168.0.112:8089/websocket/051410000312476666?token=b3eee0eef3ca01d9fdf64edaae33e9e0 `
+            this.bscok = new WebSocket(ws)
+            this.bscok.onmessage = this.websocketonmessage
+            this.bscok.onopen = this.websocketonopen
+            this.bscok.onerror = this.websocketonerror
+            this.bscok.onclose = this.websocketclose
+        },
+        websocketonopen () {},
+        websocketonerror () { // 连接建立失败重连
+            this.initWebSocket()
+        },
+        websocketonmessage (e) { // 数据接收
+            const redata = JSON.parse(e.data)
+            this.myChat.length > 0 ? this.myChat = this.myChat.concat(redata) : this.myChat.push(redata)
+        },
+        websocketsend (Data) { // 数据发送
+            this.bscok.send(JSON.stringify({
+                content: this.chatText
+            }))
+            this.chatText = ''
+        },
+        websocketclose (e) { // 关闭
+            console.log('断开连接', e)
+        }
+    },
+    destroyed () {
+        this.bscok.close() // 离开路由之后断开websocket连接
+    },
+    created () {
+        this.initWebSocket()
+        this.api.httpRequest({
+            url: 'communication_page',
+            methods: 'GET',
+            data: {
+                workId: '051410000312476666',
+                page: 1,
+                pageSize: 20
+            }
+        })
+        .then(params => {})
     }
-  },
-  methods: {},
-  created () {}
 }
 </script>
 
@@ -97,6 +142,7 @@ export default {
                     position: absolute;
                     bottom: -20px;
                     left: 0;
+                    width: 100px;
                 }
             }
         }
@@ -119,6 +165,7 @@ export default {
                     position: absolute;
                     bottom: -20px;
                     right: 0;
+                    width: 100px;
                 }
             }
         }

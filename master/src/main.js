@@ -6,6 +6,7 @@ import router from './router'
 import '@/plugin/index'
 import getQueryStringFn from '@/api/wxlogin'
 import api from './api'
+import URL from './api/url'
 
 Vue.config.productionTip = false
 
@@ -13,13 +14,15 @@ Vue.mixin({
   data () {
     return {
       getQueryStringFn: '',
-      api: ''
+      api: '',
+      URL: ''
     }
   },
   methods: {},
   created () {
       this.getQueryStringFn = getQueryStringFn
       this.api = api
+      this.URL = URL
   }
 })
 

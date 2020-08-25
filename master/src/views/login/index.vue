@@ -13,7 +13,7 @@
       .logind
         van-field(v-model="user.name" input-align="center" placeholder="请输入账号")
         van-field(v-model="user.pwd" type="password" input-align="center" placeholder="请输入密码")
-        van-button(type="primary" block @click="submit") 登陆
+        van-button(type="primary" block @click="submit" :loading="handling ? true : false") 登陆
 </template>
 
 <script>
@@ -22,36 +22,46 @@ export default {
   data () {
     return {
       logo: './static/images/logo.png',
-      user: {}
+      user: {},
+      handling: false
     }
   },
   methods: {
-    submit () {
+    submit (wechatId) {
+      this.handling = true
+      try {
+        wechatId = JSON.parse(sessionStorage.getItem('token')).asset.wechatResult.wechatId
+      } catch (error) {
+        wechatId = ''
+      }
       this.api.httpRequest({
         url: 'maintainer_account_login',
         methods: 'POST',
         data: {
           account: this.user.name,
           password: this.user.pwd,
-          wechatId: ''
+          wechatId: wechatId
         }
       })
       .then(res => {
-        if (!res.data.state != 200) {//eslint-disable-line
+        if (res.data.state != 200) {//eslint-disable-line
           this.$toast('登陆失败，请联系管理员')
           return false
         }
-        this.$router.push('order')
+        sessionStorage.setItem('token', JSON.stringify({asset: res.data.data}))
+        location.href = '/order'
       })
     }
   },
   created () {
     console.log(this.getQueryStringFn)
-    if (sessionStorage.getItem('token') == 'false') {//eslint-disable-line
-      setTimeout(() => {
-        document.querySelector('#login').setAttribute('style', 'display: block;')
-      }, 1000)
-    }
+    setTimeout(() => {
+      if (sessionStorage.getItem('token') && JSON.parse(sessionStorage.getItem('token')).bool) {//eslint-disable-line
+          document.querySelector('#login').setAttribute('style', 'display: block;')
+      } else if (sessionStorage.getItem('token')) {
+        location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/order': this.URL.proxy+ 'order' // 待定
+      }
+    }, 1000)
   }
 }
 </script>

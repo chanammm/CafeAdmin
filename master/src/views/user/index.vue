@@ -4,7 +4,7 @@
           van-swipe-item
               img(:src="image")
         van-cell-group
-          van-field(v-model="user.username" label="名称" left-icon="manager" placeholder="请输入用户名称")
+          van-field(v-model="user.adminName" label="名称" left-icon="manager" placeholder="请输入用户名称")
           van-field(v-model="user.phone" label="手机号" left-icon="phone-circle" placeholder="请输入手机号码")
           van-field(v-model="user.oldpwd" label="旧密码" type="password" left-icon="lock" placeholder="请输入旧密码")
           van-field(v-model="user.password" label="新密码" type="password" left-icon="lock" placeholder="请输入新密码")
@@ -29,10 +29,38 @@ export default {
   },
   methods: {
     submit () {
-      this.$router.push('/')
+      this.api.httpRequest({
+        url: 'modify_personal_info',
+        methods: 'POST',
+        data: {
+          adminName: this.user.adminName,
+          newPassword: this.user.password,
+          password: this.user.oldpwd,
+          phone: this.user.phone
+        }
+      })
+      .then(response => {
+        if (response.data.state != 200) {//eslint-disable-line
+          this.$toast(response.data.msg)
+          return false
+        }
+        this.$router.push('/')
+      })
     }
   },
-  created () {}
+  created () {
+    this.api.httpRequest({
+      url: 'view_personal_info',
+      methods: 'GET'
+    })
+    .then(response => {
+      if (response.data.state != 200) {//eslint-disable-line
+        this.$toast(response.data.msg)
+        return false
+      }
+      this.user = response.data.data
+    })
+  }
 }
 </script>
 

@@ -9,7 +9,7 @@ axios.defaults.baseURL = URL.fxab
 
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=utf-8'
 axios.defaults.crossDomain = true
-axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') && sessionStorage.getItem('token') != 'false'/*eslint-disable-line*/ ? JSON.parse(sessionStorage.getItem('token')).asset.secret : '' // 设置请求头为 Authorization
+axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : '' // 设置请求头为 Authorization
 
 // http request 拦截器
 axios.interceptors.request.use(config => {
@@ -25,6 +25,10 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(
   async response => {
     if (response.data.state === 201) {
+      // sessionStorage.removeItem('token')
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
       return Promise.resolve(response)
     } else {
       return Promise.resolve(response)
