@@ -25,9 +25,10 @@ axios.interceptors.request.use(config => {
 axios.interceptors.response.use(
   async response => {
     if (response.data.state === 201) {
-      // sessionStorage.removeItem('token')
+      sessionStorage.removeItem('token')
       setTimeout(() => {
-        location.reload()
+        sessionStorage.setItem('token', JSON.stringify({asset: { secret: '' }, bool: true}))
+        location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/': this.URL.proxy // 待定
       }, 1000)
       return Promise.resolve(response)
     } else {

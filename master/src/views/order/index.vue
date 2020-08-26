@@ -17,7 +17,7 @@
                   p 联系人电话：{{ list.contactPhone }}
                   p 设备名称：{{ list.facilityName != -1 ? list.facilityName : '无' }}
                   p 联系地址：{{ list.province+list.city+list.district+list.address }}
-                  van-button(round type='info' block @click="goToHome(list.workId)") 已上门
+                  van-button(round type='info' block @click="goToHome(list.workId)" v-if="list.status == 1") 上门
           van-empty(description="暂无工单" :image="empty" v-if="lists.length < 1")
     van-tabbar(v-model="active")
       van-tabbar-item(name="order" replace icon="balance-list" to="/order") 工单
@@ -110,6 +110,9 @@ export default {
 <style lang="scss">
   body{
     background: #EEEEEE;
+    .van-tabs__line{
+      background-color: #65a6f1 !important;
+    }
     ul{
       height: auto;
       overflow: hidden;
@@ -132,7 +135,7 @@ export default {
           color: white;
         }
         p{
-          padding-left: 10px;
+          padding:0 10px;
           box-sizing: border-box;
           a{
             float: right;

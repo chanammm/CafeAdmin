@@ -82,6 +82,10 @@ body{
         background-color: #5E636D;
         color: white;
         line-height: 80px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 99999;
         .box{
             width: 100px;
             margin: 0 auto;

@@ -22,7 +22,10 @@ export default {
   data () {
     return {
       logo: './static/images/logo.png',
-      user: {},
+      user: {
+        name: 'maintainer03',
+        pwd: 'root'
+      },
       handling: false
     }
   },

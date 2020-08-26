@@ -1,6 +1,6 @@
 // 按需全局引入 vant组件
 import Vue from 'vue'
-import {List, Cell, Swipe, Overlay, SwipeItem, Lazyload, Skeleton, Image as VanImage, Loading, Icon, Dialog, CellGroup, Field, Popup, Button, Tabbar, TabbarItem, Search, Tab, Tabs, Empty, PullRefresh} from 'vant'
+import {List, Cell, Swipe, Overlay, SwipeItem, Lazyload, Skeleton, Image as VanImage, Loading, Icon, Dialog, CellGroup, Field, Popup, Button, Tabbar, TabbarItem, Search, Tab, Tabs, Empty, PullRefresh, Tag, ActionSheet, Switch} from 'vant'
 import 'vant/lib/index.css'
 
 Vue.use(Cell).use(CellGroup)
@@ -23,3 +23,6 @@ Vue.use(Search)
 Vue.use(Tab).use(Tabs)
 Vue.use(Empty)
 Vue.use(PullRefresh)
+Vue.use(Tag)
+Vue.use(ActionSheet)
+Vue.use(Switch)
