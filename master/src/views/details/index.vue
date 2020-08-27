@@ -7,6 +7,7 @@
             img(:src="detailsImages" style="width: 100%;")
       van-cell-group
         van-cell(class="cell_border" title="工单号" :value="workList.workId")
+        div(style="width: 100%; height: 20px; background-color: #eeeeee")
         van-cell(class="cell_border")
           template(title)
             div(class="red_left")
@@ -19,25 +20,28 @@
           template(title)
             span(class="custom-title" style="font-weight: blod;") 视频附件
             video(:src="workList.video" controls="controls" width="200" height="200" style="display: block;")
+        div(style="width: 100%; height: 20px; background-color: #eeeeee")
         van-cell(class="cell_border")
           template(title)
             div(class="red_left")
             span(class="custom-title" style="font-weight: blod;") 门店信息
         van-cell(title="门店名称" :value="workList.shopName")
         van-cell(title="门店地址" :value="workList.province+'/'+workList.city+'/'+workList.district+'/'+workList.address")
-
+        div(style="width: 100%; height: 20px; background-color: #eeeeee")
         van-cell(class="cell_border")
           template(title)
             div(class="red_left")
             span(class="custom-title" style="font-weight: blod;") 联系人信息
         van-cell(title="联系人名称" :value="workList.contactName")
         van-cell(title="联系人电话" :value="workList.contactPhone")
+        div(style="width: 100%; height: 20px; background-color: #eeeeee")
         van-cell(class="cell_border")
           template(title)
             div(class="red_left")
             span(class="custom-title" style="font-weight: blod;") 师傅信息
         van-cell(title="维修师傅" :value="workList.maintainerName")
         van-cell(title="维修师傅电话" :value="workList.maintainerPhone")
+        div(style="width: 100%; height: 20px; background-color: #eeeeee")
         van-cell(class="cell_border")
           template(title)
             div(class="red_left")
@@ -51,6 +55,7 @@
         van-cell(title="配件费用" :value="workList.partPaymentStr")
         van-cell(title="期待上门时间" :value="workList.visitingTime")
         van-cell(title="状态" :value="workList.status")
+      div(style="width: 100%; height: 60px;")
       footer
         van-button(type="info" plain class="btn" @click="() => { this.$router.push('/order') }" style="width: 30%;") 返回上一页
         van-button(type="info" class="btn" @click="page" style="width: 30%;margin-left: 30px;" icon="chat-o") 在线沟通
@@ -70,7 +75,8 @@ export default {
   methods: {
     page () {
       if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger'){//eslint-disable-line
-        this.$router.push({path: '/winchat', query: {workId: this.$route.query.workId}})
+        // this.$router.push({path: '/winchat', query: {workId: this.$route.query.workId}})
+        this.$router.push({path: '/chat', query: {workId: this.$route.query.workId}})
       } else {
         this.$router.push({path: '/chat', query: {workId: this.$route.query.workId}})
       }
@@ -92,7 +98,6 @@ export default {
         border: none;
     }
     .van-cell-group{
-      margin-bottom: 60px;
       .van-cell__title{
         text-align: left;
       }

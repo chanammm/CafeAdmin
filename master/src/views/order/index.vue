@@ -19,6 +19,7 @@
                   p 联系地址：{{ list.province+list.city+list.district+list.address }}
                   van-button(round type='info' block @click="goToHome(list.workId)" v-if="list.status == 1") 上门
           van-empty(description="暂无工单" :image="empty" v-if="lists.length < 1")
+    div(style="width: 100%; height: 60px;")
     van-tabbar(v-model="active")
       van-tabbar-item(name="order" replace icon="balance-list" to="/order") 工单
       van-tabbar-item(name="user" replace icon="manager" to="/user") 我的
@@ -118,7 +119,6 @@ export default {
       overflow: hidden;
       padding: 10px;
       box-sizing: border-box;
-      margin-bottom: 60px;
       li{
         border-radius:4px;
         background: white;
