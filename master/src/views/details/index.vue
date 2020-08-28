@@ -57,8 +57,8 @@
         van-cell(title="状态" :value="workList.status")
       div(style="width: 100%; height: 60px;")
       footer
-        van-button(type="info" plain class="btn" @click="() => { this.$router.push('/order') }" style="width: 30%;") 返回上一页
-        van-button(type="info" class="btn" @click="page" style="width: 30%;margin-left: 30px;" icon="chat-o") 在线沟通
+        van-button(type="info" icon="replay" plain @click="() => { this.$router.push('/order') }") 返回上一页
+        van-button(type="info" @click="page" icon="chat-o") 在线沟通
 </template>
 
 <script>
@@ -75,8 +75,7 @@ export default {
   methods: {
     page () {
       if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger'){//eslint-disable-line
-        // this.$router.push({path: '/winchat', query: {workId: this.$route.query.workId}})
-        this.$router.push({path: '/chat', query: {workId: this.$route.query.workId}})
+        this.$router.push({path: '/winchat', query: {workId: this.$route.query.workId}})
       } else {
         this.$router.push({path: '/chat', query: {workId: this.$route.query.workId}})
       }
@@ -119,8 +118,11 @@ export default {
       padding: 10px 0;
       box-sizing: border-box;
       border-top: 1px solid #ebedf0;
+      overflow: hidden;
       .van-button{
         height: 40px;
+        font-size: 12px;
+        margin:0 5px;
       }
     }
 </style>

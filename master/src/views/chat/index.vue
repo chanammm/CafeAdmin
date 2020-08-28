@@ -1,19 +1,21 @@
 <template lang="pug">
     .container
         .chat
+            van-popup(v-model="pageTop" position="top")
+                div(style="margin: 10px 0" @click="num = num + 1;page(true);") 查看上一页记录
             div(v-for="(oldItem, index) in oldChat" v-bind:keys="index")
                 .youChat(v-if="oldItem.isCustomer == 1")
                     van-image(:src="yourImage" @click="viewInfo(oldItem)")
                     .your_text
                         span(v-if="oldItem.contentType == 0") {{ oldItem.content }}
                         img(:src="oldItem.content" v-if="oldItem.contentType == 1" style="width: 200px;")
-                        video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;")
+                        video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;" x5-video-player-type="h5-page" x5-video-orientation="landscape|portrait")
                         .time {{ oldItem.createTime }}
                 .meChat(v-else)
                     .me_text
                         span(v-if="oldItem.contentType == 0") {{ oldItem.content }}
                         img(:src="oldItem.content" v-if="oldItem.contentType == 1" style="width: 200px;")
-                        video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;")
+                        video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;"  x5-video-player-type="h5-page" x5-video-orientation="landscape|portrait")
                         .time {{ oldItem.createTime }}
             div(v-for="(item, index) in myChat" v-bind:keys="index")
                 .youChat(v-if="item.isCustomer == 1")
@@ -21,13 +23,13 @@
                     .your_text
                         span(v-if="item.contentType == 0") {{ item.content }}
                         img(:src="item.content" v-if="item.contentType == 1" style="width: 200px;")
-                        video(:src="item.content" v-if="item.contentType == 2" controls="controls" style="width: 200px;")
+                        video(:src="item.content" v-if="item.contentType == 2" controls="controls" style="width: 200px;"  x5-video-player-type="h5-page" x5-video-orientation="landscape|portrait")
                         .time {{ item.createTime }}
                 .meChat(v-else)
                     .me_text
                         span(v-if="item.contentType == 0") {{ item.content }}
                         img(:src="item.content" v-if="item.contentType == 1" style="width: 200px;")
-                        video(:src="item.content" v-if="item.contentType == 2" controls="controls" style="width: 200px;")
+                        video(:src="item.content" v-if="item.contentType == 2" controls="controls" style="width: 200px;"  x5-video-player-type="h5-page" x5-video-orientation="landscape|portrait")
                         .time {{ item.createTime }}
         div(style="width: 100%; height: 60px;")
             //- .old_time 2020-08-13
@@ -71,6 +73,7 @@ export default {
             show: false,
             clientShow: false,
             checked: false,
+            pageTop: false,
             client: {},
             actions: [
                 { name: '视频', id: 1 },
@@ -171,80 +174,101 @@ export default {
                 var t = document.querySelector('.chat').offsetHeight
                 window.scroll({ top: t, left: 0, behavior: 'smooth' })
             }, 1000)
+        },
+        pageTopFn () {
+            let top = document.documentElement.scrollTop || document.body.scrollTop
+            if (this.oldChat.length < 10) {
+                return
+            }
+            if (top < 10) {//eslint-disable-line
+                this.pageTop = true
+            } else {
+                this.pageTop = false
+            }
+        },
+        page (param) {
+            this.api.httpRequest({
+                url: 'communication_page',
+                methods: 'GET',
+                data: {
+                    workId: this.$route.query.workId,
+                    page: this.num,
+                    pageSize: 10
+                }
+            })
+            .then(params => {
+                if (params.data.state != 200) {//eslint-disable-line
+                    this.$toast(params.data.msg)
+                    return false
+                }
+                // params.data.page.records = [{
+                //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
+                //     contentType: 2,
+                //     createTime: '123123123',
+                //     isCustomer: 1,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }, {
+                //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
+                //     contentType: 1,
+                //     createTime: '123123123',
+                //     isCustomer: 0,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }, {
+                //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
+                //     contentType: 0,
+                //     createTime: '123123123',
+                //     isCustomer: 1,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }, {
+                //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
+                //     contentType: 2,
+                //     createTime: '123123123',
+                //     isCustomer: 0,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }, {
+                //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
+                //     contentType: 1,
+                //     createTime: '123123123',
+                //     isCustomer: 1,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }, {
+                //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
+                //     contentType: 0,
+                //     createTime: '123123123',
+                //     isCustomer: 1,
+                //     senderId: 0,
+                //     senderName: '123',
+                //     workId: '12313'
+                // }]
+                this.oldChat.length > 0 ? this.oldChat = params.data.page.records.reverse().concat(this.oldChat) : this.oldChat = params.data.page.records.reverse()
+                // this.oldChat.length > 0 ? this.oldChat = this.oldChat.concat(params.data.page.records) : this.oldChat = params.data.page.records
+                if (param) {
+                    this.pageTop = false
+                } else {
+                    this.autoHeight()
+                }
+            })
         }
     },
     destroyed () {
         this.bscok.close() // 离开路由之后断开websocket连接
     },
     created () {
+        window.onscroll = () => {
+            this.pageTopFn()
+        }
         this.initWebSocket()
-        this.api.httpRequest({
-            url: 'communication_page',
-            methods: 'GET',
-            data: {
-                workId: this.$route.query.workId,
-                page: this.num,
-                pageSize: 20
-            }
-        })
-        .then(params => {
-            if (params.data.state != 200) {//eslint-disable-line
-                this.$toast(params.data.msg)
-                return false
-            }
-            // params.data.page.records = [{
-            //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
-            //     contentType: 2,
-            //     createTime: '123123123',
-            //     isCustomer: 1,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }, {
-            //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
-            //     contentType: 1,
-            //     createTime: '123123123',
-            //     isCustomer: 0,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }, {
-            //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
-            //     contentType: 0,
-            //     createTime: '123123123',
-            //     isCustomer: 1,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }, {
-            //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
-            //     contentType: 2,
-            //     createTime: '123123123',
-            //     isCustomer: 0,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }, {
-            //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
-            //     contentType: 1,
-            //     createTime: '123123123',
-            //     isCustomer: 1,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }, {
-            //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
-            //     contentType: 0,
-            //     createTime: '123123123',
-            //     isCustomer: 1,
-            //     senderId: 0,
-            //     senderName: '123',
-            //     workId: '12313'
-            // }]
-            this.oldChat = params.data.page.records.reverse()
-            // this.oldChat = params.data.page.records
-            this.autoHeight()
-        })
+        this.page()
     }
 }
 </script>
@@ -252,7 +276,6 @@ export default {
 <style lang="scss" scoped>
 .container {
     .chat{
-        margin-bottom: 60px;
         .youChat {
             width: 100%;
             padding: 20px 10px;
@@ -281,7 +304,7 @@ export default {
                     bottom: -20px;
                     left: 0;
                     width: 300px;
-                    text-align: right;
+                    text-align: left;
                     color: #999999;
                 }
             }
@@ -345,7 +368,7 @@ export default {
         .van-button{
             margin: 6px 10px;
             height: 35px;
-            flex: 1;
+            flex: 2;
         }
     }
 }

@@ -64,7 +64,7 @@ export default {
       } else if (sessionStorage.getItem('token')) {
         location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/order': this.URL.proxy+ 'order' // 待定
       }
-      if (!/Android|iPhone"/g.test(navigator.userAgent)) {
+      if (!/Android|iPhone/g.test(navigator.userAgent)) {
         document.querySelector('#login').setAttribute('style', 'display: block;')
       }
     }, 1000)
