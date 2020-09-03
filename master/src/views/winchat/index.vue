@@ -10,7 +10,7 @@
             van-popup(v-model="pageTop" position="top")
                 div(style="margin: 10px 0; cursor: pointer;" @click="num = num + 1;page(true);") 查看上一页记录
             div(v-for="(oldItem, index) in oldChat" v-bind:keys="index")
-                .youChat(v-if="oldItem.isCustomer == 1")
+                .youChat(v-if="oldItem.senderId != senderId")
                     van-image(:src="yourImage")
                     .your_text
                         span(v-if="oldItem.contentType == 0") {{ oldItem.content }}
@@ -24,7 +24,7 @@
                         video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;")
                         .time {{ oldItem.createTime }}
             div(v-for="(item, index) in myChat" v-bind:keys="index")
-                .youChat(v-if="item.isCustomer == 1")
+                .youChat(v-if="item.senderId != senderId")
                     van-image(:src="yourImage")
                     .your_text
                         span(v-if="item.contentType == 0") {{ item.content }}
@@ -69,7 +69,8 @@ export default {
             type: 2,
             title: '上传中',
             value: ''
-        }
+        },
+        senderId: JSON.parse(sessionStorage.getItem('token')).asset.adminId
     }
   },
   methods: {
@@ -131,6 +132,7 @@ export default {
         },
         websocketonopen () {},
         websocketonerror () { // 连接建立失败重连
+            console.log('重连中...')
             this.initWebSocket()
         },
         websocketonmessage (e) { // 数据接收
@@ -154,6 +156,7 @@ export default {
         },
         websocketclose (e) { // 关闭
             console.log('断开连接', e)
+            this.websocketonerror()
         },
         autoHeight () {
             setTimeout(() => {
@@ -260,7 +263,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 body{
     max-width: 100%;
 }

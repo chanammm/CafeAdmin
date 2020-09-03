@@ -15,7 +15,7 @@ if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'microm
     if (!sessionStorage.getItem('token')) {
       if (!getQueryStringFn.getQueryString('code')) {
         location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
-        ${process.env.NODE_ENV == 'development' ? 'http://zgksx.com/por/anchor/' : location.href.split('?')[0] /*eslint-disable-line*/}
+        ${process.env.NODE_ENV == 'development' ? 'http://zgksx.com/por/anchor/' : encodeURIComponent(location.href.split('?')[0]) /*eslint-disable-line*/}
         &response_type=code&scope=snsapi_userinfo&state=
         ${process.env.NODE_ENV == 'development' ? location.href.split('?')[0] : null /*eslint-disable-line*/}
         #wechat_redirect`.replace(/ /g, '')
@@ -37,6 +37,7 @@ if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'microm
             } else {
               // 直接登陆 保存 sessionstrong secret
               params.data.data['secret'] = params.data.data.loginResult.secret// 提取层级
+              params.data.data['adminId'] = params.data.data.loginResult.adminId// 提取层级
               sessionStorage.setItem('token', JSON.stringify({asset: params.data.data}))
               location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/order': URL.proxy+ 'order' // 待定
             }

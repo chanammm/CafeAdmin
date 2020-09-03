@@ -936,8 +936,8 @@ window.addEventListener('pageshow', function (params) {
                     if (res.data.state == 200) {
                         this.UpdateTableAndVisible = true;
                         this.search({ url: 'sys_role_list' });
-                        this.data['roleId'] = res.data.data.roleId;  //缓存起来 地址ID
-                        res.data.data.roleId = res.data.data.roleName;
+                        this.data['roleId'] = res.data.data.roleId;  //缓存起来
+                        // res.data.data.roleId = res.data.data.roleName;
                         this.formData = res.data.data;
                     } else {
                         is.IError(res.data.msg);
@@ -954,8 +954,10 @@ window.addEventListener('pageshow', function (params) {
                 if (isNaN(params.addressId)) {  //不修改 区域地址
                     xml['addressId'] = this.data.addressId;
                 }
-                if (isNaN(params.roleId)) {  //不修改角色
-                    xml['roleId'] = this.data.roleId;
+                if (params.roleId.length < 1) {  //不修改角色
+                    xml['roleIds'] = this.data.roleId;
+                }else{
+                    xml['roleIds'] = params.roleId.toString().replace(/\[\]/g, '')  // ###### Thu Sep 3 15:06:33 CST 2020
                 }
                 xml = Object.assign({}, params, xml, {
                     token: JSON.parse(sessionStorage.getItem('token')).asset.secret
@@ -989,6 +991,7 @@ window.addEventListener('pageshow', function (params) {
             adminmanage(params) {
                 params['workPush'] = 0;  //是否执行工单推送(0-否,1-是)
                 params['wechatId'] = -1;  //绑定微信用户id 默认创建 -1 无
+                params['roleIds'] = params.roleId.toString().replace(/\[\]/g, '')  // ###### Thu Sep 3 15:06:33 CST 2020
                 let data = params;
 
                 axios.post('create_admin', qs.stringify(params)).then(params => {
@@ -1867,13 +1870,17 @@ window.addEventListener('pageshow', function (params) {
              * 工单完成
              * **/
             denorder(params) {
-                if (!params.maintainPayments) {
+                if (!params.completeContent) {
                     this.TableAndVisible = true;
                     this.SearchTableFormDatas.workId = params.workId
                     return false;
                 }
-                params['maintainPayment'] = parseFloat(params.maintainPayments * 100).toFixed(0);
-                params['partPayment'] = parseFloat(params.partPayments * 100).toFixed(0);
+                params['maintainPayment'] = params.maintainPayments ? parseFloat(params.maintainPayments * 100).toFixed(0) : 0;
+                params['partPayment'] = params.partPayments ? parseFloat(params.partPayments * 100).toFixed(0) : 0;
+                params['serviceCharge'] = params.serviceCharges ? parseFloat(params.serviceCharges * 100).toFixed(0) : 0;
+                params['testingCharge'] = params.testingCharges ? parseFloat(params.testingCharges * 100).toFixed(0) : 0;
+                delete params.serviceCharges;
+                delete params.testingCharges;
                 delete params.maintainPayments;
                 delete params.partPayments;
                 axios.get("complete_work", {
@@ -1881,6 +1888,8 @@ window.addEventListener('pageshow', function (params) {
                         workId: params.workId,
                         maintainPayment: params.maintainPayment,
                         partPayment: params.partPayment,
+                        testingCharge: params.testingCharge,
+                        serviceCharge: params.serviceCharge,
                         completeContent: params.completeContent
                     }
                 }).then(res => {
@@ -2049,6 +2058,11 @@ window.addEventListener('pageshow', function (params) {
                 })
             },
 
+            // ###### Thu Sep 3 14:16:10 CST 2020
+            pageFn(params) {
+                parent.location.href = '/por/master/#/winchat?workId='+ params
+            },
+
             /**
              * 后台创建工单
              * **/
@@ -2088,6 +2102,8 @@ window.addEventListener('pageshow', function (params) {
                 params['repairsTypeId'] = this.repairsid.repairsTypeId;   //报修类型ID
                 params['demandChargeIds'] = this.data['repairsTypeIds'] ? JSON.stringify(this.data['repairsTypeIds']).replace(/\[|]/g, "") : -1;  //需求类型ID
                 params['visitCost'] = parseFloat(params.visitCost * 100).toFixed(0) || 0;  //预支付费用
+                params['serviceCharge'] = parseFloat(params.serviceCharge * 100).toFixed(0) || 0;  //服务费用
+                params['testingCharge'] = parseFloat(params.testingCharge * 100).toFixed(0) || 0;  //检测费用
 
                 params['clientAddressId'] = -1;  //用户地址ID
                 params['shopName'] = params.shopName || -1;  //门店名称
@@ -2382,8 +2398,6 @@ window.addEventListener('pageshow', function (params) {
                 this.formDataTrees = {};
                 deno();
             },
-
-
         }
     });
 }, false)

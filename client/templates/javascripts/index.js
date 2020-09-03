@@ -892,6 +892,18 @@ window.onload = function (params) {
                             this.fileImages = _arr_;
                             return true;
                         }
+                    },
+                    
+                    /**
+                     * 2020-9-1 增加在线沟通渠道
+                     * 
+                     * **/ 
+                    goToChat () {
+                        if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger'){//eslint-disable-line
+                            location.href = '/por/master/winchat?workId=' + this.getQueryString('workId')
+                        } else {
+                            location.href = '/por/master/chat?workId=' + this.getQueryString('workId')
+                        }
                     }
 
                 },

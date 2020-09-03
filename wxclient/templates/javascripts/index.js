@@ -331,8 +331,8 @@ window.onload = function (params) {
                                             let __arr__ = [];
                                             params.data.page.records.map((element, index) => {
                                                 __arr__.push({
-                                                    name: element.maintainerName,
-                                                    subname: element.maintainerPhone,
+                                                    name: element.adminName,
+                                                    subname: element.phone,
                                                     id: element.id
                                                 })
                                             })

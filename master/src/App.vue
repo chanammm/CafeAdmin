@@ -19,9 +19,9 @@ body,
   padding: 0;
 }
 body {
-  max-width: 640px;
+  max-width: 640px !important;
   min-width: 320px;
-  margin: 0 auto;
+  margin: 0 auto !important;
   background: #eeeeee;
 }
 #app {

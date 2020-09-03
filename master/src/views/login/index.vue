@@ -23,8 +23,8 @@ export default {
     return {
       logo: './static/images/logo.png',
       user: {
-        name: 'maintainer03',
-        pwd: 'root'
+        name: '',
+        pwd: ''
       },
       handling: false
     }
@@ -49,10 +49,11 @@ export default {
       .then(res => {
         if (res.data.state != 200) {//eslint-disable-line
           this.$toast('登陆失败，请联系管理员')
+          this.handling = false
           return false
         }
         sessionStorage.setItem('token', JSON.stringify({asset: res.data.data}))
-        location.href = '/order'
+        location.href = this.URL.proxy + 'order'
       })
     }
   },

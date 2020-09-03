@@ -28,7 +28,7 @@ axios.interceptors.response.use(
       sessionStorage.removeItem('token')
       setTimeout(() => {
         sessionStorage.setItem('token', JSON.stringify({asset: { secret: '' }, bool: true}))
-        location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/': this.URL.proxy // 待定
+        location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/': URL.proxy // 待定
       }, 1000)
       return Promise.resolve(response)
     } else {

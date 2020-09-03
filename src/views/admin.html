@@ -108,9 +108,9 @@
                         <el-form-item label="管理员账号：">
                             <el-input v-model="formData.account" disabled="disabled"></el-input>
                         </el-form-item>
-                        <el-form-item label="角色名称：">
+                        <!-- <el-form-item label="角色名称：">
                             <el-input v-model="formData.roleName" disabled="disabled"></el-input>
-                        </el-form-item>
+                        </el-form-item> -->
                         <el-form-item label="创建时间：" >
                             <el-input v-model="formData.createTime" disabled="disabled"></el-input>
                         </el-form-item>
@@ -131,6 +131,7 @@
                             </el-radio-group>
                         </el-form-item>
                         <el-form-item label="更换角色：">
+                            <div style="color: #ccc;">当前账号的角色：{{ formData.roleName }}</div>
                             <el-select width="100%"
                                 v-model="formData.roleId"
                                 filterable
@@ -138,7 +139,7 @@
                                 reserve-keyword
                                 :remote-method="remoteMethodes"
                                 placeholder="输入【角色】自动查询，支持模糊查询"
-                                :loading="loading">
+                                :loading="loading" multiple>
                                 <el-option
                                 v-for="item in options"
                                 :key="item.value"
@@ -189,7 +190,7 @@
                                 reserve-keyword
                                 :remote-method="remoteMethodes"
                                 placeholder="输入【角色】自动查询，支持模糊查询"
-                                :loading="loading">
+                                :loading="loading" multiple>
                                 <el-option
                                 v-for="item in options"
                                 :key="item.value"

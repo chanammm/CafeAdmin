@@ -4,8 +4,8 @@
             van-popup(v-model="pageTop" position="top")
                 div(style="margin: 10px 0" @click="num = num + 1;page(true);") 查看上一页记录
             div(v-for="(oldItem, index) in oldChat" v-bind:keys="index")
-                .youChat(v-if="oldItem.isCustomer == 1")
-                    van-image(:src="yourImage" @click="viewInfo(oldItem)")
+                .youChat(v-if="oldItem.senderId != senderId")
+                    van-image(:src="yourImage" @click="viewInfo(oldItem, true)")
                     .your_text
                         span(v-if="oldItem.contentType == 0") {{ oldItem.content }}
                         img(:src="oldItem.content" v-if="oldItem.contentType == 1" style="width: 200px;")
@@ -18,7 +18,7 @@
                         video(:src="oldItem.content" v-if="oldItem.contentType == 2" controls="controls" style="width: 200px;"  x5-video-player-type="h5-page" x5-video-orientation="landscape|portrait")
                         .time {{ oldItem.createTime }}
             div(v-for="(item, index) in myChat" v-bind:keys="index")
-                .youChat(v-if="item.isCustomer == 1")
+                .youChat(v-if="item.senderId != senderId")
                     van-image(:src="yourImage")
                     .your_text
                         span(v-if="item.contentType == 0") {{ item.content }}
@@ -46,9 +46,9 @@
                     van-image(:src="client.headImgUrl" width="80" height="80")
                     p(style="margin: 5px 0; color: white") {{ client.adminName }}
                     p(style="margin: 0; color: white") {{ client.phone }}
-                van-cell(center title="消息推送" style="text-align: left")
-                    template(right-icon)
-                        van-switch(v-model="checked" size="24" active-color="#07c160")
+                //- van-cell(center title="消息推送" style="text-align: left")
+                //-     template(right-icon)
+                //-         van-switch(v-model="checked" size="24" active-color="#07c160")
         van-dialog(v-model="file.bool" :title="file.title" show-cancel-button style="height: 300px" @confirm="websocketsend")
             van-loading(v-if='file.load')
             img(:src="file.value" style="height: 155px" v-if="file.type == 1")
@@ -86,7 +86,8 @@ export default {
                 type: 2,
                 title: '上传中',
                 value: ''
-            }
+            },
+            senderId: JSON.parse(sessionStorage.getItem('token')).asset.adminId
         }
     },
     methods: {
@@ -145,10 +146,16 @@ export default {
         },
         websocketonopen () {},
         websocketonerror () { // 连接建立失败重连
+            console.log('失败重连中...')
             this.initWebSocket()
         },
         websocketonmessage (e) { // 数据接收
             const redata = JSON.parse(e.data)
+            console.log(redata)
+            if (redata.contentType == 4) {//eslint-disable-line
+                this.$toast(redata.msg)
+                return false
+            }
             this.myChat.length > 0 ? this.myChat = this.myChat.concat(redata) : this.myChat.push(redata)
             this.autoHeight()
         },
@@ -156,8 +163,9 @@ export default {
             if (!this.chatText && !this.file.value) {
                 return false
             }
+            console.log(this.chatText.replace(/ /g, '&nbsp;'))
             this.bscok.send(JSON.stringify({
-                content: this.file.value ? this.file.value : this.chatText,
+                content: this.file.value ? this.file.value : this.chatText.replace(/ /g, '&nbsp;'),
                 contentType: this.file.value ? this.file.type : 0
             }))
             this.chatText = ''
@@ -168,6 +176,7 @@ export default {
         },
         websocketclose (e) { // 关闭
             console.log('断开连接', e)
+            this.websocketonerror()
         },
         autoHeight () {
             setTimeout(() => {
@@ -250,8 +259,16 @@ export default {
                 //     senderName: '123',
                 //     workId: '12313'
                 // }]
-                this.oldChat.length > 0 ? this.oldChat = params.data.page.records.reverse().concat(this.oldChat) : this.oldChat = params.data.page.records.reverse()
                 // this.oldChat.length > 0 ? this.oldChat = this.oldChat.concat(params.data.page.records) : this.oldChat = params.data.page.records
+                if (this.oldChat.length > 0) {
+                    this.oldChat = params.data.page.records.reverse().concat(this.oldChat)
+                } else {
+                    if (params.data.page.records.length > 0) {
+                        this.oldChat = params.data.page.records.reverse()
+                    } else {
+                        this.oldChat = []
+                    }
+                }
                 if (param) {
                     this.pageTop = false
                 } else {

@@ -317,9 +317,19 @@
                             {{formData.maintainPaymentStr}} 元
                         </el-form-item>
 
-                        <el-form-item label="配件金额展示：" prop="partPaymentStr">
+                        <el-form-item label="配件金额：" prop="partPaymentStr">
                             <!-- <el-input v-model="formData.paymentStr"></el-input> -->
                             {{formData.partPaymentStr}} 元
+                        </el-form-item>
+
+                        <el-form-item label="服务费：" prop="serviceCharge">
+                            <!-- <el-input v-model="formData.paymentStr"></el-input> -->
+                            {{formData.serviceCharge}} 元
+                        </el-form-item>
+
+                        <el-form-item label="检测费：" prop="testingCharge">
+                            <!-- <el-input v-model="formData.paymentStr"></el-input> -->
+                            {{formData.testingCharge}} 元
                         </el-form-item>
 
                         <el-form-item label="工单耗时：" prop="timeConsumingStr">
@@ -371,6 +381,8 @@
                             </el-button>
                             <el-button style="margin-top: 10px;" v-show="formData.orderCount > 0" type="primary"
                                 @click="option = []; order(formData)"> 查看订单
+                            </el-button>
+                            <el-button style="margin-top: 10px;" type="primary" @click="pageFn(formData.workId)"> 在线沟通
                             </el-button>
                         </div>
                     </el-form>
@@ -434,13 +446,19 @@
                         <el-form-item label="工单号" prop="workId">
                             <el-input v-model="SearchTableFormDatas.workId" disabled="disabled"></el-input>
                         </el-form-item>
-                        <el-form-item label="维修金额" prop="maintainPayments">
+                        <el-form-item label="维修金额">
                             <el-input v-model="SearchTableFormDatas.maintainPayments" type="number"></el-input>
                         </el-form-item>
-                        <el-form-item label="配件金额" prop="partPayment">
+                        <el-form-item label="配件金额">
                             <el-input v-model="SearchTableFormDatas.partPayments" type="number"></el-input>
                         </el-form-item>
-                        <el-form-item label="回访记录" prop="completeContent">
+                        <el-form-item label="服务费">
+                            <el-input v-model="SearchTableFormDatas.serviceCharges" type="number"></el-input>
+                        </el-form-item>
+                        <el-form-item label="检测费">
+                            <el-input v-model="SearchTableFormDatas.testingCharges" type="number"></el-input>
+                        </el-form-item>
+                        <el-form-item label="回访记录">
                             <el-input type="textarea" v-model="SearchTableFormDatas.completeContent"></el-input>
                         </el-form-item>
                         <div class="btn-center" style="text-align: center; margin: 20px;">
@@ -612,6 +630,14 @@
 
                             <el-form-item label="预付费" prop="visitCost">
                                 <el-input v-model="formDataTrees.visitCost" type="number"></el-input>
+                            </el-form-item>
+
+                            <el-form-item label="服务费" prop="serviceCharge">
+                                <el-input v-model="formDataTrees.serviceCharge" type="number"></el-input>
+                            </el-form-item>
+
+                            <el-form-item label="检测费" prop="testingCharge">
+                                <el-input v-model="formDataTrees.testingCharge" type="number"></el-input>
                             </el-form-item>
 
                             <el-form-item label="省/市/区">
