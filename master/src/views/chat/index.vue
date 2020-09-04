@@ -163,9 +163,12 @@ export default {
             if (!this.chatText && !this.file.value) {
                 return false
             }
-            console.log(this.chatText.replace(/ /g, '&nbsp;'))
+            this.chatText = this.chatText.replace(/ /g, '')
+            if (!this.chatText) {
+                return false
+            }
             this.bscok.send(JSON.stringify({
-                content: this.file.value ? this.file.value : this.chatText.replace(/ /g, '&nbsp;'),
+                content: this.file.value ? this.file.value : this.chatText,
                 contentType: this.file.value ? this.file.type : 0
             }))
             this.chatText = ''
