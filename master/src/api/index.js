@@ -46,6 +46,7 @@ axios.interceptors.response.use(
   })
 const Fn = {
   async httpRequest (option = {}) {
+    axios.defaults.headers.common['Authorization'] = sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : '' // 设置请求头为 Authorization
     if (option.methods == 'GET' || option.methods == 'get') {//eslint-disable-line
       return axios.get(
         option.url, {

@@ -8,15 +8,15 @@ import areaList from './area';
 
 const URLs = `https://admin.api.zgksx.com/`;
 
-const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
-const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
-? location.href 
-: "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
-
-// const pathLogin = "http://zgksx.com/por/admin/";
+// const pathLogin = "http://192.168.0.168:8080/cafeadmin/src/dist/";
 // const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
 // ? location.href 
-// : "http://zgksx.com/por/dz/index.html";
+// : "http://192.168.0.168:8080/cafeadmin/client/templates/build/index.html";
+
+const pathLogin = "http://zgksx.com/por/admin/";
+const toPath = window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger' 
+? location.href 
+: "http://zgksx.com/por/dz/index.html";
 
 const URLFiles = `https://file.zgksx.com/`;
 const wxUri = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
@@ -91,7 +91,7 @@ window.onload = function (params) {
                     activeId: 1,
                     activeIndex: 0,
                     tag: 0,
-                    num: 1,
+                    num: sessionStorage.getItem('num') || 1,
                     machineList: [],
                     machine: {
                         machineName: '选择服务'
@@ -170,7 +170,9 @@ window.onload = function (params) {
                         contactPhone: '',
                         citys: '',
                         address: ''
-                    }
+                    },
+                    currentPage: sessionStorage.getItem('num') || 1,
+                    total: 0
                 },
                 created: function () {
                     this.loadingShow = true;
@@ -599,23 +601,24 @@ window.onload = function (params) {
                     },
 
                     ourHref(params) {
+                        sessionStorage.removeItem('num')
                         params < 1 ? location.href = './content.html' : params > 1 ? location.href = './user.html' : location.href = './order.html';
                     },
 
                     page(params) {
+                        sessionStorage.setItem('num', this.num)
                         location.href = `./details.html?workId=${params}`
                     },
-
+                    toPage(params){
+                        this.num = params
+                        this.onLoad()
+                    },
                     onLoad() {
-                        if (this.refreshing) {
-                            this.list = [];
-                            this.refreshing = false;
-                        }
                         axios.get('wechat_admin_work_list', {
                             params: {
                                 status: this.tag > 0 ? this.tag : '',
                                 page: this.num,
-                                pageSize: 20,
+                                pageSize: 5,
                                 key: this.search
                             }
                         })
@@ -623,26 +626,27 @@ window.onload = function (params) {
                                 this.show = false;
                                 this.loadingShow = false;
                                 if (params.data.state == 200) {
+                                    this.list = [];
+                                    this.total = params.data.page.total
+                                    this.currentPage = this.num
                                     params.data.page.records.map((element, index) => {
                                         params.data.page.records[index]['work'] = '工单号：' + element.workId;
-                                        params.data.page.records[index]['contact'] = '联系人：' + element.contactName + '，联系电话：' + element.contactPhone;
+                                        params.data.page.records[index]['contact'] = `联系人：${element.contactName != -1 ? element.contactName : '无'}，联系电话：${element.contactPhone != -1 ? element.contactPhone : '无'}`;
                                         params.data.page.records[index]['src'] = 'https://www.zgksx.com/file/machinePic/041509001276628133.png';
+                                        params.data.page.records[index]['logs'] = axios.get('work_log_list?workId=' + element.workId).then(param => {
+                                            params.data.page.records[index]['logs'] = '无';
+                                            if (param.data.state == 200) {
+                                                params.data.page.records[index]['logs'] = '执行人：'+param.data.list[0].createName +'，内容：'+ param.data.list[0].logContent
+                                            }
+                                            return params.data.page.records[index]['logs']
+                                        })
                                     })
+
                                     this.list.length > 0 ? this.list = this.list.concat(params.data.page.records) : this.list = params.data.page.records;
-
-                                    // 加载状态结束
-                                    this.loading = false;
                                     this.removex();
-                                    this.num++;
-
-                                    if (params.data.page.records.length < 10) this.finished = true;
-
-                                } else if (params.data.state == 300) {   //数据空
-                                    this.loading = false;
-                                    this.finished = true;
+                                } else if (params.data.state == 300) {
+                                    this.loading = true;
                                 } else {
-                                    this.loading = false;
-                                    this.finished = true;
                                     this.num = 1;
                                     vant.Toast(params.data.msg)
                                 };
@@ -656,16 +660,6 @@ window.onload = function (params) {
                                 element.innerHTML = element.innerHTML.replace(/x/g, '');
                             })
                         })
-                    },
-
-                    onRefresh() {
-                        // 清空列表数据
-                        this.finished = false;
-                        // 重新加载数据
-                        // 将 loading 设置为 true，表示处于加载状态
-                        this.loading = true;
-                        this.num = 1;
-                        this.onLoad();
                     },
                     onOversize(file) {
                         vant.Toast('文件大小不能超过 50M');
@@ -900,9 +894,9 @@ window.onload = function (params) {
                      * **/ 
                     goToChat () {
                         if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) != 'micromessenger'){//eslint-disable-line
-                            location.href = '/por/master/winchat?workId=' + this.getQueryString('workId')
+                            location.href = '/por/master/#/winchat?workId=' + this.getQueryString('workId')
                         } else {
-                            location.href = '/por/master/chat?workId=' + this.getQueryString('workId')
+                            location.href = '/por/master/#/chat?workId=' + this.getQueryString('workId')
                         }
                     }
 

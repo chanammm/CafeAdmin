@@ -17,7 +17,7 @@ if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'microm
         location.href = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx998479db1176209a&redirect_uri=
         ${process.env.NODE_ENV == 'development' ? 'http://zgksx.com/por/anchor/' : encodeURIComponent(location.href.split('?')[0]) /*eslint-disable-line*/}
         &response_type=code&scope=snsapi_userinfo&state=
-        ${process.env.NODE_ENV == 'development' ? location.href.split('?')[0] : null /*eslint-disable-line*/}
+        ${process.env.NODE_ENV == 'development' ? location.href.split('?')[0] : getQueryStringFn.getQueryString('wechat') +'||'+getQueryStringFn.getQueryString('workId') /*eslint-disable-line*/}
         #wechat_redirect`.replace(/ /g, '')
       } else {
         axios.post('maintainer_repairs_wechat_login', qs.stringify({code: getQueryStringFn.getQueryString('code')}))
@@ -39,7 +39,11 @@ if (window.navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == 'microm
               params.data.data['secret'] = params.data.data.loginResult.secret// 提取层级
               params.data.data['adminId'] = params.data.data.loginResult.adminId// 提取层级
               sessionStorage.setItem('token', JSON.stringify({asset: params.data.data}))
-              location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/order': URL.proxy+ 'order' // 待定
+              if (/qm_chat/g.test(getQueryStringFn.getQueryString('state'))) {
+                location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/chat?workId='+ getQueryStringFn.getQueryString('state').split('||')[1]: URL.proxy+ 'chat?workId='+ getQueryStringFn.getQueryString('state').split('||')[1] // 待定
+              } else {
+                location.href = process.env.NODE_ENV == 'development'/*eslint-disable-line*/ ? location.origin+'/#/order': URL.proxy+ 'order' // 待定
+              }
             }
           }
         })

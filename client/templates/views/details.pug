@@ -27,6 +27,7 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 需求信息
+              span(style="float: right; cursor: pointer; color: blue" @click="contentMsg = true") 修改
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
           van-cell(title="产品名称" :value="workList.facilityName")
@@ -60,7 +61,7 @@ html(lang="en")
           van-cell(title="维修师傅" :value="workList.maintainerName")
           van-cell(title="维修师傅电话" :value="workList.maintainerPhone")
           div(v-if="workList.status == '已派单'" style="text-align: center;")
-            van-button(type="info" plain style="width: 20%; margin: 10px auto; font-size: 12px;background: none; border-color: #1989fa;" @click="goToChat") 在线沟通
+            van-button(type="info" plain style="width: 50%; margin: 10px auto; font-size: 12px;background: none; border-color: #1989fa;" @click="goToChat") 在线沟通
           
           van-cell(class="cell_border")
             template(#title)
@@ -82,5 +83,7 @@ html(lang="en")
           div(style="width: 100%;margin-bottom: 20px;height: auto;overflow: hidden;")
             van-button(round type="info" class="btn" @click="href('order')" style="width: 40%; float: left;") 返回上一页
             van-button(round type="info" class="btn" @click="href('logs')" style="width: 40%; float: left;") 查看日志
+          van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
+            van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")
           
           

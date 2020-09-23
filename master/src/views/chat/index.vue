@@ -5,7 +5,7 @@
                 div(style="margin: 10px 0" @click="num = num + 1;page(true);") 查看上一页记录
             div(v-for="(oldItem, index) in oldChat" v-bind:keys="index")
                 .youChat(v-if="oldItem.senderId != senderId")
-                    van-image(:src="yourImage" @click="viewInfo(oldItem, true)")
+                    van-image(:src="oldItem.headImgUrl" @click="viewInfo(oldItem);clientShow = true" round)
                     .your_text
                         span(v-if="oldItem.contentType == 0") {{ oldItem.content }}
                         img(:src="oldItem.content" v-if="oldItem.contentType == 1" style="width: 200px;")
@@ -19,7 +19,7 @@
                         .time {{ oldItem.createTime }}
             div(v-for="(item, index) in myChat" v-bind:keys="index")
                 .youChat(v-if="item.senderId != senderId")
-                    van-image(:src="yourImage")
+                    van-image(:src="item.headImgUrl" round)
                     .your_text
                         span(v-if="item.contentType == 0") {{ item.content }}
                         img(:src="item.content" v-if="item.contentType == 1" style="width: 200px;")
@@ -43,7 +43,7 @@
         van-popup(v-model="clientShow" position="top")
             van-image(:src="clientBg" class="client")
                 .client_message(style="position: absolute; top:20px; left: 0; width: 100%;")
-                    van-image(:src="client.headImgUrl" width="80" height="80")
+                    van-image(:src="client.headImgUrl" width="80" height="80" round)
                     p(style="margin: 5px 0; color: white") {{ client.adminName }}
                     p(style="margin: 0; color: white") {{ client.phone }}
                 //- van-cell(center title="消息推送" style="text-align: left")
@@ -87,7 +87,8 @@ export default {
                 title: '上传中',
                 value: ''
             },
-            senderId: JSON.parse(sessionStorage.getItem('token')).asset.adminId
+            senderId: JSON.parse(sessionStorage.getItem('token')).asset.adminId,
+            timeSin: 1000
         }
     },
     methods: {
@@ -134,7 +135,6 @@ export default {
                 }
                 this.client = params.data.data
             })
-            this.clientShow = true
         },
         initWebSocket () {
             const ws = `${this.URL.ws + this.$route.query.workId}?token=${sessionStorage.getItem('token') ? JSON.parse(sessionStorage.getItem('token')).asset.secret : ''}`
@@ -153,7 +153,7 @@ export default {
             const redata = JSON.parse(e.data)
             console.log(redata)
             if (redata.contentType == 4) {//eslint-disable-line
-                this.$toast(redata.msg)
+                this.$toast(redata.content)
                 return false
             }
             this.myChat.length > 0 ? this.myChat = this.myChat.concat(redata) : this.myChat.push(redata)
@@ -179,7 +179,14 @@ export default {
         },
         websocketclose (e) { // 关闭
             console.log('断开连接', e)
-            this.websocketonerror()
+            setTimeout(() => {
+                this.timeSin++
+                if (this.timeSin > 1010) {
+                    // 重连10次
+                    return false
+                }
+                this.websocketonerror()
+            }, this.timeSin)
         },
         autoHeight () {
             setTimeout(() => {
@@ -213,55 +220,6 @@ export default {
                     this.$toast(params.data.msg)
                     return false
                 }
-                // params.data.page.records = [{
-                //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
-                //     contentType: 2,
-                //     createTime: '123123123',
-                //     isCustomer: 1,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }, {
-                //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
-                //     contentType: 1,
-                //     createTime: '123123123',
-                //     isCustomer: 0,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }, {
-                //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
-                //     contentType: 0,
-                //     createTime: '123123123',
-                //     isCustomer: 1,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }, {
-                //     content: 'https://www.zgksx.com/file/workVideo/082316001825795129.mp4',
-                //     contentType: 2,
-                //     createTime: '123123123',
-                //     isCustomer: 0,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }, {
-                //     content: 'https://img.yzcdn.cn/vant/apple-3.jpg',
-                //     contentType: 1,
-                //     createTime: '123123123',
-                //     isCustomer: 1,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }, {
-                //     content: '阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的阿萨大大撒旦大苏打实打实的啊实打实的',
-                //     contentType: 0,
-                //     createTime: '123123123',
-                //     isCustomer: 1,
-                //     senderId: 0,
-                //     senderName: '123',
-                //     workId: '12313'
-                // }]
                 // this.oldChat.length > 0 ? this.oldChat = this.oldChat.concat(params.data.page.records) : this.oldChat = params.data.page.records
                 if (this.oldChat.length > 0) {
                     this.oldChat = params.data.page.records.reverse().concat(this.oldChat)

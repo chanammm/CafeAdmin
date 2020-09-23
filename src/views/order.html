@@ -35,6 +35,7 @@
                             <el-option label="工单号" value="workId"></el-option>
                             <el-option label="联系人名称" value="contactName"></el-option>
                             <el-option label="联系人电话" value="contactPhone"></el-option>
+                            <el-option label="门店名称" value="shopName"></el-option>
                         </el-select>
                     </el-input>
 
@@ -625,7 +626,7 @@
                             </el-form-item>
 
                             <el-form-item label="联系人电话" prop="contactPhone">
-                                <el-input v-model="formDataTrees.contactPhone" type="number"></el-input>
+                                <el-input v-model="formDataTrees.contactPhone"></el-input>
                             </el-form-item>
 
                             <el-form-item label="预付费" prop="visitCost">

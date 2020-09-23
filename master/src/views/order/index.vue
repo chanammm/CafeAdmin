@@ -69,39 +69,41 @@ export default {
         this.orderList()
     },
     orderList () {
-      if (this.refreshing) {
-          this.lists = []
-          this.refreshing = false
-      }
-      this.api.httpRequest({
-        url: 'work_page',
-        methods: 'GET',
-        data: {
-              status: this.tags,
-              page: this.num,
-              pageSize: 10,
-              workId: this.search
-          }
-      })
-        .then(params => {
-            this.show = false
-            this.loadingShow = false
-            if (params.data.state == 200) {//eslint-disable-line
-                this.lists.length > 0 ? this.lists = this.lists.concat(params.data.page.records) : this.lists = params.data.page.records
-                // 加载状态结束
-                this.loading = false
-                this.num++
-                if (params.data.page.records.length < 10) this.finished = true
-            } else if (params.data.state == 300) {//eslint-disable-line
-                this.loading = false
-                this.finished = true
-            } else {
-                this.loading = false
-                this.finished = true
-                this.num = 1
-                this.$toast(params.data.msg)
+      setTimeout(() => {
+        if (this.refreshing) {
+            this.lists = []
+            this.refreshing = false
+        }
+        this.api.httpRequest({
+          url: 'work_page',
+          methods: 'GET',
+          data: {
+                status: this.tags,
+                page: this.num,
+                pageSize: 10,
+                workId: this.search
             }
         })
+          .then(params => {
+              this.show = false
+              this.loadingShow = false
+              if (params.data.state == 200) {//eslint-disable-line
+                  this.lists.length > 0 ? this.lists = this.lists.concat(params.data.page.records) : this.lists = params.data.page.records
+                  // 加载状态结束
+                  this.loading = false
+                  this.num++
+                  if (params.data.page.records.length < 10) this.finished = true
+              } else if (params.data.state == 300) {//eslint-disable-line
+                  this.loading = false
+                  this.finished = true
+              } else {
+                  this.loading = false
+                  this.finished = true
+                  this.num = 1
+                  this.$toast(params.data.msg)
+              }
+          })
+      }, 500)
     }
   },
   created () {}

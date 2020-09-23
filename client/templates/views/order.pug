@@ -29,16 +29,20 @@ html(lang="en")
           each item in [{name:'全部', id: 0},{name: "进行中", id: 1},{name: "已完成", id: 2},{name: "已取消", id: 3}]
             van-tab(title=item.name)
               div(:style="secrHeight")
-                van-pull-refresh(v-model="refreshing" @refresh="onRefresh")
-                  van-list(v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad()")
-                    van-cell(v-for="item in list" :key="item" @click="page(item.workId)")
-                      van-card(:desc="item.contact" :title="'工单号：' + item.workId" :num="item.createTime" thumb="../images/order.png")
-                        template(#tags)
-                            div(style="display: block;") 保修类型：{{ item.repairsTypeName }}
-                            div(style="display: block;") 门店名称：{{ item.shopName }}
-                            div(style="display: block;") 期望上门时间：{{ item.visitingTime || "无" }}
-                            van-tag(plain :type="item.status == 4 ? 'success' : 'danger'") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
-                            van-button(plain hairline type="primary" size="small" style="margin:6px 0;width:100%;" v-if="item.status == 4" @click.stop="tryAgain(item.workId)") 再次提交工单
+                //- van-pull-refresh(v-model="refreshing" @refresh="onRefresh")
+                //- van-list(v-model="loading" :finished="finished")
+                van-cell(v-for="item in list" :key="item" @click="page(item.workId)")
+                  van-card(:desc="item.contact" :title="'工单号：' + item.workId" :num="item.createTime" thumb="../images/order.png")
+                    template(#tags)
+                        div(style="display: block;") 保修类型：{{ item.repairsTypeName }}
+                        div(style="display: block;") 门店名称：{{ item.shopName }}
+                        div(style="display: block;") 期望上门时间：{{ item.visitingTime || "无" }}
+                        div(style="display: block; font-size: 10px; color: #999") 最新日志：
+                        div(style="display: block; font-size: 10px; color: #999") {{ item.logs || "无" }}
+                        van-tag(plain :type="item.status == 4 ? 'success' : 'danger'") {{ item.status == 4 ? '已完成' : item.status == 19 ? '已取消': '进行中'}}
+                        van-button(plain hairline type="primary" size="small" style="margin:6px 0;width:100%;" v-if="item.status == 4" @click.stop="tryAgain(item.workId)") 再次提交工单
+                van-pagination(v-model="currentPage" v-if="list.length > 0" :total-items="total" :show-page-size="3" :items-per-page="5" @change="toPage" force-ellipses)
+                div(v-if="list.length < 1" style="text-align: center;color: #ccc;margin-top: 10px;") 暂无数据
         van-tabbar(v-model="active" @change="ourHref")
           van-tabbar-item(icon="comment-o") 填写信息
           van-tabbar-item(icon="todo-list-o") 我的工单
