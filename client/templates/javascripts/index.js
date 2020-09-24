@@ -320,51 +320,7 @@ window.onload = function (params) {
                         })
                     } else if (/details/.test(location.href)) {
                         this.containers();
-                        axios.get('sys_work_detail?workId=' + this.getQueryString('workId')).then(params => {
-                            setTimeout(() => {
-                                this.show = false;
-                                this.loadingShow = false;
-                            }, 1000)
-                            if (params.data.state == 200) {
-                                this.workList = {};
-                                Object.keys(params.data.data).forEach((element, index) => {
-                                //     if (this.alias.get(element)) {
-                                //         if (element == 'machineBrandPic' || element == 'machineOverallPic' || element == 'faultPartPic') {
-                                //             this.workList.push({ name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index] })
-                                //         } else {
-                                            if (element == 'creationType') {
-                                                params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
-                                            }
-                                //             } else {
-                                            if(element == 'facilityName'){
-                                                let arr = [];
-                                                try {
-                                                    JSON.parse(Object.values(params.data.data)[index]).map((element, index) => {
-                                                        arr.push(element.name);
-                                                    })
-                                                    params.data.data[element] =  arr.toString().replace(/\[\]/g, '');
-                                                } catch (error) {
-                                                    console.info(error)
-                                                }
-                                            }
-                                            if (element == 'status') {
-                                                params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
-                                            } else {
-                                                params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
-                                            }
-                                //             }
-
-                                //         }
-                                //     }
-                                })
-                                this.workList = params.data.data;
-                            } else {
-                                // vant.Toast('获取数据异常！请重试');
-                                setTimeout(() => {
-                                    location.href = './order.html';
-                                }, 500)
-                            }
-                        })
+                        this.detailsMessage();
                     } else if (/logs/.test(location.href)) {
                         this.containers();
                         axios.get('work_log_list?workId=' + this.getQueryString('workId')).then(params => {
@@ -898,6 +854,101 @@ window.onload = function (params) {
                         } else {
                             location.href = '/por/master/#/chat?workId=' + this.getQueryString('workId')
                         }
+                    },
+
+                    // ###### Thu Sep 24 16:06:18 CST 2020
+                    dobient () {
+                        axios.post('sys_repairs_type_list', qs.stringify({  //查看报修分类列表
+                            page: 1,
+                            pageSize: 20
+                        }))
+                        .then(res => {
+                            if (res.data.state == 200) {
+                                let _arr_= [];
+                                _arr_.push({ text: '修改保修类型' })
+                                _arr_[0]['children'] = [];
+                                res.data.page.records.forEach(element => {
+                                    _arr_[0]['children'].push({
+                                        text: element.repairsTypeName,
+                                        id: element.repairsTypeId
+                                    })
+                                })
+                                this.items = _arr_;
+
+                            } else {
+                                vant.Toast(params.data.msg)
+                            };
+                        });
+                    },
+
+                    // ###### Thu Sep 24 16:11:27 CST 2020
+                    onSelectDetails (params) {
+                        this.$dialog.confirm({
+                            title: '提示',
+                            message: '是否修改报修类型？',
+                        })
+                        .then(() => {
+                            axios.post('wechat_edit_work_repairs_type', qs.stringify({
+                                workId: this.getQueryString('workId'),
+                                repairsTypeId: params.id
+                            }))
+                            .then(res => {
+                                vant.Toast(res.data.msg)
+                                this.detailsMessage()
+                            });
+                        })
+                        .catch(() => {
+                            // on cancel
+                        });
+                    },
+
+                    //  ###### Thu Sep 24 16:31:37 CST 2020
+                    detailsMessage () {
+                        axios.get('sys_work_detail?workId=' + this.getQueryString('workId')).then(params => {
+                            setTimeout(() => {
+                                this.show = false;
+                                this.loadingShow = false;
+                            }, 1000)
+                            if (params.data.state == 200) {
+                                this.workList = {};
+                                Object.keys(params.data.data).forEach((element, index) => {
+                                //     if (this.alias.get(element)) {
+                                //         if (element == 'machineBrandPic' || element == 'machineOverallPic' || element == 'faultPartPic') {
+                                //             this.workList.push({ name: this.alias.get(element), value: '', view: Object.values(params.data.data)[index] })
+                                //         } else {
+                                            if (element == 'creationType') {
+                                                params.data.data[element] = this.creationType.get(parseInt(Object.values(params.data.data)[index]))
+                                            }
+                                //             } else {
+                                            if(element == 'facilityName'){
+                                                let arr = [];
+                                                try {
+                                                    JSON.parse(Object.values(params.data.data)[index]).map((element, index) => {
+                                                        arr.push(element.name);
+                                                    })
+                                                    params.data.data[element] =  arr.toString().replace(/\[\]/g, '');
+                                                } catch (error) {
+                                                    console.info(error)
+                                                }
+                                            }
+                                            if (element == 'status') {
+                                                params.data.data[element] =  this.status.get(Object.values(params.data.data)[index])
+                                            } else {
+                                                params.data.data[element] = Object.values(params.data.data)[index] == -1 ? '无' : Object.values(params.data.data)[index]
+                                            }
+                                //             }
+
+                                //         }
+                                //     }
+                                })
+                                this.workList = params.data.data;
+                            } else {
+                                // vant.Toast('获取数据异常！请重试');
+                                setTimeout(() => {
+                                    location.href = './order.html';
+                                }, 500)
+                            }
+                        })
                     }
 
                 },

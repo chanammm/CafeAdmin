@@ -93,7 +93,7 @@ html(lang="en")
                 van-uploader(v-model="fileListss" multiple :after-read="updataFile('faultPartPic')" :before-delete="deleteFn('fileListss')")
             //- van-action-sheet(v-model="contentMsg" :actions="actions" @select="onSelect" cancel-text="取消" close-on-click-action)
           van-button(round type="info" size="normal" @click="submit" :loading="handling ? true : false" ) 提交
-        van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
+        van-popup(v-model="contentMsg" position="bottom")
           van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")
         van-popup(v-model="timeMsg" position="bottom" :style="{ height: '40%' }")
           van-datetime-picker(v-model="currentDate"

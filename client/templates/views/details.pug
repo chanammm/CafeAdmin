@@ -27,7 +27,7 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 需求信息
-              span(style="float: right; cursor: pointer; color: blue" @click="contentMsg = true") 修改
+              span(style="float: right; cursor: pointer; color: blue" @click="dobient(); contentMsg = true" v-if="workList.status != '已完成' && workList.status != '已取消'") 修改报修类型
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
           van-cell(title="产品名称" :value="workList.facilityName")
@@ -84,6 +84,6 @@ html(lang="en")
             van-button(round type="info" class="btn" @click="href('order')" style="width: 40%; float: left;") 返回上一页
             van-button(round type="info" class="btn" @click="href('logs')" style="width: 40%; float: left;") 查看日志
           van-popup(v-model="contentMsg" position="bottom" :style="{ height: '40%' }")
-            van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelect")
+            van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelectDetails")
           
           
