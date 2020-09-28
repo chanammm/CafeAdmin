@@ -895,6 +895,7 @@ window.onload = function (params) {
                             .then(res => {
                                 vant.Toast(res.data.msg)
                                 this.detailsMessage()
+                                this.contentMsg = false
                             });
                         })
                         .catch(() => {

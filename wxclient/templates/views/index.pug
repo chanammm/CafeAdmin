@@ -32,6 +32,7 @@ html(lang="en")
             template(#title)
               div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
               span(class="custom-title" style="font-weight: blod;") 需求信息
+              van-tag(type="success" style="float: right; cursor: pointer; color: #FFF" @click="dobient(); contentMsg = true" v-if="workList.hasBeenModified != 1") 修改报修类型
           van-cell(title="需求名称" :value="workList.demandChargeName")
           van-cell(title="报修类型名称" :value="workList.repairsTypeName")
           van-cell(title="产品名称" :value="workList.facilityName")
@@ -94,4 +95,7 @@ html(lang="en")
         van-action-sheet(v-model="contactShow" cancel-text="提交" @cancel="submit" description="填写沟通内容")
           van-field(v-model="message" rows="2" autosize  type="textarea" maxlength="200" placeholder="请输入沟通内容" show-word-limit) 
         van-action-sheet(v-model="matersShow" :actions="actions" @select="submit")
+
+        van-popup(v-model="contentMsg" position="bottom")
+            van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelectDetails")
     

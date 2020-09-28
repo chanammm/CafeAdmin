@@ -121,7 +121,11 @@ window.onload = function (params) {
                     },{
                         name: '工单派单',
                         id: 2
-                    }]
+                    }],
+                    contentMsg: false,
+                    activeId: 1,
+                    activeIndex: 0,
+                    items: []
                 },
                 created: function () {
                     document.querySelector('.container').style.display = 'block';
@@ -372,7 +376,55 @@ window.onload = function (params) {
                     },
                     preview(params) {
                         vant.ImagePreview(params.split(','))
+                    },
+
+                    // ###### Thu Sep 24 19:17:01 CST 2020
+                    dobient () {
+                        axios.post('sys_repairs_type_list', qs.stringify({  //查看报修分类列表
+                            page: 1,
+                            pageSize: 20
+                        }))
+                        .then(res => {
+                            if (res.data.state == 200) {
+                                let _arr_= [];
+                                _arr_.push({ text: '修改保修类型' })
+                                _arr_[0]['children'] = [];
+                                res.data.page.records.forEach(element => {
+                                    _arr_[0]['children'].push({
+                                        text: element.repairsTypeName,
+                                        id: element.repairsTypeId
+                                    })
+                                })
+                                this.items = _arr_;
+
+                            } else {
+                                vant.Toast(params.data.msg)
+                            };
+                        });
+                    },
+
+                    // ###### Thu Sep 24 19:17:06 CST 2020
+                    onSelectDetails (params) {
+                        this.$dialog.confirm({
+                            title: '提示',
+                            message: '是否修改报修类型？',
+                        })
+                        .then(() => {
+                            axios.post('wechat_edit_work_repairs_type', qs.stringify({
+                                workId: sessionStorage.getItem('work_id'),
+                                repairsTypeId: params.id
+                            }))
+                            .then(res => {
+                                vant.Toast(res.data.msg)
+                                this.orderDirection()
+                                this.contentMsg = false
+                            });
+                        })
+                        .catch(() => {
+                            // on cancel
+                        });
                     }
+
                 },
             });
             // 通过 CDN 引入时不会自动注册 Lazyload 组件
