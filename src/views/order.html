@@ -363,7 +363,12 @@
                         <el-form-item label="状态日志" prop="logs">
                             <div style="height:300px; line-height:0 !important;overflow-y: scroll;">
                                 <el-steps direction="vertical" :active="1" >
-                                    <el-step icon="el-icon-success" v-for="(item, i) in formData.logs" v-bind:key="i" :title="item.create" :description="item.logContent"></el-step>
+                                    <el-step icon="el-icon-success" v-for="(item, i) in formData.logs" v-bind:key="i" :title="item.create" :description="item.logContent">
+                                        <template slot="description" >
+                                            <!-- ###### Wed Oct 21 15:11:06 CST 2020 -->
+                                            <div v-for="(tip, index) in item.logContents">{{ tip }}</div>
+                                          </template>
+                                    </el-step>
                                 </el-steps>
                               </div>
                         </el-form-item>

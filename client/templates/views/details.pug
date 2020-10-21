@@ -36,7 +36,7 @@ html(lang="en")
             template(#title)
               span(class="custom-title" style="font-weight: blod;") 视频附件
               video(:src="workList.video" controls="controls" width="200" height="200" style="display: block;")
-          van-cell(title="图片" v-if="workList.faultDiagram != '无'")
+          van-cell(title="图片" v-if="workList.faultDiagram != '无'"  @click="vant.ImagePreview([workList.faultDiagram])")
             van-image(style="width: 100px;margin-top:2px;" :src="workList.faultDiagram")
 
 

@@ -2005,10 +2005,18 @@ window.addEventListener('pageshow', function (params) {
                                     '联络登记：' + record.createName : record.logType == 3 ? 
                                     '派单登记：' + record.createName : record.logType == 4 ? 
                                     '完成登记：' + record.createName : record.logType == 5 ? 
+                                    '修改报修类型登记：' + record.createName : record.logType == 7 ? 
                                     '继续联络登记：' + record.createName : record.logType == 17 ? 
                                     '编辑登记：' + record.createName : record.logType == 18 ? 
                                     '提交登记：' + record.createName : '取消登记：' + record.createName;
                                     record.create = record.create + '，' + record.createTime;
+                                    record.logContent == -1 ? record.logContent = '未填入登记内容': null;
+                                    // ###### Wed Oct 21 16:23:02 CST 2020
+                                    record['logContents'] = []
+                                    record.logContent = record.logContent.replace(/\n/g, "</br>")
+                                    record.logContent.split('</br>').forEach((item, index) => {
+                                        record.logContents.push(item)
+                                    })
                                     __arr__.push(record);
                                 })
                                 res.data.data['logs'] = __arr__;
@@ -2146,6 +2154,7 @@ window.addEventListener('pageshow', function (params) {
                         this.formDataTrees = {};
                         this.formData = {};
                         this.list();
+                        this.active = 0;
                     } else {
                         is.IError(res.data.msg);
                         this.active = 2;

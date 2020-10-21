@@ -950,6 +950,11 @@ window.onload = function (params) {
                                 }, 500)
                             }
                         })
+                    },
+
+                    // ###### Mon Oct 12 14:11:09 CST 2020
+                    viewpic (params) {
+                        // vant.ImagePreview([params])
                     }
 
                 },
