@@ -172,7 +172,13 @@ window.onload = function (params) {
                         address: ''
                     },
                     currentPage: sessionStorage.getItem('num') || 1,
-                    total: 0
+                    total: 0,
+                    workIdLogs: '',
+                    date: '',
+                    dataShow: false,
+                    minDate: new Date(2010, 0, 1),
+                    maxDate: new Date(2030, 0, 31),
+                    formDate: ''
                 },
                 created: function () {
                     this.loadingShow = true;
@@ -204,12 +210,10 @@ window.onload = function (params) {
                                                             parentName: item.machineName
                                                         })
                                                     })
-
                                                 })
                                                 this.items = _arr_;
-
                                             } else {
-                                                vant.Toast(params.data.msg)
+                                                vat.Toast(params.data.msg)
                                             };
                                         });
                                 } else {
@@ -323,6 +327,7 @@ window.onload = function (params) {
                         this.detailsMessage();
                     } else if (/logs/.test(location.href)) {
                         this.containers();
+                        this.workIdLogs = this.getQueryString('workId')
                         axios.get('work_log_list?workId=' + this.getQueryString('workId')).then(params => {
                             setTimeout(() => {
                                 this.show = false;
@@ -335,6 +340,9 @@ window.onload = function (params) {
                                     setTimeout(() => {
                                         document.querySelector('#goBack').onclick = () => {
                                             location.href = './details.html?workId='+ this.getQueryString('workId')
+                                        }
+                                        document.querySelector('#goBackOrder').onclick = () => {
+                                            location.href = './order.html'
                                         }
                                     }, 1000)
                                 })
@@ -563,19 +571,35 @@ window.onload = function (params) {
 
                     page(params) {
                         sessionStorage.setItem('num', this.num)
+                        sessionStorage.setItem('searchKey', JSON.stringify({
+                            key: this.search,
+                            date: this.formDate,
+                            tag: this.tag,
+                            num: this.num
+                        }))
                         location.href = `./details.html?workId=${params}`
                     },
                     toPage(params){
                         this.num = params
                         this.onLoad()
                     },
-                    onLoad() {
+                    onLoad(bool = false) {
+                        if(sessionStorage.getItem('searchKey') && !bool){
+                            let d = JSON.parse(sessionStorage.getItem('searchKey'))
+                            this.num = d.num
+                            this.search = d.key
+                            this.formDate = d.date
+                            this.tag = d.tag
+                            this.date = `${d.date[0]} 至 ${d.date[1]}`
+                        }
                         axios.get('wechat_admin_work_list', {
                             params: {
                                 status: this.tag > 0 ? this.tag : '',
                                 page: this.num,
                                 pageSize: 5,
-                                key: this.search
+                                key: this.search,
+                                startTime: this.formDate[0],
+                                endTime: this.formDate[1]
                             }
                         })
                             .then(params => {
@@ -592,6 +616,7 @@ window.onload = function (params) {
                                         params.data.page.records[index]['logs'] = axios.get('work_log_list?workId=' + element.workId).then(param => {
                                             params.data.page.records[index]['logs'] = '无';
                                             if (param.data.state == 200) {
+                                                sessionStorage.setItem('logs', JSON.stringify(param.data.list))
                                                 params.data.page.records[index]['logs'] = '执行人：'+param.data.list[0].createName +'，内容：'+ param.data.list[0].logContent
                                             }
                                             return params.data.page.records[index]['logs']
@@ -623,6 +648,7 @@ window.onload = function (params) {
 
                     // 2020-8-3 追加地址
                     region(params){
+                        console.log(params)
                         this.addressMsg = !this.addressMsg;
                         if(params){  // 提交地址
                             this.formData['citys'] = [];
@@ -905,6 +931,9 @@ window.onload = function (params) {
 
                     //  ###### Thu Sep 24 16:31:37 CST 2020
                     detailsMessage () {
+                        if(sessionStorage.getItem('logs')) {
+                            this.logs = JSON.parse(sessionStorage.getItem('logs'))
+                        }
                         axios.get('sys_work_detail?workId=' + this.getQueryString('workId')).then(params => {
                             setTimeout(() => {
                                 this.show = false;
@@ -955,6 +984,53 @@ window.onload = function (params) {
                     // ###### Mon Oct 12 14:11:09 CST 2020
                     viewpic (params) {
                         // vant.ImagePreview([params])
+                    },
+
+                    // ###### Tue Jan 12 13:46:13 CST 2021
+                    getDateTime: function (data) {
+                        var date = new Date(data);   //如果date为10位不需要乘1000
+                        var Y = date.getFullYear() + '-';
+                        var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+                        var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+                        var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+                        var m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+                        var s = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+                
+                        return Y + M + D + h + m + s;
+                    },
+                    onConfirm (date) {
+                        const [start, end] = date;
+                        this.dataShow = false;
+                        this.date = `${this.getDateTime(start).split(' ')[0]} 至 ${this.getDateTime(end).split(' ')[0]}`;
+                        this.formDate =[this.getDateTime(start).split(' ')[0],this.getDateTime(end).split(' ')[0]]
+                        this.onLoad(true)
+                    },
+                    searAddress () {
+                        if (!this.formData._textarea) return;
+                        try {
+                            this.formData.shopName = this.formData._textarea.split(/[\n]/)[0].split('：')[1]
+
+                            this.formData.contactName = this.formData._textarea.split(/[\n]/)[7].split('：')[1].split(' ')[0]
+                            this.formData.contactPhone = this.formData._textarea.split(/[\n]/)[7].split('：')[1].split(' ')[1]
+
+                            this.projects.push({
+                                name: `${this.formData._textarea.split(/[\n]/)[1].split('：')[1]}，编码：${this.formData._textarea.split(/[\n]/)[4].split('：')[1]}，${this.formData._textarea.split(/[\n]/)[2].split('：')[1]}`, 
+                                _id: new Date().getTime()
+                            });
+
+                            axios.post('wechat_address_parse', qs.stringify({
+                                address: this.formData._textarea.split(/[\n]/)[8].split('：')[1]
+                            })).then(params => {
+                                if(params.data.state == 200) {
+                                    this.formData.citys = params.data.data.province+','+params.data.data.city+','+params.data.data.district
+                                    this.formData.address = this.formData._textarea.split(/[\n]/)[8].split('：')[1]
+                                } else {
+                                    vant.Toast('地址无法识别，请手动输入')
+                                }
+                            })
+                        } catch (error) {
+                            vant.Toast('全部/部分出错，请手动检查修改')
+                        }
                     }
 
                 },

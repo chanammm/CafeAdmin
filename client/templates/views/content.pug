@@ -52,6 +52,11 @@ html(lang="en")
             li
               span 详细地址：
               van-field(v-model="formData.address")
+            li
+              span 文本识别：
+              p(style="font-size: 10px;color: #ccc") 请按照规定格式，格式不正确会引起识别缺失或无法识别
+              van-field(type="textarea" v-model="formData._textarea")
+              p(style="text-align: center;margin: 0 auto; width: 60%;background-color: red; border-radius: 5px;line-height: 36px;color: #fff;margin-top: 10px;" @click="searAddress") 内容识别
             .hr
             .title_name 产品明细（半自动或奶泡机需填写编号）
             li(v-for="(item, index) in projects" v-bind:keys="index")

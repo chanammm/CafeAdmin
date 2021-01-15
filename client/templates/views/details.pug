@@ -80,9 +80,20 @@ html(lang="en")
           van-cell(title="配件费用" :value="workList.partPaymentStr")
           van-cell(title="期待上门时间" :value="workList.visitingTime")
           van-cell(title="状态" :value="workList.status")
+          van-cell(v-if="workList.nickName != -1" title="微信昵称" :value="workList.nickName")
+
+          van-cell(class="cell_border")
+            template(#title)
+              div(style="width: 4px;background: red;height: 100%;float: left;margin-right: 6px")
+              span(class="custom-title" style="font-weight: blod;") 状态日志
+          van-steps(direction="vertical" :active="0" active-color="red")
+            van-step(v-for="(item, index) in logs" v:key="index")
+              h3 {{ (item.logType == 1 ? "确认登记：": item.logType == 1 ? "确认登记：": item.logType == 2 ? "联络登记：": item.logType == 3 ? "派单登记：": item.logType == 4 ? "回访登记：": item.logType == 5 ? "继续联络：": item.logType == 17 ? "编辑登记：": item.logType == 18 ? "提交登记：": "取消登记：") + item.createName }}
+              p {{ item.logContent }}
+              p {{ item.createTime }}
           div(style="width: 100%;margin-bottom: 20px;height: auto;overflow: hidden;")
-            van-button(round type="info" class="btn" @click="href('order')" style="width: 40%; float: left;") 返回上一页
-            van-button(round type="info" class="btn" @click="href('logs')" style="width: 40%; float: left;") 查看日志
+            van-button(round type="info" class="btn" @click="href('order')") 返回上一页
+            //- van-button(round type="info" class="btn" @click="href('logs')" style="width: 40%; float: left;") 查看日志
           van-popup(v-model="contentMsg" position="bottom")
             van-tree-select(:items="items" :active-id.sync="activeId" :main-active-index.sync="activeIndex" @click-item="onSelectDetails")
           

@@ -2122,7 +2122,7 @@ window.addEventListener('pageshow', function (params) {
                 params['latitude'] = params.latitude || -1;  //坐标
 
                 params['city'] = this.formData.province ? CodeToText[this.formData.province[1]] : -1;  //市
-                params['district'] = this.formData.province ? CodeToText[this.formData.province[2]] : -1; //区
+                params['district'] = this.formData.province ? CodeToText[this.formData.province[2]] || -1 : -1; //区
                 params['province'] = this.formData.province ? CodeToText[this.formData.province[0]] : -1;  //省无地址ID 情况下必传
                 params['address'] = params.address || -1;  //详细地址
 
@@ -2146,7 +2146,7 @@ window.addEventListener('pageshow', function (params) {
                 params['completeContent'] = params.completeContent || -1;  // 回访记录
 
                 params['facilityName'] = params.facilityName || -1;    //工单设备名(选填)
-
+                
                 axios.post("create_work", qs.stringify(params)).then(res => {
                     if (res.data.state == 200) {
                         is.ISuccessfull(res.data.msg);

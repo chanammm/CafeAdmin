@@ -20,12 +20,14 @@ html(lang="en")
         van-swipe(class="my-swipe" :autoplay="3000" indicator-color="white" :show-indicators=false)
           van-swipe-item
               img(:src="image")
+        .text(style="border-left: 3px solid red;margin-left: 10px;padding-left: 10px;margin-bottom: 20px;") 工单号：{{ workIdLogs }}
         .text(style="border-left: 3px solid red;margin-left: 10px;padding-left: 10px;margin-bottom: 20px;") 状态日志：
         van-steps(direction="vertical" :active="0" active-color="red")
           van-step(v-for="(item, index) in logs" v:key="index")
             h3 {{ (item.logType == 1 ? "确认登记：": item.logType == 1 ? "确认登记：": item.logType == 2 ? "联络登记：": item.logType == 3 ? "派单登记：": item.logType == 4 ? "回访登记：": item.logType == 5 ? "继续联络：": item.logType == 17 ? "编辑登记：": item.logType == 18 ? "提交登记：": "取消登记：") + item.createName }}
             p {{ item.logContent }}
             p {{ item.createTime }}
-        van-button(id="goBack") 返回
+        van-button(id="goBackOrder" style="margin-bottom: 10px !important") 返回列表
+        van-button(id="goBack") 返回详情
           
           
