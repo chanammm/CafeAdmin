@@ -25,7 +25,7 @@
     "mini-css-extract-plugin": "^0.9.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "picker-extend": "^2.1.0",
-    "pug": "^2.0.3",
+    "pug": "^3.0.1",
     "pug-cli": "^1.0.0-alpha6",
     "pug-html-loader": "^1.1.5",
     "qs": "^6.9.1",
