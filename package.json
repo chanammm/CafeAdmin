@@ -31,7 +31,7 @@
     "pug": "^2.0.4",
     "pug-html-loader": "^1.1.5",
     "qrcodejs2": "0.0.2",
-    "qs": "^6.9.1",
+    "qs": "^6.9.7",
     "serialize-javascript": ">=2.1.1",
     "style-loader": "^0.23.1",
     "uglifyjs-webpack-plugin": "^2.2.0",
